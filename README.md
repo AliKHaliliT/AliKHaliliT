@@ -9,7 +9,7 @@ As my dear friend "Mr. Octane" from the Apex Games always says, "I am not Just a
 - Artificial Intelligence
 - Python
 
-"I also know about stuff like":
+"I also know about stuff, like":
 
 - C
 - C++
@@ -19,8 +19,8 @@ As my dear friend "Mr. Octane" from the Apex Games always says, "I am not Just a
 - React Native
 - And possibly more :)
 
-## <picture> <img src="https://github.com/7oSkaaa/7oSkaaa/blob/main/Images/Connect-with-me.gif?raw=true" width="100px"> </picture> Let's Connect
-<p align="center">
+### Let's Connect
+<p>
 	<a href="mailto:ali.khalili.t98@gmail.com"><img img src="https://img.shields.io/badge/gmail-%23EA4335.svg?style=plastic&logo=gmail&logoColor=white" alt="Gmail"/></a>
 	<a href="https://www.linkedin.com/in/ali-khalili-790b10146/"><img src="https://img.shields.io/badge/linkedin-%230A66C2.svg?style=plastic&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
 </p>
