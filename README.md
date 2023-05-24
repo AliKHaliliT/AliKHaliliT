@@ -17,7 +17,7 @@ As my dear friend "Mr. Octane" from the Apex Games always says, "I am not Just a
 - CSS
 - JavaScript
 - React Native
-- And more :)
+- And possibly more :)
 
 ## <picture> <img src="https://github.com/7oSkaaa/7oSkaaa/blob/main/Images/Connect-with-me.gif?raw=true" width="100px"> </picture> Let's Connect
 <p align="center">
