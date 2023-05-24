@@ -1,12 +1,20 @@
-### Hi there 👋
-
-<br>
-
-As my dear friend from the Apex Games always says, I am not just about:
-
 <p align="center">
-  
-  ![Artificial Intelligence](<a href="https://www.flaticon.com/free-icons/artificial-intelligence" title="artificial intelligence icons">Artificial intelligence  icons created by Becris - Flaticon</a>)
-  ![Python](https://img.shields.io/badge/Python%20-%2314354C.svg?style=for-the-badge&logo=python&logoColor=white)
+  <a href="https://github.com/DenverCoder1/readme-typing-svg"><img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=cyan&size=25&center=true&vCenter=true&width=600&height=100&lines=Hi+There+👋;Welcome;I+am+Ali"></a>
+</p>
 
 <br>
+
+As my dear friend "Mr. Octane" from the Apex Games always says, "I am not Just about":
+
+- Artificial Intelligence
+- Python
+
+"I also know about stuff like":
+
+- C
+- C++
+- HTML
+- CSS
+- JavaScript
+- React Native
+- And more :)
