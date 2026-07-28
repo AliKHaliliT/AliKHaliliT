@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The brand pixel-mark (see PixelMark in TopBar): a 3×2 mosaic in
+       ink + field + pulse, on a transparent ground. Colors follow the
+       Rangefinder seed; ink flips with the OS theme. -->
+  <style>
+    .ink { fill: #191713; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #efeae3; }
+    }
+  </style>
+  <rect x="2.5" y="7.5" width="7.5" height="7.5" class="ink" />
+  <rect x="12.25" y="7.5" width="7.5" height="7.5" fill="#ff6b2e" />
+  <rect x="22" y="7.5" width="7.5" height="7.5" class="ink" />
+  <rect x="2.5" y="17" width="7.5" height="7.5" class="ink" />
+  <rect x="12.25" y="17" width="7.5" height="7.5" class="ink" />
+  <rect x="22" y="17" width="7.5" height="7.5" fill="#7fb5c9" />
+</svg>

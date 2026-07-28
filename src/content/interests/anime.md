@@ -1,0 +1,4 @@
+---
+title: Anime
+category: hobby
+---

@@ -1,0 +1,31 @@
+{
+  "basedOn": "rangefinder",
+  "light": {
+    "background": "#f0efeb",
+    "card": "#faf9f6",
+    "textPrimary": "#191713",
+    "textSecondary": "#6b675e",
+    "border": "#d3d0c7",
+    "borderStrong": "#a8a496",
+    "inputBg": "#faf9f6",
+    "signal": "#bc4a10",
+    "field": "#ff6b2e",
+    "pulse": "#7fb5c9",
+    "footer": "#171512",
+    "footerInk": "#f0ede6"
+  },
+  "dark": {
+    "background": "#131110",
+    "card": "#1b1815",
+    "textPrimary": "#efeae3",
+    "textSecondary": "#a49c8f",
+    "border": "#37312a",
+    "borderStrong": "#584f43",
+    "inputBg": "#100e0c",
+    "signal": "#ff8a50",
+    "field": "#ff7038",
+    "pulse": "#8fc3d8",
+    "footer": "#0f0d0b",
+    "footerInk": "#f0ede6"
+  }
+}

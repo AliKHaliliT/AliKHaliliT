@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Neutral template defaults: the siteSeed vite plugin rewrites the
+         title, this description, and injects OG/Twitter tags at build time
+         from src/content/settings/site.json. -->
+    <meta
+      name="description"
+      content="A personal operating system: portfolio, digital garden, and life records, published as a static site."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f0efeb" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131110" />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/fraunces-600-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/switzer-400-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/plex-mono-500-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <!-- The hero bio renders in the italic face above the fold. -->
+    <link
+      rel="preload"
+      href="/src/assets/fonts/fraunces-400-italic-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <title>VITA</title>
+    <script>
+      // Restore the deep link encoded by 404.html (spa-github-pages -
+      // GitHub Pages has no server-side rewrite for SPA routes).
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

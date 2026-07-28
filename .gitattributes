@@ -1,0 +1,12 @@
+# Normalize line endings on commit; the working copy keeps the platform default.
+* text=auto
+
+# Scripts are line-ending sensitive regardless of the committer's platform.
+*.sh text eol=lf
+*.{bat,cmd,ps1} text eol=crlf
+
+# Binary assets are never diffed or normalized.
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.ico binary
