@@ -189,7 +189,7 @@ function hero(T) {
 
   // stencil caption with drawn separators
   const stencil = (() => {
-    const words = ["ENGINEER", "RESEARCHER", "KEEPER OF RECORDS"];
+    const words = ["ARTIFICER", "SCHOLAR", "KEEPER OF RECORDS"];
     const cw = 13.4;
     let x = 88, out = "";
     words.forEach((wd, i) => {
@@ -201,7 +201,7 @@ function hero(T) {
     return out;
   })();
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="ALI KHALILI. Engineer, researcher, keeper of records.">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="ALI KHALILI. Artificer, scholar, keeper of records.">
   <!-- The archive wall: the dossier tagged after hours. Hand-built; the tag is
        raw rects and the QR really encodes the site. Colors follow the
        Rangefinder seed. Regenerate with npm run profile-art. -->
@@ -320,8 +320,8 @@ function enter(T) {
 function ticker(T) {
   const W = 1200, H = 46;
   const words = [
-    "INSPECT THE PROJECTS", "SCAN THE PAPERS", "TRACE THE CAREER", "WALK THE GARDEN",
-    "BROWSE THE LIBRARY", "TOUR THE ATLAS", "READ THE BLOG", "FOLLOW THE UPDATES",
+    "RAID THE WORKSHOP", "DECIPHER THE SCROLLS", "FOLLOW THE QUESTLINE", "WANDER THE GARDEN",
+    "LOOT THE LIBRARY", "CHART THE ATLAS", "READ THE CHRONICLES", "CATCH THE RAVENS",
   ];
   const cw = 12.4, sepW = 34, gap = 18;
   let x = 0, seg = "";
@@ -333,7 +333,7 @@ function ticker(T) {
     x += sepW;
   }
   const TL = x;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Marquee inviting you to inspect the projects, scan the papers, trace the career, walk the garden, browse the library, tour the atlas, read the blog, and follow the updates">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Marquee inviting you to raid the workshop, decipher the scrolls, follow the questline, wander the garden, loot the library, chart the atlas, read the chronicles, and catch the ravens">
   <style>.mq{animation:mq 30s linear infinite}@keyframes mq{to{transform:translateX(-${TL}px)}}${REDUCED}</style>
   <rect width="${W}" height="${H}" fill="${T.plate}"/>
   <line x1="0" y1="1.5" x2="${W}" y2="1.5" stroke="${T.ink}" stroke-opacity="0.25" stroke-dasharray="4 8"/>

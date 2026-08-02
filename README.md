@@ -4,7 +4,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="util_resources/readme/hero.svg" />
     <source media="(prefers-color-scheme: light)" srcset="util_resources/readme/hero-light.svg" />
-    <img src="util_resources/readme/hero.svg" width="100%" alt="ALI KHALILI. A pixel-tagged archive wall announcing the portfolio, digital garden, and life record." />
+    <img src="util_resources/readme/hero.svg" width="100%" alt="ALI KHALILI. A pixel-tagged archive wall. Artificer, scholar, keeper of records." />
   </picture>
 </a>
 
@@ -20,13 +20,13 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="util_resources/readme/ticker.svg" />
     <source media="(prefers-color-scheme: light)" srcset="util_resources/readme/ticker-light.svg" />
-    <img src="util_resources/readme/ticker.svg" width="100%" alt="Marquee: projects, publications, experience, digital garden, library, atlas, blog" />
+    <img src="util_resources/readme/ticker.svg" width="100%" alt="Marquee: raid the workshop, decipher the scrolls, follow the questline, wander the garden, loot the library, chart the atlas, read the chronicles, catch the ravens" />
   </picture>
 </a>
 
 <br />
 <br />
 
-<sub><samp>Every pixel above is hand-built SVG · No services, no trackers · The record lives at <a href="https://alikhalilit.github.io/AliKHaliliT/">alikhalilit.github.io/AliKHaliliT</a></samp></sub>
+<sub><samp><a href="https://alikhalilit.github.io/AliKHaliliT/">Click to enter the archive</a></samp></sub>
 
 </div>
