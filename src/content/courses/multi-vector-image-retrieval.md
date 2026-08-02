@@ -2,6 +2,7 @@
 title: Multi-vector Image Retrieval
 provider: DeepLearning.AI
 link: https://www.deeplearning.ai/courses/multi-vector-image-retrieval
+date: "2026-01"
 tags:
   - Vector Search
   - Image Retrieval

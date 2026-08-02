@@ -2,6 +2,7 @@
 title: Building Multimodal Search and RAG
 provider: DeepLearning.AI
 link: https://www.deeplearning.ai/courses/building-multimodal-search-and-rag
+date: "2026-01"
 tags:
   - Multimodal
   - RAG
