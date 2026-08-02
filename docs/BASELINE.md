@@ -28,7 +28,7 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
 | --- | --- |
 | `LICENSE` | Absent on purpose. This is a personal deployment: the app code inherits its MIT license from the upstream template, and the personal content in `src/content/` is all-rights-reserved, which no single license file could state honestly. |
 | `CHANGELOG.md` | Absent: nobody upgrades through releases of a personal deployment; the template's changelog lives upstream. |
-| `util_resources/` | The repository carries tracked assets. `readme/` holds the profile page's hand-built SVG art (hero, enter plate, ticker), self-contained files with no external references. |
+| `util_resources/` | The repository carries tracked assets. `readme/` holds the profile page's SVG art (hero, enter plate, ticker, each in dark and light), self-contained files with no external references, rebuilt deterministically by `npm run profile-art`. |
 | `.github/workflows/deploy.yml` | The site deploys through GitHub Actions to Pages. |
 | `.env.example` | Anything reads a `.env`; nothing does today. |
 

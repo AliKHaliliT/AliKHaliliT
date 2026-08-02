@@ -23,6 +23,7 @@ Ali's explicit request.
 | `npm run lint` | ESLint |
 | `npx tsc --noEmit` | Type-check without emitting |
 | `npm run icon -- <size>` | Render the pixel-mark to PNG (`--theme dark`, `--bg "#hex"`, `--out dir`) |
+| `npm run profile-art` | Rebuild the profile README's SVG art into `util_resources/readme/` |
 
 Run `npm test` after touching `contentLoader`, `contentService`, or `portfolioSnapshot`:
 those suites pin parsing, sorting, localStorage fallback, and the export contract.
