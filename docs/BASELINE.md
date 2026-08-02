@@ -36,6 +36,17 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
 
 - Editor and IDE directories (`.vscode/`, `.idea/`).
 - Secrets and local environments: any `.env` with real values.
+- `LOCAL.md`, the private local ledger, created at the repository root the first time
+  something sensitive needs recording. Every tracked byte and every commit message is
+  written for a public audience, even while the repository is private, because visibility
+  can flip with one settings change and git history keeps every byte ever tracked. So
+  confidential facts, private repository names, deployment details, and the description
+  of what was withheld and why go here instead of into STATE.md, a decision record, or a
+  commit body; the tracked entry carries only the public-safe version, with at most a
+  neutral pointer such as "details local". Screenshots get the same review before being
+  embedded, since a tracked image is as permanent as tracked text. When it is unclear
+  whether a fact is sensitive, surface it to the owner rather than recording it (adopted
+  in [decision 0005](decisions/0005-write-tracked-content-for-a-public-audience.md)).
 - Anything regenerable: `node_modules/`, `dist/`, coverage, caches, and the icon exports
   (`pixel-mark-*.png`).
 - Operating-system junk: `.DS_Store`, `Thumbs.db`, `Desktop.ini`.

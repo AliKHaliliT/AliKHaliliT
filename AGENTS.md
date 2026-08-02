@@ -31,14 +31,24 @@ those suites pin parsing, sorting, localStorage fallback, and the export contrac
 These are non-negotiable. Depth lives in the indexed documents; this is the checklist.
 
 - **This is the real record.** Every content file under `src/content/` is Ali's actual
-  life data. Never replace it with demo content, never invent entries, and treat
-  confidential projects (names kept locally) as permanently
-  off the site.
-- **Prose carries no em dashes.** Not in docs, comments, or UI copy. Use a colon for an
-  explanatory clause, a semicolon to join two clauses, or parentheses for an aside.
-- **All prose must read as if a person wrote it.** The language-model tells (colon-led
-  definitions, balanced semicolon antitheses, triadic lists, not-X-but-Y reversals) are fine
-  one at a time and forbidden stacked: at most one such flourish per paragraph.
+  life data. Never replace it with demo content and never invent entries. A short list of
+  confidential projects stays permanently off the site; the names live in the untracked
+  `LOCAL.md`.
+- **Prose carries no em dashes.** Not in docs, comments, or UI copy. Use a semicolon to
+  join two clauses or parentheses for an aside.
+- **All prose must read as if a person wrote it.** Never write the clause-colon splice, a
+  sentence shaped as claim, colon, elaboration; in prose a colon may only introduce a
+  list, a quote, or a label. The softer language-model tells (balanced semicolon
+  antitheses, triadic lists, not-X-but-Y reversals) are fine one at a time and forbidden
+  stacked, so allow at most one flourish per paragraph and keep the rest plain declarative
+  sentences.
+- **Every tracked byte is public prose.** Confidential facts, private repository names,
+  deployment details, and the description of what was withheld and why never enter a
+  tracked file or a commit message, even in a private repository, because visibility can
+  flip and history is permanent. Such context goes to the untracked `LOCAL.md` at the root
+  (see [docs/BASELINE.md](docs/BASELINE.md)); read it when it exists, create it when first
+  needed, and when unsure whether a fact is sensitive, ask the owner instead of recording
+  it.
 - **Motion runs behind `LazyMotion` strict** (`domAnimation` features): always import and
   use `m.` from framer-motion, never `motion.`. See [docs/THEMING.md](docs/THEMING.md).
 - **Colors come from CSS variables** with the `dark:` Tailwind variant; never hardcode a
