@@ -1,6 +1,20 @@
-<p align="center">
-  <a href="https://github.com/DenverCoder1/readme-typing-svg"><img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=cyan&size=25&center=true&vCenter=true&width=600&height=100&lines=Hi+There+👋;Welcome;I+am+Ali"></a>
-</p>
+<div align="center">
 
+<a href="https://alikhalilit.github.io/AliKHaliliT/">
+  <img src="util_resources/readme/hero.svg" width="100%" alt="ALI KHALILI. A pixel-tagged archive wall announcing the portfolio, digital garden, and life record." />
+</a>
 
-WORKING ON A NEW DESIGN FOR THIS PAGE...
+<a href="https://alikhalilit.github.io/AliKHaliliT/">
+  <img src="util_resources/readme/enter.svg" width="640" alt="Enter the archive: open the website" />
+</a>
+
+<a href="https://alikhalilit.github.io/AliKHaliliT/">
+  <img src="util_resources/readme/ticker.svg" width="100%" alt="Marquee: projects, publications, experience, digital garden, library, atlas, blog" />
+</a>
+
+<br />
+<br />
+
+<sub><samp>every pixel above is hand-built SVG · no services, no trackers · the record lives at <a href="https://alikhalilit.github.io/AliKHaliliT/">alikhalilit.github.io/AliKHaliliT</a></samp></sub>
+
+</div>

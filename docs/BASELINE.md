@@ -9,7 +9,7 @@ tooling, and a change that reshapes it is recorded as a decision record.
 
 | File | Role | Modification rule |
 | --- | --- | --- |
-| `README.md` | Ali's GitHub profile page. | Owner-only. It predates this deployment, is not governed by the template's README rules, and is never touched by agents. |
+| `README.md` | Ali's GitHub profile page. | Owner-governed. It is not subject to the template's README rules, and agents touch it only on the owner's explicit request. Its art lives in `util_resources/readme/`. |
 | `.gitignore` | What git must never track. | Every rule must correspond to the actual stack: add into the matching labeled section, and remove a rule when the tool it serves leaves the project. Never remove a rule that still matches something real without an owner decision. |
 | `.gitattributes` | Line-ending and binary policy. | Near-frozen; changes are owner decisions, because they silently rewrite every contributor's checkout. |
 | `.editorconfig` | Vendor-neutral editor baseline. | Near-frozen; same reasoning as `.gitattributes`. |
@@ -28,7 +28,7 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
 | --- | --- |
 | `LICENSE` | Absent on purpose. This is a personal deployment: the app code inherits its MIT license from the upstream template, and the personal content in `src/content/` is all-rights-reserved, which no single license file could state honestly. |
 | `CHANGELOG.md` | Absent: nobody upgrades through releases of a personal deployment; the template's changelog lives upstream. |
-| `util_resources/` | The repository embeds images beyond the profile README. None today, so the folder does not exist. |
+| `util_resources/` | The repository carries tracked assets. `readme/` holds the profile page's hand-built SVG art (hero, enter plate, ticker), self-contained files with no external references. |
 | `.github/workflows/deploy.yml` | The site deploys through GitHub Actions to Pages. |
 | `.env.example` | Anything reads a `.env`; nothing does today. |
 

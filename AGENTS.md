@@ -8,7 +8,8 @@ is Markdown files bundled at build time: no server, no database.
 This file is the single entry point for any contributor, human or agent. Read
 [STATE.md](STATE.md) first to learn what is in flight, then this file for the rules, then
 the indexed document that covers whatever you are about to touch. The README is Ali's
-GitHub profile page and is not governed by the template's README rules; do not touch it.
+GitHub profile page and is not governed by the template's README rules; touch it only on
+Ali's explicit request.
 
 ## Commands
 

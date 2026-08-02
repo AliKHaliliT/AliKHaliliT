@@ -5,6 +5,9 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Now
 
+- The profile page got its poster: an animated hand-built SVG wall (pixel tag, crew
+  stickers, marquee) that points every click at the site, replacing the placeholder and
+  its third-party typing service (2026-08-01).
 - The docs baseline synced with the 2026-08-01 My-Styles changes, adopting the sharpened
   human-prose rule and the public-audience rule with the untracked LOCAL.md ledger; the
   sensitive specifics this file used to carry moved there (2026-08-01).

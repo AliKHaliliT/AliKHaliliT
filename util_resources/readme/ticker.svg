@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 46" role="img" aria-label="Marquee listing the site's sections">
+  <style>.mq{animation:mq 24s linear infinite}@keyframes mq{to{transform:translateX(-1560px)}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+  <rect width="1200" height="46" fill="#1b1815"/>
+  <line x1="0" y1="1.5" x2="1200" y2="1.5" stroke="#efeae3" stroke-opacity="0.25" stroke-dasharray="4 8"/>
+  <line x1="0" y1="44.5" x2="1200" y2="44.5" stroke="#efeae3" stroke-opacity="0.25" stroke-dasharray="4 8"/>
+  <g class="mq" font-family="ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace" font-size="17" letter-spacing="2">
+    <text x="0" y="29" textLength="1560" fill="#efeae3">ALIKHALILIT.GITHUB.IO/ALIKHALILIT ▚ PROJECTS ▚ PUBLICATIONS ▚ EXPERIENCE ▚ DIGITAL GARDEN ▚ LIBRARY ▚ ATLAS ▚ BLOG ▚ </text>
+    <text x="1560" y="29" textLength="1560" fill="#efeae3">ALIKHALILIT.GITHUB.IO/ALIKHALILIT ▚ PROJECTS ▚ PUBLICATIONS ▚ EXPERIENCE ▚ DIGITAL GARDEN ▚ LIBRARY ▚ ATLAS ▚ BLOG ▚ </text>
+    <text x="3120" y="29" textLength="1560" fill="#efeae3">ALIKHALILIT.GITHUB.IO/ALIKHALILIT ▚ PROJECTS ▚ PUBLICATIONS ▚ EXPERIENCE ▚ DIGITAL GARDEN ▚ LIBRARY ▚ ATLAS ▚ BLOG ▚ </text>
+  </g>
+</svg>
