@@ -263,7 +263,7 @@ const RowOut = ({ link, label }: { link?: string; label: string }) => {
       rel="noreferrer"
       aria-label={`Open ${label} directly`}
       title="Open directly"
-      className="relative z-10 -m-2 flex h-9 w-9 items-center justify-center rounded-ctl text-[var(--color-text-secondary)] transition-colors hover:bg-field/10 hover:text-signal"
+      className="relative z-10 flex h-7 w-7 items-center justify-center self-center justify-self-end rounded-ctl text-[var(--color-text-secondary)] transition-colors hover:bg-field/10 hover:text-signal"
     >
       <ArrowUpRight size={14} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
     </a>
