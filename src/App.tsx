@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from "framer-motion";
 import { ContentProvider } from "@/context/ContentContext";
@@ -32,16 +33,24 @@ import { Organizations } from "@/pages/Organizations";
 
 /**
  * Route swap choreography: the leaving page settles out, the arriving one
- * rises in. `initial={false}` leaves the first paint to the pages' own
- * entrance animations. Honors MotionConfig reducedMotion="user".
+ * rises in. Only the wrapper itself skips animating on first paint; the
+ * pages' own entrance animations run. An `initial={false}` on AnimatePresence
+ * would suppress mount animations for every motion descendant of the first
+ * render instead, which froze looping ornaments at their final keyframe in
+ * production (dev hid it because StrictMode's double mount re-triggered
+ * them). Honors MotionConfig reducedMotion="user".
  */
 const RouteTransitions = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const firstPaint = useRef(true);
+  useEffect(() => {
+    firstPaint.current = false;
+  }, []);
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait">
       <m.div
         key={location.pathname}
-        initial={{ opacity: 0, y: 6 }}
+        initial={firstPaint.current ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -4 }}
         transition={{ duration: 0.16, ease: "easeOut" }}
