@@ -5,6 +5,4 @@ cover: https://standardebooks.org/images/covers/fyodor-dostoevsky_the-gambler_c-
 status: Read
 ---
 
-Notes coming. This shelf entry is a placeholder for a longer piece.
-
 Cover art from the Standard Ebooks edition, released into the public domain.

@@ -6,6 +6,6 @@ image: https://commons.wikimedia.org/wiki/Special:FilePath/Naghshe%20Jahan%20Squ
 visited: true
 ---
 
-Home country. Cities and stories to come.
+Home country.
 
 Photo: Arad, CC BY-SA 3.0, via Wikimedia Commons.
