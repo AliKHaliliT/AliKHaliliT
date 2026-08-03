@@ -289,10 +289,10 @@ function hero(T) {
 
 /* ------------------------------------------------------------------ CTA */
 function enter(T) {
-  const W = 760, H = 132;
+  const W = 860, H = 132;
   const chev = (x, cls) =>
     `<g class="${cls}" transform="translate(${x} ${H / 2 - 21})"><path d="M0 0 L16 0 L34 21 L16 42 L0 42 L18 21 Z" fill="${ORANGE}"/></g>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Enter the archive: open the website">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Click to enter the archive: open the website">
   <style>
     .c1{animation:seq 1.5s steps(1) infinite}
     .c2{animation:seq 1.5s steps(1) infinite .25s}
@@ -309,9 +309,9 @@ function enter(T) {
   <g stroke="${ORANGE}" stroke-width="6">
     <path d="M5 29 V5 H29 M${W - 29} 5 H${W - 5} V29 M${W - 5} ${H - 29} V${H - 5} H${W - 29} M29 ${H - 5} H5 V${H - 29}" fill="none"/>
   </g>
-  <text x="44" y="${H / 2 + 12}" font-family="${MONO}" font-weight="700" font-size="36" letter-spacing="4" fill="${T.plateInk}">ENTER THE ARCHIVE</text>
-  <rect class="cur" x="486" y="${H / 2 - 16}" width="17" height="32" fill="${SKY}"/>
-  ${chev(560, "c1")}${chev(610, "c2")}${chev(660, "c3")}
+  <text x="40" y="${H / 2 + 11}" font-family="${MONO}" font-weight="700" font-size="32" letter-spacing="3" textLength="580" fill="${T.plateInk}">CLICK TO ENTER THE ARCHIVE</text>
+  <rect class="cur" x="634" y="${H / 2 - 15}" width="15" height="30" fill="${SKY}"/>
+  ${chev(688, "c1")}${chev(736, "c2")}${chev(784, "c3")}
 </svg>`;
   writeFileSync(path.join(OUT, `enter${T.suffix}.svg`), svg);
 }
@@ -334,6 +334,10 @@ function ticker(T) {
   }
   const TL = x;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Marquee inviting you to raid the workshop, decipher the scrolls, follow the questline, wander the garden, loot the library, chart the atlas, read the chronicles, and catch the ravens">
+  <defs>
+    <linearGradient id="fadeL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${T.plate}"/><stop offset="1" stop-color="${T.plate}" stop-opacity="0"/></linearGradient>
+    <linearGradient id="fadeR" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${T.plate}" stop-opacity="0"/><stop offset="1" stop-color="${T.plate}"/></linearGradient>
+  </defs>
   <style>.mq{animation:mq 30s linear infinite}@keyframes mq{to{transform:translateX(-${TL}px)}}${REDUCED}</style>
   <rect width="${W}" height="${H}" fill="${T.plate}"/>
   <line x1="0" y1="1.5" x2="${W}" y2="1.5" stroke="${T.ink}" stroke-opacity="0.25" stroke-dasharray="4 8"/>
@@ -343,6 +347,8 @@ function ticker(T) {
     <g transform="translate(${TL} 0)">${seg}</g>
     <g transform="translate(${TL * 2} 0)">${seg}</g>
   </g>
+  <rect width="90" height="${H}" fill="url(#fadeL)"/>
+  <rect x="${W - 90}" width="90" height="${H}" fill="url(#fadeR)"/>
 </svg>`;
   writeFileSync(path.join(OUT, `ticker${T.suffix}.svg`), svg);
 }
