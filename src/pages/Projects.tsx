@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import { FolderOpen, ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { ProjectModal } from "@/components/projects/ProjectModal";
+import { SpecimenPlate } from "@/components/projects/FeaturedArt";
 import { useContent } from "@/context/ContentContext";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { FilterBar } from "@/components/ui/FilterBar";
@@ -113,16 +114,16 @@ export const Projects = () => {
                 className="group grid cursor-pointer overflow-hidden rounded-card border border-[var(--color-border)] bg-[var(--color-card)] transition-all duration-200 hover:-translate-y-px hover:border-[var(--color-border-strong)] hover:shadow-lift md:grid-cols-[1.1fr_1fr]"
               >
                 <div className="relative min-h-48 bg-[var(--color-background)] md:min-h-full">
-                  <SafeImage
-                    src={featured.image}
-                    alt={featured.title}
-                    className="absolute inset-0 transition-transform duration-200 group-hover:scale-[1.02]"
-                    fallback={
-                      <div className="absolute inset-0 flex items-center justify-center text-[var(--color-text-secondary)]">
-                        <FolderOpen size={40} strokeWidth={1.25} />
-                      </div>
-                    }
-                  />
+                  {featured.image ? (
+                    <SafeImage
+                      src={featured.image}
+                      alt={featured.title}
+                      className="absolute inset-0 transition-transform duration-200 group-hover:scale-[1.02]"
+                      fallback={<SpecimenPlate title={featured.title} year={featured.year} />}
+                    />
+                  ) : (
+                    <SpecimenPlate title={featured.title} year={featured.year} />
+                  )}
                 </div>
                 <div className="flex flex-col p-6 md:p-8">
                   <p className="mb-3 flex items-center gap-1.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-signal">

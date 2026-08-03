@@ -17,6 +17,7 @@ import { PillLink } from "@/components/ui/Pill";
 import { PixelBand } from "@/components/ui/PixelBand";
 import { SectionBlock } from "@/components/ui/SectionBlock";
 import { TagList } from "@/components/ui/TagList";
+import { DraftingPlot } from "@/components/projects/FeaturedArt";
 import { formatMonthYearRange, formatShortDate } from "@/lib/dates";
 import { excerpt, firstLine, parseProfileLinks } from "@/lib/text";
 import { LINK_ICONS } from "@/lib/linkIcons";
@@ -244,6 +245,31 @@ const Hero = () => {
   );
 };
 
+/** The trailing cell of a ledger row: an outbound anchor to the item's own
+    link when it has one, an inert arrow otherwise. Sits above the row's
+    stretched link, so the two click targets never nest. */
+const RowOut = ({ link, label }: { link?: string; label: string }) => {
+  if (!link)
+    return (
+      <ArrowRight
+        size={14}
+        className="text-[var(--color-text-secondary)] transition-transform group-hover:translate-x-1 group-hover:text-signal"
+      />
+    );
+  return (
+    <a
+      href={link}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`Open ${label} directly`}
+      title="Open directly"
+      className="relative z-10 -m-2 flex h-9 w-9 items-center justify-center rounded-ctl text-[var(--color-text-secondary)] transition-colors hover:bg-field/10 hover:text-signal"
+    >
+      <ArrowUpRight size={14} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+    </a>
+  );
+};
+
 /* ── 001 Telemetry ────────────────────────────────────────────────── */
 
 /** The Now chapter reads straight from the updates feed: nothing on the home
@@ -259,11 +285,11 @@ const NowSection = () => {
       <Rise>
         <div className="mb-2 mt-5 border-t border-dashed border-[var(--color-border)]">
           {latest.map((u) => (
-            <Link
+            <div
               key={u.id}
-              to="/updates"
-              className="group grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-dashed border-[var(--color-border)] px-1.5 py-4 transition-colors hover:bg-field/5 sm:grid-cols-[6.5rem_1fr_auto_auto]"
+              className="group relative grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-dashed border-[var(--color-border)] px-1.5 py-4 transition-colors hover:bg-field/5 sm:grid-cols-[6.5rem_1fr_auto_auto]"
             >
+              <Link to="/updates" aria-label="All updates" className="absolute inset-0" />
               <span className="hidden font-mono text-[11px] tabular-nums tracking-[0.03em] text-[var(--color-text-secondary)] sm:block">
                 {u.date ? formatShortDate(u.date).toUpperCase() : "-"}
               </span>
@@ -273,11 +299,8 @@ const NowSection = () => {
               <Badge tone={u.updateType === "milestone" ? "signal" : "neutral"}>
                 {u.updateType || "note"}
               </Badge>
-              <ArrowRight
-                size={14}
-                className="text-[var(--color-text-secondary)] transition-transform group-hover:translate-x-1 group-hover:text-signal"
-              />
-            </Link>
+              <RowOut link={u.link} label={u.linkTitle || "this update"} />
+            </div>
           ))}
         </div>
       </Rise>
@@ -357,8 +380,20 @@ const CareerSection = () => {
               <h3 className="font-serif text-[clamp(1.35rem,2.6vw,1.9rem)] font-semibold tracking-[-0.02em]">
                 {item.title}
               </h3>
-              <span className="text-sm font-medium text-[var(--color-text-secondary)]">
+              <span className="flex items-center gap-2.5 text-sm font-medium text-[var(--color-text-secondary)]">
                 {item.company}
+                {item.link && (
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Open ${item.company} directly`}
+                    title="Open directly"
+                    className="flex h-8 w-8 items-center justify-center rounded-ctl border border-[var(--color-border-strong)] text-[var(--color-text-secondary)] transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal"
+                  >
+                    <ArrowUpRight size={13} />
+                  </a>
+                )}
               </span>
             </div>
             {firstLine(item.body) && (
@@ -387,11 +422,11 @@ const CareerSection = () => {
             </p>
             <div className="border-t border-dashed border-[var(--color-border)]">
               {degrees.map((e) => (
-                <Link
+                <div
                   key={e.id}
-                  to="/education"
-                  className="group grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dashed border-[var(--color-border)] px-1 py-3.5 transition-colors hover:bg-field/5 sm:grid-cols-[auto_1fr_auto]"
+                  className="group relative grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dashed border-[var(--color-border)] px-1 py-3.5 transition-colors hover:bg-field/5 sm:grid-cols-[auto_1fr_auto]"
                 >
+                  <Link to="/education" aria-label="All education" className="absolute inset-0" />
                   <span className="hidden font-mono text-[11px] tabular-nums text-[var(--color-text-secondary)] sm:block sm:w-40">
                     {formatMonthYearRange(e.startDate, e.endDate)}
                   </span>
@@ -399,11 +434,8 @@ const CareerSection = () => {
                     {e.title}
                     <span className="text-[var(--color-text-secondary)]"> · {e.institution}</span>
                   </span>
-                  <ArrowRight
-                    size={14}
-                    className="text-[var(--color-text-secondary)] transition-transform group-hover:translate-x-1 group-hover:text-signal"
-                  />
-                </Link>
+                  <RowOut link={e.link} label={e.institution} />
+                </div>
               ))}
               {education.length > degrees.length && (
                 <Link
@@ -576,13 +608,7 @@ const WorkSection = () => {
               {featured.image ? (
                 <img src={featured.image} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" />
               ) : (
-                <>
-                  <span className="absolute left-[12%] top-[20%] rounded-ctl border border-[var(--color-border-strong)] bg-[var(--color-background)] px-2 py-1 font-mono text-[10px] uppercase tracking-[0.08em]">
-                    {featured.title.split(" ")[0]}
-                  </span>
-                  <span className="absolute left-[10%] top-[46%] h-[30%] w-[36%] rounded-card border-[1.5px] border-signal" />
-                  <span className="absolute left-[56%] top-[28%] h-[22%] w-[26%] rounded-card border-[1.5px] border-pulse" />
-                </>
+                <DraftingPlot title={featured.title} year={featured.year} />
               )}
             </div>
           </FeaturedCardShell>
@@ -592,11 +618,11 @@ const WorkSection = () => {
         <Rise>
           <div className="mb-2 border-t border-dashed border-[var(--color-border)]">
             {rest.map((p) => (
-              <Link
+              <div
                 key={p.id}
-                to="/projects"
-                className="group grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dashed border-[var(--color-border)] px-1 py-3.5 transition-colors hover:bg-field/5 sm:grid-cols-[1fr_auto_auto]"
+                className="group relative grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dashed border-[var(--color-border)] px-1 py-3.5 transition-colors hover:bg-field/5 sm:grid-cols-[1fr_auto_auto]"
               >
+                <Link to="/projects" aria-label="All projects" className="absolute inset-0" />
                 <span className="truncate font-serif text-lg tracking-[-0.01em]">
                   {p.title}
                   {p.role && <span className="text-[var(--color-text-secondary)]"> · {p.role}</span>}
@@ -606,11 +632,8 @@ const WorkSection = () => {
                     {p.year}
                   </span>
                 )}
-                <ArrowRight
-                  size={14}
-                  className="text-[var(--color-text-secondary)] transition-transform group-hover:translate-x-1 group-hover:text-signal"
-                />
-              </Link>
+                <RowOut link={p.link} label={p.title} />
+              </div>
             ))}
             {projects.length > rest.length + 1 && (
               <p className="mb-0 px-1 py-3 font-mono text-[11px] text-[var(--color-text-secondary)]">
