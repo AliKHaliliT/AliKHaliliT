@@ -183,11 +183,11 @@ export const SearchModal = () => {
       }));
     trips.forEach((t) =>
       push(scoreOf(q, { title: t.city, facts: [t.country], tags: t.tags, body: t.body }), {
-        id: t.id, title: t.city, subtitle: t.country, type: "Travel", href: "/travel",
+        id: t.id, title: t.city, subtitle: t.country, type: "Travel", href: `/travel/city/${t.slug}`,
       }));
     countries.forEach((c) =>
       push(scoreOf(q, { title: c.name, facts: [c.code, c.years], tags: c.tags, body: c.body }), {
-        id: `country-${c.id}`, title: c.name, subtitle: c.years, type: "Travel", href: "/travel",
+        id: `country-${c.id}`, title: c.name, subtitle: c.years, type: "Travel", href: `/travel/country/${c.slug}`,
       }));
     updates.forEach((u) =>
       push(scoreOf(q, { title: u.body ? excerpt(u.body, 60) : "Update", facts: [u.updateType], tags: u.tags, body: u.body }), {

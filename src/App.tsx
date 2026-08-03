@@ -12,6 +12,7 @@ import { Dashboard } from "@/pages/Dashboard";
 import { Projects } from "@/pages/Projects";
 import { Library } from "@/pages/Library";
 import { Travel } from "@/pages/Travel";
+import { TravelCountry, TravelCity } from "@/pages/TravelDetail";
 import { Garden } from "@/pages/Garden";
 import { GardenPost } from "@/pages/GardenPost";
 import { Blog } from "@/pages/Blog";
@@ -60,6 +61,8 @@ const AppRoutes = () => {
         <Route path="/projects" element={<Projects />} />
         <Route path="/library" element={<Library />} />
         <Route path="/travel" element={<Travel />} />
+        <Route path="/travel/country/:slug" element={<TravelCountry />} />
+        <Route path="/travel/city/:slug" element={<TravelCity />} />
         <Route path="/garden" element={<Garden />} />
         <Route path="/garden/:slug" element={<GardenPost />} />
         <Route path="/blog" element={<Blog />} />

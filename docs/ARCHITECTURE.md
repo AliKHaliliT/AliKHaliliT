@@ -61,6 +61,8 @@ src/content/**/*.md
 | `/uses` | Redirect to `/skills` | (a `Navigate` in `App.tsx`) |
 | `/interests` | Interests | `src/pages/Interests.tsx` |
 | `/travel` | Travel | `src/pages/Travel.tsx` |
+| `/travel/country/:slug` | Country detail | `src/pages/TravelDetail.tsx` |
+| `/travel/city/:slug` | City detail | `src/pages/TravelDetail.tsx` |
 | `/garden` | Garden | `src/pages/Garden.tsx` |
 | `/garden/:slug` | Garden post | `src/pages/GardenPost.tsx` |
 | `/blog` | Blog | `src/pages/Blog.tsx` |
