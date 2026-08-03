@@ -20,9 +20,10 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
   push (2026-07-28).
 - Ali supplies: real author lists for the two Iranian conference papers (currently
   "et al."), two pending experience entries when they turn official (details local), any
-  competition wins, a cover and rating for The Gambler, and bodies for the anime and
-  movies interests (2026-07-28). The Turkey, Toronto, and Calgary dates all landed as
-  April 2026, month precision by the privacy rule (2026-08-01).
+  competition wins, a rating for The Gambler, and bodies for the anime and movies
+  interests (2026-07-28). The Turkey, Toronto, and Calgary dates all landed as April
+  2026, month precision by the privacy rule (2026-08-01), and the atlas plus the book
+  cover got real, permissively licensed images (2026-08-02).
 - Owner-voice drafts: site description and tagline; the bio is done (2026-07-28).
 
 ## Deferred
