@@ -21,7 +21,7 @@ Ali's explicit request.
 | `npm run preview` | Serve the production build locally |
 | `npm test` | Vitest characterization suites |
 | `npm run lint` | ESLint |
-| `npx tsc --noEmit` | Type-check without emitting |
+| `npx tsc -b` | Type-check all projects (the root tsconfig is solution-style; a plain `tsc --noEmit` checks nothing) |
 | `npm run icon -- <size>` | Render the pixel-mark to PNG (`--theme dark`, `--bg "#hex"`, `--out dir`) |
 | `npm run profile-art` | Rebuild the profile README's SVG art into `util_resources/readme/` |
 

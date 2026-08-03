@@ -21,6 +21,8 @@ export type ContentType =
 
 export interface BaseContent {
   id: string | number;
+  /** Filename-derived URL key; the loader sets it on every item. */
+  slug: string;
   type: ContentType;
   title?: string;
   body?: string;
@@ -78,7 +80,6 @@ export interface Country extends BaseContent {
 export interface Post extends BaseContent {
   type: "posts";
   title: string;
-  slug: string;
   desc?: string;
   postType?: string; // common: Seedling | Evergreen | List; any label is valid
 }
@@ -86,7 +87,6 @@ export interface Post extends BaseContent {
 export interface BlogPost extends BaseContent {
   type: "blog";
   title: string;
-  slug: string;
   date: string;
   excerpt?: string;
   cover?: string;

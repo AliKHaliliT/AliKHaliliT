@@ -509,6 +509,22 @@ const HonorsSection = () => {
 
 /* ── 004 Selected work ────────────────────────────────────────────── */
 
+/** The featured card's click surface: outbound to the project's link, or
+    into the projects record when the entry has none. */
+const FeaturedCardShell = ({ link, children }: { link?: string; children: React.ReactNode }) => {
+  const cls =
+    "group mb-2 mt-5 grid overflow-hidden rounded-card border border-[var(--color-border-strong)] bg-[var(--color-card)] transition-all duration-200 hover:-translate-y-px hover:shadow-lift md:grid-cols-[1.15fr_0.85fr]";
+  return link ? (
+    <a href={link} target="_blank" rel="noopener noreferrer" className={cls}>
+      {children}
+    </a>
+  ) : (
+    <Link to="/projects" className={cls}>
+      {children}
+    </Link>
+  );
+};
+
 const WorkSection = () => {
   const { projects } = useContent();
   const featured = projects.find((p) => p.featured) ?? projects[0];
@@ -521,10 +537,25 @@ const WorkSection = () => {
     <SectionBlock no="004" label="Selected work" title="Projects" href="/projects" linkText="All projects">
       {featured && (
         <Rise>
-          <div className="mb-2 mt-5 grid overflow-hidden rounded-card border border-[var(--color-border-strong)] bg-[var(--color-card)] md:grid-cols-[1.15fr_0.85fr]">
+          {/* The whole card is one click target: the project's own link when
+              it has one, the projects record otherwise. */}
+          <FeaturedCardShell link={featured.link}>
             <div className="flex flex-col gap-4 p-7 md:p-9">
-              <Badge className="self-start" tone="signal">Featured</Badge>
-              <h3 className="m-0 font-serif text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-[-0.02em]">
+              <div className="flex items-start justify-between gap-4">
+                <Badge tone="signal">Featured</Badge>
+                {featured.link ? (
+                  <ArrowUpRight
+                    size={18}
+                    className="text-[var(--color-text-secondary)] transition-colors group-hover:text-signal"
+                  />
+                ) : (
+                  <ArrowRight
+                    size={18}
+                    className="text-[var(--color-text-secondary)] transition-colors group-hover:text-signal"
+                  />
+                )}
+              </div>
+              <h3 className="m-0 font-serif text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-[-0.02em] transition-colors duration-150 group-hover:text-signal">
                 {featured.title}
               </h3>
               {featuredDesc && (
@@ -554,7 +585,7 @@ const WorkSection = () => {
                 </>
               )}
             </div>
-          </div>
+          </FeaturedCardShell>
         </Rise>
       )}
       {rest.length > 0 && (
