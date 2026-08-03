@@ -353,5 +353,19 @@ function ticker(T) {
   writeFileSync(path.join(OUT, `ticker${T.suffix}.svg`), svg);
 }
 
-for (const T of Object.values(THEMES)) { hero(T); enter(T); ticker(T); }
+/* ----------------------------------------------------------------- note */
+function note(T) {
+  const W = 1200, H = 66;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="The wall is animated. If it stands still, your device prefers reduced motion; enable animation effects in your system's accessibility settings to wake it.">
+  <style>.ember{animation:breathe 2.4s ease-in-out infinite}@keyframes breathe{0%,100%{opacity:0.25}50%{opacity:1}}${REDUCED}</style>
+  <g font-family="${MONO}" font-size="13" letter-spacing="2" fill="${T.stencil}">
+    <text x="${(W - 800) / 2}" y="26" textLength="800">THE WALL IS ENCHANTED. IF THE EMBER AT THE END OF THIS LINE BREATHES, IT IS AWAKE.</text>
+    <text x="${(W - 1020) / 2}" y="50" textLength="1020">IF ALL STANDS STILL, YOUR DEVICE HAS CAST A STILLNESS CHARM. LIFT IT UNDER ACCESSIBILITY, ANIMATION OR MOTION.</text>
+  </g>
+  <circle class="ember" cx="${(W + 800) / 2 + 18}" cy="21" r="5" fill="${ORANGE}"/>
+</svg>`;
+  writeFileSync(path.join(OUT, `note${T.suffix}.svg`), svg);
+}
+
+for (const T of Object.values(THEMES)) { hero(T); enter(T); ticker(T); note(T); }
 console.log("wrote hero/enter/ticker in dark and light variants to util_resources/readme/");

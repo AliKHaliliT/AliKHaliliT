@@ -24,4 +24,10 @@
   </picture>
 </a>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="util_resources/readme/note.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="util_resources/readme/note-light.svg" />
+  <img src="util_resources/readme/note.svg" width="100%" alt="The wall is animated. If it stands still, your device prefers reduced motion; enable animation effects in your system's accessibility settings to wake it." />
+</picture>
+
 </div>

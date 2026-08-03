@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 66" role="img" aria-label="The wall is animated. If it stands still, your device prefers reduced motion; enable animation effects in your system's accessibility settings to wake it.">
+  <style>.ember{animation:breathe 2.4s ease-in-out infinite}@keyframes breathe{0%,100%{opacity:0.25}50%{opacity:1}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+  <g font-family="ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace" font-size="13" letter-spacing="2" fill="#6f665a">
+    <text x="200" y="26" textLength="800">THE WALL IS ENCHANTED. IF THE EMBER AT THE END OF THIS LINE BREATHES, IT IS AWAKE.</text>
+    <text x="90" y="50" textLength="1020">IF ALL STANDS STILL, YOUR DEVICE HAS CAST A STILLNESS CHARM. LIFT IT UNDER ACCESSIBILITY, ANIMATION OR MOTION.</text>
+  </g>
+  <circle class="ember" cx="1018" cy="21" r="5" fill="#ff7038"/>
+</svg>
