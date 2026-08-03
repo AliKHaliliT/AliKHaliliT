@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from "framer-motion";
 import { ContentProvider } from "@/context/ContentContext";
@@ -42,15 +42,19 @@ import { Organizations } from "@/pages/Organizations";
  */
 const RouteTransitions = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const firstPaint = useRef(true);
-  useEffect(() => {
-    firstPaint.current = false;
-  }, []);
+  // First-paint detection without refs or effects: the landing pathname is
+  // captured once, and the first navigation away locks hasNavigated via the
+  // adjust-state-during-render pattern. Only the very first wrapper renders
+  // with initial=false.
+  const [initialPath] = useState(() => location.pathname);
+  const [hasNavigated, setHasNavigated] = useState(false);
+  if (!hasNavigated && location.pathname !== initialPath) setHasNavigated(true);
+  const firstPaint = !hasNavigated && location.pathname === initialPath;
   return (
     <AnimatePresence mode="wait">
       <m.div
         key={location.pathname}
-        initial={firstPaint.current ? false : { opacity: 0, y: 6 }}
+        initial={firstPaint ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -4 }}
         transition={{ duration: 0.16, ease: "easeOut" }}
