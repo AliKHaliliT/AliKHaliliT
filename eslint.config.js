@@ -5,6 +5,49 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+
+/**
+ * The layer rule, enforced rather than reviewed.
+ *
+ * Each entry names a layer and the layers it may not reach. Cross-slice imports
+ * always travel through the '@/' alias, which is what makes them checkable here;
+ * a slice's own files use relative paths and are untouched by these patterns.
+ */
+const LAYERS = [
+  { files: ['src/app/**'], forbid: [] },
+  { files: ['src/pages/**'], forbid: ['app'] },
+  { files: ['src/features/**'], forbid: ['app', 'pages'] },
+  { files: ['src/entities/**'], forbid: ['app', 'pages', 'features'] },
+  { files: ['src/shared/**'], forbid: ['app', 'pages', 'features', 'entities'] },
+]
+
+// A slice is entered through its index.ts, so reaching past one is its own
+// violation. Suites live outside src/ and never match these globs.
+const DEEP_IMPORT = {
+  group: ['@/entities/*/*', '@/features/*/*', '@/pages/*/*', '@/shared/*/*'],
+  message: 'Enter a slice through its index.ts, not by reaching inside it.',
+}
+
+// One rule per layer: ESLint's later config wins for a matching file, so the
+// directional patterns and the deep-import pattern have to travel together.
+const layerRules = LAYERS.map(({ files, forbid }) => ({
+  files,
+  rules: {
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          ...forbid.map((layer) => ({
+            group: [`@/${layer}`, `@/${layer}/**`],
+            message: `Imports point downward only: this layer may not reach @/${layer}.`,
+          })),
+          DEEP_IMPORT,
+        ],
+      },
+    ],
+  },
+}))
+
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -27,12 +70,5 @@ export default defineConfig([
       ],
     },
   },
-  {
-    // Context modules intentionally export a Provider + its hook as a pair;
-    // the only cost is a full-reload fallback for these files in dev HMR.
-    files: ['**/context/*.tsx'],
-    rules: {
-      'react-refresh/only-export-components': 'off',
-    },
-  },
+  ...layerRules,
 ])

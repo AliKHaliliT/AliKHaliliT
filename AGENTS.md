@@ -25,8 +25,12 @@ Ali's explicit request.
 | `npm run icon -- <size>` | Render the pixel-mark to PNG (`--theme dark`, `--bg "#hex"`, `--out dir`) |
 | `npm run profile-art` | Rebuild the profile README's SVG art into `util_resources/readme/` |
 
-Run `npm test` after touching `contentLoader`, `contentService`, or `portfolioSnapshot`:
-those suites pin parsing, sorting, localStorage fallback, and the export contract.
+Run `npm test` after touching the record's `seed`, `store`, or `schema`, or the portfolio
+`snapshot`: those suites pin parsing, sorting, localStorage fallback, the record contract,
+and the export contract. The loader suite is adapted to the real record, where some
+collections are legitimately empty, so it asserts an array for every collection and items
+only for the populated ones. Do not replace it with the template's version, which assumes
+the demo seed fills every folder.
 
 ## Hard rules
 
@@ -51,10 +55,31 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
   (see [docs/BASELINE.md](docs/BASELINE.md)); read it when it exists, create it when first
   needed, and when unsure whether a fact is sensitive, ask the owner instead of recording
   it.
+- **The layer rule is absolute.** Imports point downward through
+  `app -> pages -> features -> entities -> shared`, never up or sideways. A slice is
+  entered only through its `index.ts` (suites excepted), same-layer slices never import
+  each other, and a concern spanning two slices moves up a layer. ESLint checks this, so a
+  violation fails `npm run lint` rather than surviving review.
+- **Content is checked at the door.** Everything entering the record passes through
+  `entities/record/schema.ts`; never widen a type with a cast to make a value fit. A bad
+  markdown file fails with its path named, and a bad localStorage override falls back to
+  the committed record with the key to clear named.
+- **The environment is read only through `shared/config`.** No other module touches
+  `import.meta.env`.
+- **Follow the doc-comment convention** in the [template's Conventions section](https://github.com/AliKHaliliT/VITA#conventions)
+  and the documentation rules in [docs/CONVENTIONS.md](docs/CONVENTIONS.md); the latter is
+  frozen and must not be edited.
+- **The documentation rulebook is owned by the style.** [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
+  changes only in the Helm template inside the My-Styles repository, never here, and this
+  deployment never diverges from its copy. A rule believed wrong or missing goes upstream
+  instead (see [The upstream report](#the-upstream-report)).
 - **Motion runs behind `LazyMotion` strict** (`domAnimation` features): always import and
   use `m.` from framer-motion, never `motion.`. See [docs/THEMING.md](docs/THEMING.md).
-- **Colors come from CSS variables** with the `dark:` Tailwind variant; never hardcode a
-  color. See [docs/THEMING.md](docs/THEMING.md).
+- **Colors come only from the token utilities** defined in `src/app/styles/tokens.css`
+  (`bg-surface`, `text-ink`, `border-line`, `text-signal`, and so on). Never hardcode a
+  color, never reach for a raw palette class, and never spell a token the long way as
+  `bg-[var(--surface)]`; a composite value such as a `color-mix()` is the only place the
+  variable itself appears. See [docs/THEMING.md](docs/THEMING.md).
 - **No personal strings in source code.** Owner data lives only under `src/content/`.
 - **Content types map one-to-one** to a folder, an interface, and a glob entry: see
   [docs/CONTENT-MODEL.md](docs/CONTENT-MODEL.md).
@@ -66,21 +91,45 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
 - **Markdown formatting.** Every fenced block gets a language identifier; lists and fences
   are surrounded by blank lines (MD031, MD032, MD040).
 
+## The upstream report
+
+This deployment follows the [VITA template](https://github.com/AliKHaliliT/VITA), which
+follows the Helm client style in the [My-Styles](https://github.com/AliKHaliliT/My-Styles)
+repository, and the rulebook both live under is owned there. When work here surfaces
+something the template or the style should have had, the improvement is not kept as a local
+advantage. Check the decision records upstream first, and if the idea was already considered
+and rejected there, drop it unless new evidence exists. Otherwise write a self-contained
+report entry stating what the improvement is, how it surfaced, why it is believed better
+than what the template does today, and that the upstream logs hold no prior ruling, and
+close it by telling the receiver to verify the claim with research before adopting it. Then
+send it upstream, to the template for app-shaped improvements and to My-Styles for
+style-shaped ones. The full workflow, including the qualification gate and the final
+alignment check that follows integration, is defined in the style's AGENTS.md.
+
+Improvements travel in the other direction too. This repository is a deployment rather than
+a fork of a fork, so template changes are applied here deliberately, and a commit that does
+so says which template change it carries.
+
 ## Documentation index
 
-A document that is not listed here does not exist: no reader can be expected to find it.
-Register a new document in this table in the same change that creates it.
+This is the single index of the project's technical documentation. A document that is not
+listed here does not exist as far as this project is concerned: when you create a document,
+register it here in the same change; when you remove one, delist it here. The README is
+absent from this table on purpose, because it is the GitHub profile page rather than a
+document about this project (see [docs/BASELINE.md](docs/BASELINE.md)).
 
-| Document | Species | Read it when |
-| -------- | ------- | ------------ |
-| [STATE.md](STATE.md) | living | Always first: what is Now, Next, Deferred, or Blocked |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | living | Before any structural change: data flow, routing, boundaries |
-| [docs/THEMING.md](docs/THEMING.md) | living | Before touching design tokens, palettes, type, or motion |
-| [docs/CONTENT-MODEL.md](docs/CONTENT-MODEL.md) | living | Field schemas for every type, and the add-a-type checklist |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | living | The feature landscape and standing technical debt |
-| [docs/SETUP.md](docs/SETUP.md) | living | First-time environment setup and GitHub Pages deploy |
-| [docs/BASELINE.md](docs/BASELINE.md) | living | Which root files must exist, which are never tracked, and why |
-| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | living, frozen | Before writing any document: the rulebook, never edited directly |
-| [docs/decisions/](docs/decisions/) | records | Why a durable choice was made; cite by number, never edit |
+| Document | What it is and when to read it |
+| --- | --- |
+| [STATE.md](STATE.md) | Living project state (Now / Next / Deferred / Blocked). Read first, always. |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The annotated map of the whole site. Read before any structural change. |
+| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | The documentation rulebook: document species, schemas, naming. Frozen; owned by the style. Read before writing or changing any documentation. |
+| [docs/BASELINE.md](docs/BASELINE.md) | The repository baseline: always-present files, never-tracked files, and their modification rules. Read before adding, removing, or reshaping root-level or dot files. |
+| [docs/THEMING.md](docs/THEMING.md) | The design language: tokens, palettes, type, and motion. Read before touching any of them. |
+| [docs/CONTENT-MODEL.md](docs/CONTENT-MODEL.md) | Field schemas for every content type, and the add-a-type checklist. |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | The feature landscape and standing technical debt. |
+| [docs/SETUP.md](docs/SETUP.md) | First-time environment setup and the GitHub Pages deploy. |
+| [docs/decisions/](docs/decisions/) | Immutable decision records holding the project's "why". Read the relevant record before revisiting a settled topic; never edit an accepted record. |
 
-There are no assistant-specific instruction files: every agent reads this one.
+There are no assistant-specific instruction files: every assistant reads this file
+directly. If a tool genuinely cannot read AGENTS.md, give it a one-line shim that imports
+or points to this file and nothing more.

@@ -10,8 +10,72 @@
 | Routing | React Router DOM v7 |
 | Animation | Framer Motion |
 | Content | Markdown files + `front-matter` (YAML frontmatter parsing) |
-| Testing | Vitest (`npm test`): characterization suites for the services |
+| Testing | Vitest (`npm test`): characterization suites for the seams |
 | Deployment | GitHub Pages (static) |
+
+---
+
+## The layers and their one rule
+
+The site is built as one-way sliced layers. Imports point downward, never up or
+sideways:
+
+```text
+app  ->  pages  ->  features  ->  entities  ->  shared
+```
+
+- **app** is the composition root: the bootstrap, the provider stack, the route
+  table, the chrome, and the design tokens. It is the only layer allowed to know
+  everything, and all cross-layer wiring is tied here.
+- **pages** compose a route's content from features, entities, and shared parts.
+  Ephemeral view state (an open filter, a selected item) lives here; logic does not.
+- **features** are interactions with logic of their own, which today means the
+  command palette and the portfolio export.
+- **entities** are the domain nouns. `record` owns the content model, both of its
+  doors, and the collections the site reads; `site` owns file-seeded identity and
+  appearance.
+- **shared** is the base: typed configuration, the small libraries, the UI kit,
+  and the test helpers. It knows nothing about the layers above.
+
+A slice is entered only through its `index.ts` public API, and suites are the one
+exception since they test a module directly. A part used by exactly one page stays
+inside that page (the project and book modals), and a part two pages need moves
+down a layer (the city card). A concern spanning two entity slices moves up a
+layer instead of reaching sideways, which is why the portfolio export is a feature:
+it reads both the record and the site's palette.
+
+The reasoning behind the shape is recorded in
+[the template's decision 0007](https://github.com/AliKHaliliT/VITA/blob/main/docs/decisions/0007-build-the-site-as-one-way-sliced-layers.md), and the
+choice to keep the record as a single entity slice in
+[the template's decision 0008](https://github.com/AliKHaliliT/VITA/blob/main/docs/decisions/0008-keep-the-record-as-one-entity-slice.md).
+
+```text
+vita/
+├── AGENTS.md                   # Agent entry point and the documentation index
+├── index.html                  # The single page; mounts src/app/main.tsx
+├── vite.config.ts              # Build, the @ -> src alias, and the seed plugins
+│
+├── docs/                       # Technical documentation (indexed in AGENTS.md)
+│
+├── src/
+│   ├── app/                    # Composition root
+│   │   ├── main.tsx            # Boots the palette, then mounts App
+│   │   ├── App.tsx             # Providers wrapped around the router
+│   │   ├── providers.tsx       # Motion runtime and the record provider
+│   │   ├── router.tsx          # The route table and the route transitions
+│   │   ├── layout/             # AppLayout, TopBar, Footer, theme, nav visibility
+│   │   └── styles/             # index.css (base) and tokens.css (the tokens)
+│   ├── pages/                  # One slice per route
+│   ├── features/               # search, portfolio-export
+│   ├── entities/
+│   │   ├── record/             # Content model, both doors, the collections
+│   │   └── site/               # Identity, palette, page copy
+│   ├── shared/                 # config, lib, ui, testing
+│   └── content/                # The record itself, as Markdown and JSON
+│
+└── tests/                      # Vitest suites mirroring the src structure
+    └── src/
+```
 
 ---
 
@@ -19,80 +83,101 @@
 
 ```text
 src/content/**/*.md
-  -> contentLoader.ts          import.meta.glob at build time; parses frontmatter
-  -> ContentService.getAll()   checks localStorage first, falls back to parsed files
-  -> ContentContext            React Context; provides typed arrays + CRUD methods
-  -> Pages & Components        consume via useContent()
+  -> entities/record/seed.ts     import.meta.glob at build time; parses and checks frontmatter
+  -> entities/record/store.ts    checks localStorage first, falls back to the parsed files
+  -> entities/record/context.ts  React context; provides typed collections + writers
+  -> pages and components        consume via useContent()
 ```
 
 **Persistence model:**
 
 - Markdown files are seed data only. They are read at build time via `import.meta.glob`.
-- Runtime edits (written by a same-origin editing surface through `ContentService`) are
-  stored in `localStorage` under `os_content_<type>` and `os_settings` and shadow the seed.
+- Runtime edits (written by a same-origin editing surface) are stored in
+  `localStorage` under `os_content_<type>` and `os_settings` and shadow the seed.
 - Clearing browser storage resets everything to the Markdown seed. This is intentional.
 - Saves also record a fingerprint of the bundled seed (`os_content_seed_<type>`); if a
-  redeploy changes the markdown under a shadowed type, `getAll` logs a console warning naming
-  the key to clear.
-- All localStorage writes go through `safeSetItem` (`src/lib/storage.ts`): quota or
+  redeploy changes the markdown under a shadowed type, `getAll` logs a console warning
+  naming the key to clear.
+- All localStorage writes go through `safeSetItem` (`src/shared/lib/storage.ts`): quota or
   unavailability surfaces as a console error and a one-time alert instead of an unhandled throw.
 - `ContentService.downloadMarkdown(item)` exports any item as a `.md` file so it can be
   committed back to the repo as seed data.
 
 ---
 
+## The record boundary
+
+Content reaches the site through two doors, and neither is trusted by
+construction. `entities/record/schema.ts` holds the contract both are checked
+against, and a violation becomes a `RecordContractError` naming the file or the
+storage key rather than a crash on some page far from the cause.
+
+The two doors are treated differently on purpose. Bundled markdown is committed
+content, so a file whose frontmatter cannot produce a valid item is an authoring
+bug and the loader throws with the path. The localStorage override is written by a
+separate application in the same browser, so a malformed value is not this site's
+bug to fail on; the store reports the key to clear and serves the committed seed
+instead. Only invariants the whole site depends on are checked, because a guard
+that outgrows the model starts rejecting valid content. See
+[the template's decision 0009](https://github.com/AliKHaliliT/VITA/blob/main/docs/decisions/0009-guard-the-record-with-hand-written-validators.md).
+
+---
+
 ## Routing
 
-| Path | Page | Component |
-| ---- | ---- | --------- |
-| `/` | Home | `src/pages/Dashboard.tsx` |
-| `/experience` | Experience | `src/pages/Experience.tsx` |
-| `/education` | Education | `src/pages/EducationPage.tsx` |
-| `/awards` | Awards | `src/pages/Awards.tsx` |
-| `/certificates` | Certificates | `src/pages/Certificates.tsx` |
-| `/publications` | Publications | `src/pages/Publications.tsx` |
-| `/speaking` | Speaking | `src/pages/Speaking.tsx` |
-| `/volunteering` | Volunteering | `src/pages/Volunteering.tsx` |
-| `/organizations` | Organizations | `src/pages/Organizations.tsx` |
-| `/references` | References | `src/pages/References.tsx` |
-| `/projects` | Projects | `src/pages/Projects.tsx` |
-| `/library` | Library | `src/pages/Library.tsx` |
-| `/skills` | Skills | `src/pages/SkillsPage.tsx` |
-| `/uses` | Redirect to `/skills` | (a `Navigate` in `App.tsx`) |
-| `/interests` | Interests | `src/pages/Interests.tsx` |
-| `/travel` | Travel | `src/pages/Travel.tsx` |
-| `/travel/country/:slug` | Country detail | `src/pages/TravelDetail.tsx` |
-| `/travel/city/:slug` | City detail | `src/pages/TravelDetail.tsx` |
-| `/garden` | Garden | `src/pages/Garden.tsx` |
-| `/garden/:slug` | Garden post | `src/pages/GardenPost.tsx` |
-| `/blog` | Blog | `src/pages/Blog.tsx` |
-| `/blog/:slug` | Blog post | `src/pages/BlogPost.tsx` |
-| `/updates` | Updates | `src/pages/Updates.tsx` |
+| Path | Page | Slice |
+| ---- | ---- | ----- |
+| `/` | Home | `pages/dashboard` |
+| `/experience` | Experience | `pages/experience` |
+| `/education` | Education | `pages/education` |
+| `/awards` | Awards | `pages/awards` |
+| `/certificates` | Certificates | `pages/certificates` |
+| `/publications` | Publications | `pages/publications` |
+| `/speaking` | Speaking | `pages/speaking` |
+| `/volunteering` | Volunteering | `pages/volunteering` |
+| `/organizations` | Organizations | `pages/organizations` |
+| `/references` | References | `pages/references` |
+| `/projects` | Projects | `pages/projects` |
+| `/library` | Library | `pages/library` |
+| `/skills` | Skills | `pages/skills` |
+| `/uses` | Redirect to `/skills` | (a `Navigate` in `app/router.tsx`) |
+| `/interests` | Interests | `pages/interests` |
+| `/travel` | Travel | `pages/travel` |
+| `/travel/country/:slug` | Country detail | `pages/travel-detail` |
+| `/travel/city/:slug` | City detail | `pages/travel-detail` |
+| `/garden` | Garden | `pages/garden` |
+| `/garden/:slug` | Garden post | `pages/garden-post` |
+| `/blog` | Blog | `pages/blog` |
+| `/blog/:slug` | Blog post | `pages/blog-post` |
+| `/updates` | Updates | `pages/updates` |
 
-Routes are added in `src/App.tsx`; anything unknown lands on `NotFound`. The nav map lives in
-`src/lib/nav.ts` (consumed by TopBar, Footer, and GroundTrack).
+Routes are declared in `src/app/router.tsx`; anything unknown lands on the
+not-found page. The nav map lives in `src/shared/config/nav.ts`, which is where
+labels, grouping, and site order come from. Paths therefore appear in two places
+by design: the router owns which component answers a path, and the nav map owns
+where that path sits in the site map.
 
 ---
 
 ## Shell and layout
 
-Navigation is a sticky **TopBar** (`src/components/layout/TopBar.tsx`): grouped dropdowns from
-`NAV_GROUPS`, the command-palette trigger, the theme toggle, and a full-screen mobile index.
-The **Footer** (`layout/Footer.tsx`) is the dossier back cover: a complete sitemap, socials
-from settings, and the pixel band. Content sits in a centered
-1180px rail with dashed hairline edges (`App.tsx`). There is no sidebar; the old
-`SidebarContext` and its `sidebar-collapsed` key are gone.
+`app/layout/AppLayout.tsx` draws everything around a route's content. Navigation is
+a sticky **TopBar**: grouped dropdowns from `NAV_GROUPS`, the command-palette
+trigger, the theme toggle, and a full-screen mobile index. The **Footer** is the
+dossier back cover: a complete sitemap, socials from settings, and the pixel band.
+Content sits in a centered 1180px rail with dashed hairline edges. There is no
+sidebar.
 
 ---
 
 ## Search
 
-`src/components/SearchModal.tsx`, rendered at the app root and opened via **Ctrl+K** or
-**Cmd+K** or a custom `open-search` DOM event (dispatched from the header). It is a client-side
-substring match over sixteen content types, scored so a title hit outranks a structured-fact
-hit (institution, venue, company, and so on), which outranks tags, which outrank a hit buried
-in the body; results group by section with a per-type cap. There is no search index; it
-filters the in-memory `ContentContext` arrays directly.
+`features/search/SearchModal.tsx`, rendered inside the layout and opened via **Ctrl+K**
+or **Cmd+K** or a custom `open-search` DOM event (dispatched from the header). It is a
+client-side substring match over sixteen content types, scored so a title hit outranks a
+structured-fact hit (institution, venue, company, and so on), which outranks tags, which
+outrank a hit buried in the body; results group by section with a per-type cap. There is
+no search index; it filters the in-memory record directly.
 
 ---
 
@@ -110,10 +195,10 @@ files:
   source code**: everything owner-specific is a content file the admin can regenerate.
 - **`portfolio.json` out** (site record to builder): a snapshot of the whole record,
   `{ format: "vita-portfolio", version, exportedAt, settings, content }` with every content
-  collection. This repo keeps its half of the contract in `src/types/portfolio.ts` and the
-  reference exporter in `src/services/portfolioSnapshot.ts` (pinned by
-  `portfolioSnapshot.test.ts`); the builder keeps its own copy, and the `format` and
-  `version` fields keep the two sides honest. The snapshot doubles as a full backup format.
+  collection. The `features/portfolio-export` slice owns this half of the contract, holding
+  the shape in `contract.ts` and the reference exporter in `snapshot.ts` (pinned by its
+  suite); the builder keeps its own copy, and the `format` and `version` fields keep the two
+  sides honest. The snapshot doubles as a full backup format.
 - The resume builder's documents (`os_resumes`) are its own localStorage, not site data; the
   site's runtime override keys (`os_content_<type>`, `os_settings`, `os_site`, `os_palette`)
   remain readable by any same-origin editing surface.
@@ -122,8 +207,11 @@ files:
 
 ## Design system
 
-The visual language (design tokens, color palettes, typography, radius, shadow, motion, and the
-shared UI atoms) lives in [THEMING.md](THEMING.md).
+`src/app/styles/tokens.css` is the only place a color is written down. Every token
+becomes a Tailwind utility, which is how components speak in tokens rather than raw
+values, and the dark block re-points the same names so no component names a theme.
+The rest of the visual language (palettes, typography, radius, shadow, motion, and
+the shared UI atoms) lives in [THEMING.md](THEMING.md).
 
 ---
 
@@ -139,16 +227,20 @@ The site's own name and metadata follow the same three-layer file-seed model as 
    accent, falling back to "Built from {city}, logged everywhere."; and `colophon` for the
    footer's bottom line, falling back to "A dossier by {owner}". An optional `pageCopy`
    record overrides any page-header description, keyed per page with fallbacks in
-   `src/lib/pageCopy.ts`). The `siteSeed`
+   `src/entities/site/pageCopy.ts`). The `siteSeed`
    plugin in `vite.config.ts` rewrites the `<title>` and description meta and injects the Open
    Graph and Twitter tags at build time; the literals in `index.html` are neutral template
    defaults.
 2. **Override**: `localStorage.os_site`, written by the companion admin panel's Site identity
    editor (per-browser; clearing it falls back to the deployed seed file).
-3. `src/lib/siteMeta.ts` is the dependency-free model and head-tag generator shared with the
-   Vite plugin; `src/lib/site.ts` adds persistence and the `useSiteIdentity()` hook, consumed by
-   the TopBar wordmark, the Footer colophon, and `TitleSync` (which sets `document.title` per
-   route via `pageLabel()` in `src/lib/nav.ts`).
+3. `src/entities/site/meta.ts` is the dependency-free model and head-tag generator shared with
+   the Vite plugin; `src/entities/site/identity.ts` adds persistence and the `useSiteIdentity()`
+   hook, consumed by the TopBar wordmark, the Footer colophon, and `TitleSync` (which sets
+   `document.title` per route via `pageLabel()` in `src/shared/config/nav.ts`).
+
+The build reaching into an entity slice is the one deliberate exception to the layer
+rule: `meta.ts` and `paletteCss.ts` are dependency-free by design precisely so the Vite
+plugins can read them at build time, before any layer exists.
 
 The rule this system enforces: **no personal strings in source code**. Everything
 owner-specific lives in `src/content/` (markdown, `profile.md`, `site.json`, `palette.json`),
@@ -159,7 +251,7 @@ which is exactly what the companion admin panel produces.
 ## Travel hierarchy
 
 Countries and cities are two separate content types joined at render time in
-`src/pages/Travel.tsx`.
+`src/pages/travel/TravelPage.tsx`.
 
 - `countries` type maps to `src/content/travel/countries/*.md`
 - `trips` type maps to `src/content/travel/cities/*.md`
@@ -175,12 +267,12 @@ Join key: `trip.country === country.name` (an exact string match, so it must be 
 
 - **No server**: a pure static site. All logic is client-side.
 - **Bundle size**: `react-markdown` plus `remark-gfm` are code-split behind the shared
-  `Markdown` component (`src/components/ui/Markdown.tsx`). Further splits are possible via
+  `Markdown` component (`src/shared/ui/Markdown.tsx`). Further splits are possible via
   `build.rollupOptions.output.manualChunks`.
 - **Content edits require a rebuild**: Markdown files are bundled at build time. Runtime
   localStorage overrides are per-browser only until exported and committed as seed files.
 - **`ContentType` includes `"settings"`** but settings is a single `UserSettings` object, not an
-  `AnyContentItem[]`. It is handled separately in ContentContext and ContentService.
+  `AnyContentItem[]`. It is handled separately in the record's context and store.
 - **Blog versus Garden**: Garden (`posts`) is personal knowledge management, atomic notes; Blog
   is polished long-form articles for external readers.
 - **Updates subtypes**: `note` (a short thought), `link` (a link plus commentary), `milestone`

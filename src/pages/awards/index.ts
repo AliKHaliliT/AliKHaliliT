@@ -1,0 +1,1 @@
+export { AwardsPage } from "./AwardsPage";

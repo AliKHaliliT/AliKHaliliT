@@ -1,77 +1,66 @@
 # Documentation Conventions
 
-The rulebook for how this repository documents itself. It is frozen: never edit it to fit a
-new document; change it only through a decision record that supersedes the relevant rule.
-Everything here is inherited from a shared house style, with only truth-preserving edits for
-this project's stack.
+This file is the rulebook for this project's technical documentation: which documents exist, what species each one is, how each species is written, and where a "why" belongs. It is normative and frozen: **do not modify this file**. If a rule ever has to change, the change is made deliberately, by the style's owner, inside the template itself in the My-Styles repository, and recorded as a new decision record superseding [0001](decisions/0001-adopt-the-documentation-system.md), which is also where the rationale behind this whole system lives. A project derived from this template never edits its copy of this file and never diverges from it, however much better a local rule looks from below; a case for changing a rule travels upstream through the report described in AGENTS.md, and the rule then changes for every project or for none.
 
 ## The two species of documents
 
-Every document is exactly one of two kinds, and the kind never mixes inside one file.
+Every technical document is exactly one of two species, and the species dictates all of its rules.
 
-- A **living document** describes what is true now. It is rewritten in place as reality
-  changes; the stale text is deleted, not struck through or preserved. It never contains
-  history: no dates, no "previously", no "we changed X to Y". Git is the archive of what it
-  used to say.
-- A **record** is written once, dated, and never edited again (except a single status line).
-  Its job is to remain an accurate account of a moment, so it must not be updated to stay
-  current. Decision records and CHANGELOG entries are records.
+**Living documents** describe the present. They are edited in place, they are always current, and they are bounded in size. A living document never contains history: no dates, no "previously", no "we changed X to Y" narration. When reality changes, the document is rewritten to match it and the old text disappears; git remembers what it used to say. `AGENTS.md`, `STATE.md`, and `docs/ARCHITECTURE.md` are living documents.
 
-The two failure modes this guards against: a record that keeps growing until it is an
-unreadable log, and a living document that rots because nobody rewrites it.
+**Records** describe one past event. A record is written once, dated, and never edited again. It is not updated to stay current, because its job is to remain an accurate account of a moment. When reality moves past a record, a new record is written that supersedes the old one. Everything under `docs/decisions/` is a record.
+
+Nearly every documentation failure is a species violation. A history file that grows until it is unusable is record-species content forced into one ever-growing living file. An architecture document that rots is a living document treated as append-only. Never mix the two species in one file.
 
 ## The spine and the organic zone
 
-The **spine** is the fixed set of required documents, each with an assigned species:
+Every project carries this fixed spine:
 
-| Document | Species | Purpose |
-| -------- | ------- | ------- |
-| `AGENTS.md` | living | The entry point and the single documentation index |
-| `STATE.md` | living | Current status: Now, Next, Deferred, Blocked |
-| `CHANGELOG.md` | records | Curated per-release summary for people who fork the template |
-| `docs/BASELINE.md` | living | Which root files must exist, and the rules for changing them |
-| `docs/ARCHITECTURE.md` | living | The system map as it exists today |
-| `docs/CONVENTIONS.md` | living, frozen | This rulebook |
-| `docs/decisions/` | records | Durable architectural and process rationale |
+| Document | Species | Role |
+| --- | --- | --- |
+| `AGENTS.md` | Living | Vendor-neutral agent entry point: the operating manual and the single documentation index. |
+| `STATE.md` | Living | Current project state: what is in flight, queued, deferred, or blocked. |
+| `CHANGELOG.md` | Records | Curated per-release summary for consumers; present only where consumers upgrade through releases (the trigger lives in BASELINE.md). |
+| `docs/ARCHITECTURE.md` | Living | The map of the system as it is today. |
+| `docs/CONVENTIONS.md` | Living, frozen | This rulebook. |
+| `docs/decisions/` | Records | The decision log; the durable home of rationale. |
 
-The **organic zone** is any further document under `docs/` (for example `THEMING.md`,
-`CONTENT-MODEL.md`, `ROADMAP.md`, `SETUP.md`). Each such file covers one subject, declares
-one species, uses an UPPERCASE Markdown filename, and is registered in the AGENTS.md index
-in the same change that creates it.
+Assistant-specific instruction files (a `CLAUDE.md`, a `GEMINI.md`, tool rule files) do not exist in this project: every assistant reads `AGENTS.md` directly. If a tool ever genuinely cannot read `AGENTS.md`, it gets a one-line shim that does nothing but import or point to `AGENTS.md` in whatever include syntax the tool understands. A shim is not a document: it is not indexed, it carries no content of its own, and it never grows a second line.
 
-## Size and growth
-
-A document targets roughly 150 lines: one comfortable read. When a subject outgrows that,
-it splits into a child document indexed separately. Growth happens by fission, never by
-accretion. One subject per file; one species per file.
+Beyond the spine, documentation grows organically: any further document the project needs is added under `docs/` (UPPERCASE markdown, one subject per file, one species per file) and registered in the index. Growth changes the number of documents, never the species rules of an existing one.
 
 ## The index contract
 
-AGENTS.md holds the only index of technical documents, each with a one-line note on its
-contents and when to read it. A document that is not listed there does not exist, because no
-reader can be expected to find it. Registering happens with creation; delisting happens with
-removal.
+`AGENTS.md` holds the single index of all technical documents, each with a one-line description of what it contains and when to read it. A document that is not listed there does not exist: no reader can be expected to find it, and no agent will. Creating a document and registering it in the index happen in the same change, as does delisting on removal.
 
-## Rules for records: decision records
+## Rules for living documents
 
-A decision record captures a choice that shapes future work, or reasoning that would
-otherwise be re-litigated later. It lives at `docs/decisions/NNNN-short-kebab-title.md` with
-a zero-padded sequence number, and follows this template:
+- Present tense only; describe what is, never what was or how it got here.
+- No dates and no changelog narration (`STATE.md` entries are the one exception: each carries the absolute date it was recorded).
+- Rewrite in place; never append-and-preserve. Deleting stale text is the job; git is the archive.
+- Size budget: one comfortable read, roughly 150 lines. A living document that outgrows its budget is split by subject into child documents, each registered in the index. Growth happens by fission, never by accretion.
+
+### The STATE.md schema
+
+`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). Every entry is one line, ends with the absolute date it was recorded (YYYY-MM-DD), and is deleted, not struck through, when it no longer applies; finished work is git's memory, not STATE.md's.
+
+## Rules for records (decision records)
+
+Write a decision record when a choice shapes future work and its reasoning would otherwise be lost: an architectural boundary, a convention, a rejected-but-tempting alternative, a reversal of an earlier decision. Records live in `docs/decisions/`, named `NNNN-short-kebab-title.md` with a zero-padded sequence number, and follow this template:
 
 ```markdown
-# NNNN. Title stated as a noun phrase
+# NNNN. Title stating the decision
 
 Status: Accepted
 Date: YYYY-MM-DD
 
 ## Context
 
-The situation and constraints that forced a decision.
+The situation that forced a decision, and the constraints that shaped it.
 
 ## Options considered
 
-- **Option name.** One or two lines, with the reason it was rejected. This is the
-  highest-value part of the record: it stops the rejected idea from being re-proposed.
+Each realistic option with the one-or-two-line reason it lost. This section is the highest-value part of the record: it is what stops the same alternative from being re-proposed a year later.
 
 ## Decision
 
@@ -79,46 +68,25 @@ What was decided, stated plainly.
 
 ## Consequences
 
-What becomes easier, what becomes harder, and what future work it implies.
+What becomes easier, what becomes harder, and what future work this implies.
 ```
 
-A record is never edited after acceptance. When a later decision replaces it, only its
-status line changes, to `Superseded by [NNNN](NNNN-title.md)`; the body stays as the
-historical artifact. Records cite one another by relative link and number.
+An accepted record is immutable. When a decision changes, write a new record explaining why, and flip the old record's `Status:` line to `Superseded by [NNNN](NNNN-the-new-record.md)`; that status line is the only edit an accepted record may ever receive.
 
-## The STATE.md schema
+## Where a "why" belongs
 
-STATE.md is the one document in the spine permitted to carry dates. It has exactly four
-level-2 sections, in order: `Now` (in flight), `Next` (queued and ready), `Deferred`
-(consciously postponed), `Blocked` (waiting on something external). Each item is a single
-dash bullet ending in an absolute date in parentheses, `(YYYY-MM-DD)`, which is the
-recording date. An item is deleted when it no longer applies; finished work goes to git
-history, not to a "Done" section. An empty section still shows a placeholder line.
+Rationale has exactly three homes here, chosen by reach:
 
-## Where a rationale belongs
+1. A "why" that fits in a sentence or two and only explains one change goes in the **commit message body**.
+2. A "why" that will shape future decisions, or that would be re-litigated without a record, becomes a **decision record**.
+3. A "what changed" that a consumer needs when upgrading goes in **`CHANGELOG.md`** where the project versions releases. Where it versions none, upgrade-facing summaries have no home and impact lives in commit subjects.
 
-Rationale has exactly three homes, by scope:
+Chronology itself is never documented: git already is the complete log, and any document that re-narrates it degenerates into a worse git log.
 
-- **The commit message body**, for a one-or-two-sentence reason explaining a single change.
-- **A decision record**, for reasoning that shapes future decisions or would be
-  re-litigated.
-- **CHANGELOG.md**, for the consumer-facing "what changed and why it matters" of a release.
+## Naming
 
-Chronology itself is never documented in prose: git already is the complete log. No document
-re-narrates git history.
-
-## Prose style
-
-- **No em dashes anywhere.** Use a colon for an explanatory clause, a semicolon to join two
-  independent clauses, or parentheses for an aside.
-- Present tense and an objective register in living documents.
-- Markdown is the universal format. Fenced blocks carry a language identifier; lists and
-  fences are surrounded by blank lines (MD031, MD032, MD040).
+Spine and organic technical documents use UPPERCASE basenames at predictable locations (`STATE.md`, `docs/ARCHITECTURE.md`), matching the ecosystem convention that uppercase markdown means "meta-document about the project". Decision records use `NNNN-short-kebab-title.md` because they are many, ordered, and cited by number.
 
 ## Code-level documentation
 
-Code documents its public surface, not its internals. Exported functions, components, and
-types whose failure modes or contracts are not obvious carry a short doc comment stating
-what they do and what they assume; purely internal helpers keep a one-line summary at most.
-Match the comment density of the surrounding file. A comment states a constraint the code
-cannot show; it never narrates what the next line does or where the code came from.
+Doc comments are governed separately by the TSDoc convention in the [README's Conventions section](../README.md#conventions): one-sentence summaries on every export, the `@param`/`@returns`/`@throws` trio on fully documented functions, direct-only `@throws`, and runnable `@example` blocks on complex components and services.

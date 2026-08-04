@@ -1,6 +1,6 @@
 # Content Model
 
-All types are defined once, in `src/types/content.ts` (the companion admin panel and resume builder keep their own copies; this file is the site's authority). There is no runtime schema validation. The loaders trust the frontmatter, and `contentLoader.test.ts` pins the parsing and sorting behavior.
+All types are defined once, in `src/entities/record/model.ts` (the companion admin panel and resume builder keep their own copies; this file is the site's authority). There is no runtime schema validation. The loaders trust the frontmatter, and `contentLoader.test.ts` pins the parsing and sorting behavior.
 
 ---
 
@@ -32,7 +32,7 @@ orcid: ""
 # Any other platform, one per line: "Label: URL" or "Label [icon]: URL".
 # Nothing is hardcoded; add whatever belongs on the dossier (Kaggle,
 # Hugging Face, Instagram, ...). The optional [icon] names a glyph from
-# src/lib/linkIcons.ts: with an icon the hero renders an icon square,
+# src/shared/lib/linkIcons.ts: with an icon the hero renders an icon square,
 # without one a text chip.
 links: |
   Kaggle: https://www.kaggle.com/username
@@ -445,9 +445,9 @@ tags:
 ## The portfolio snapshot (not a content type)
 
 The resume builder lives in its own repo and does **not** add a content type here. What this
-repo owns is the export contract it consumes: `src/types/portfolio.ts` defines
+repo owns is the export contract it consumes: `src/features/portfolio-export/contract.ts` defines
 `portfolio.json` (format `vita-portfolio`, versioned: settings plus every content collection),
-and `src/services/portfolioSnapshot.ts` builds it. The snapshot doubles as a full backup of
+and `src/features/portfolio-export/snapshot.ts` builds it. The snapshot doubles as a full backup of
 the record. See the ecosystem boundary in [ARCHITECTURE.md](ARCHITECTURE.md) and decisions
 [0003](decisions/0003-self-contained-resume-builder.md) and
 [0004](decisions/0004-three-repo-ecosystem.md).
@@ -483,7 +483,7 @@ content type growing its own long-form body.
 
 `awardType`, `pubType`, `speakingType`, `certType`, and `memberType` are open
 strings: the values listed in each section above are common suggestions (they
-get proper labels from `src/lib/labels.ts`), but any owner-invented value is
+get proper labels from `src/entities/record/labels.ts`), but any owner-invented value is
 valid and renders as its Title Case form. An athletics trophy
 (`awardType: athletics`), a patent (`pubType: patent`), or an attended
 conference (`speakingType: attendance`) needs no code change.

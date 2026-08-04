@@ -3,8 +3,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { readFileSync } from "fs";
-import { generatePaletteCss, type Palette } from "./src/lib/paletteCss";
-import { escapeHtml, siteHeadTags, type SiteIdentity } from "./src/lib/siteMeta";
+import { generatePaletteCss, type Palette } from "./src/entities/site/paletteCss";
+import { escapeHtml, siteHeadTags, type SiteIdentity } from "./src/entities/site/meta";
 
 const SEED_PATH = path.resolve(__dirname, "src/content/settings/palette.json");
 const SITE_SEED_PATH = path.resolve(__dirname, "src/content/settings/site.json");

@@ -8,31 +8,40 @@ warm chart paper and dark mode is warm charcoal. The rule of forms says **data i
 (3px chips, hairline cards, dashed rules) and **actions are round** (full pills). The
 signature elements are the **pixel band** (`ui/PixelBand`) and the **ground track**, a
 dashed line whose square field-green node marks the page's position in the site map
-(`GroundTrack`, with positions from `src/lib/nav.ts`).
+(`GroundTrack`, with positions from `src/shared/config/nav.ts`).
 
-Light and dark mode switch via the `.dark` class on `<html>`, toggled by `useTheme` (a button
-in the TopBar) and persisted in `localStorage`.
+Light and dark mode switch via the `data-theme` attribute on `<html>`, toggled by `useTheme`
+(a button in the TopBar) and persisted in `localStorage`.
 
 ## Color tokens
 
-CSS custom properties live in `src/index.css` (the `@theme` block; dark values under
-`:root.dark`). The literals are the **Rangefinder** preset, the shipped default. Text and
-ground pairs meet WCAG AA in both themes.
+`src/app/styles/tokens.css` holds them in two layers. The raw variables carry the values and
+are re-pointed under `[data-theme="dark"]`; an `@theme inline` block maps each one to a
+Tailwind utility, so a component writes `bg-surface` and never names a theme or a hex. The
+mapping is inline rather than a copy because the runtime palette override rewrites the raw
+layer, and only an inline mapping carries that through to the utilities.
 
-| Variable | Light | Dark | Role |
-| -------- | ----- | ---- | ---- |
-| `--color-background` | `#f0efeb` | `#131110` | Page ground |
-| `--color-card` | `#faf9f6` | `#1b1815` | Cards, modals, inputs |
-| `--color-text-primary` | `#191713` | `#efeae3` | Ink |
-| `--color-text-secondary` | `#6b675e` | `#a49c8f` | Muted ink, meta |
-| `--color-border` | `#d3d0c7` | `#37312a` | Hairlines, usually drawn dashed |
-| `--color-border-strong` | `#a8a496` | `#584f43` | Chip borders, hover borders |
-| `--color-input-bg` | `#faf9f6` | `#100e0c` | Inputs (darker than cards in dark mode) |
-| `--color-signal` | `#bc4a10` | `#ff8a50` | The working accent: links, active, focus (text-safe) |
-| `--color-canopy` | `#bc4a10` | `#ff8a50` | Alias of signal (legacy call sites) |
-| `--color-field` | `#ff6b2e` | `#ff7038` | Loud fill: pixel band, dots, highlights (never text) |
-| `--color-pulse` | `#7fb5c9` | `#8fc3d8` | Ornament, never carries meaning |
-| `--color-footer` | `#171512` | `#0f0d0b` | Footer ground (`--color-footer-ink` is its text) |
+The literals are the **Rangefinder** preset, the shipped default. Text and ground pairs meet
+WCAG AA in both themes.
+
+| Variable | Utility | Light | Dark | Role |
+| -------- | ------- | ----- | ---- | ---- |
+| `--surface` | `bg-surface` | `#f0efeb` | `#131110` | Page ground |
+| `--card` | `bg-card` | `#faf9f6` | `#1b1815` | Cards, modals, panels |
+| `--ink` | `text-ink` | `#191713` | `#efeae3` | Ink: headlines and body |
+| `--muted` | `text-muted` | `#6b675e` | `#a49c8f` | Muted ink, meta |
+| `--line` | `border-line` | `#d3d0c7` | `#37312a` | Hairlines, usually drawn dashed |
+| `--line-strong` | `border-line-strong` | `#a8a496` | `#584f43` | Chip borders, hover borders |
+| `--well` | `bg-well` | `#faf9f6` | `#100e0c` | Inputs (darker than cards in dark mode) |
+| `--signal` | `text-signal` | `#bc4a10` | `#ff8a50` | The working accent: links, active, focus (text-safe) |
+| `--field` | `bg-field` | `#ff6b2e` | `#ff7038` | Loud fill: pixel band, dots, highlights (never text) |
+| `--pulse` | `bg-pulse` | `#7fb5c9` | `#8fc3d8` | Ornament, never carries meaning |
+| `--footer` | `bg-footer` | `#171512` | `#0f0d0b` | Footer ground (`--footer-ink` is its text) |
+
+The palette editor keys (`background`, `textPrimary`, `inputBg`, and so on) keep their own
+names, because they are the shape of `palette.json` and of the palette carried in the
+portfolio contract. `paletteCss.ts` maps those keys onto the variables above, which is what
+lets the token vocabulary change without touching a published file format.
 
 The color rule: taxonomies stay **neutral** chips, with one working accent per palette
 (`signal` for text, `field` for fills), and `pulse` as ornament.
@@ -54,8 +63,8 @@ the seed, localStorage overrides). This is the file-seed model from decision
    as an `os-palette-override` style tag appended after the seed block, so it wins at equal
    specificity. Per-browser only.
 
-`src/lib/paletteCss.ts` is the dependency-free palette-to-CSS generator shared by the app and
-the Vite plugin; `src/lib/palette.ts` holds the preset catalog (Rangefinder, Meridian,
+`src/entities/site/paletteCss.ts` is the dependency-free palette-to-CSS generator shared by the app and
+the Vite plugin; `src/entities/site/palette.ts` holds the preset catalog (Rangefinder, Meridian,
 Blueprint, Observatory, Ledger), the per-token guide, `SEED_PALETTE`, and persistence. The
 companion admin panel carries the editor (presets, per-token pickers, Download palette.json in
 the exact seed-file format). Because everything reads the CSS variables, no component knows
@@ -116,11 +125,11 @@ the signature elements behave like a powered-on instrument.
 - **Reduced motion.** `MotionConfig reducedMotion="user"` covers Framer; the global CSS
   guard neutralizes keyframes and transitions; AmbientField checks the media query itself.
 
-## Shared atoms (`src/components/ui/`)
+## Shared atoms (`src/shared/ui/`)
 
 `Badge` (the annotation chip: square, mono, optional field-green glow dot), `PillLink` and
 `PillButton` (round actions), `PixelBand` (mosaic divider), `SectionBlock` (numbered dossier
 chapter scaffold), `PageHeader` (mono eyebrow plus Fraunces title plus track), `GroundTrack`,
 `FilterBar` (pills, ink-solid active), `TagList` (mono `#tags`), `EmptyState`, `Modal`, and
-`Markdown` (a code-split renderer). The nav map lives in `src/lib/nav.ts`, shared by TopBar,
+`Markdown` (a code-split renderer). The nav map lives in `src/shared/config/nav.ts`, shared by TopBar,
 Footer, and GroundTrack.

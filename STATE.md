@@ -5,6 +5,11 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Now
 
+- The deployment is level with the refactored template: sliced layers with the layer rule
+  checked by ESLint, semantic design tokens behind a `data-theme` attribute, both record
+  doors checked against a contract, the style-owned rulebook, and a doc comment on every
+  export (2026-08-04). Decision 0006 carries the reasoning and names the one adaptation
+  that must survive every future copy.
 - The profile page got its poster: an animated hand-built SVG wall (pixel tag, crew
   stickers, marquee) that points every click at the site, replacing the placeholder and
   its third-party typing service (2026-08-01).

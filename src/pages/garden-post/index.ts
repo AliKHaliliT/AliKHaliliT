@@ -1,0 +1,1 @@
+export { GardenPostPage } from "./GardenPostPage";

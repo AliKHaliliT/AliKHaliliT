@@ -3,7 +3,15 @@
 The living rulebook for the repository's always-present files: which files must exist,
 which must never be tracked, and how each may be modified. Unlike
 [CONVENTIONS.md](CONVENTIONS.md) this document is not frozen: the baseline evolves with the
-tooling, and a change that reshapes it is recorded as a decision record.
+tooling, and a change that reshapes it is recorded as a decision record (the current shape
+arrived with the template alignment in [0006](decisions/0006-track-the-refactored-template.md)).
+
+Two entries below are deliberate divergences from the template's baseline rather than
+oversights, and both are recorded here because this file is where a project states the facts
+the frozen rulebook leaves open. The README is the GitHub profile page, so the template's
+README schema does not apply to it. And no `LICENSE` exists, because the app code is MIT
+upstream while the personal record is all-rights-reserved, and one license file cannot say
+both truthfully.
 
 ## Always present
 
@@ -56,9 +64,10 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
 
 Files created only to support a task in progress are not repository content. Prefer
 creating them outside the repository tree in the first place. When one does live inside the
-tree, it is purged in the same change that ends its usefulness. If it is unclear whether a
-file is still needed, surface it to the owner rather than deleting it or silently leaving
-it behind.
+tree, it is purged in the same change that ends its usefulness. A development utility worth
+keeping across tasks belongs in `local_util_resources/`, which is already untracked. If it
+is unclear whether a file is still needed, surface it to the owner rather than deleting it
+or silently leaving it behind.
 
 ## Line endings
 

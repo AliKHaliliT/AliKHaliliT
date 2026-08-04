@@ -1,0 +1,91 @@
+/*
+ * The design tokens, and the only place a color is written down.
+ *
+ * Two layers. The raw variables below hold the values and are re-pointed per
+ * theme; the @theme inline block maps them to utilities, so a component says
+ * bg-surface and never names a theme or a hex. The mapping is inline rather
+ * than a copy because the runtime palette override rewrites the raw layer, and
+ * an inline mapping is what lets that reach the utilities.
+ *
+ * The preset catalog and the override mechanism live in
+ * src/entities/site/palette.ts (Admin -> Appearance); the literals here are what ships
+ * before any override. Every text and ground pair meets WCAG AA in both themes.
+ */
+
+/* Default preset: "Rangefinder", international orange on stone gray with a
+   glacier-blue ornament. */
+:root {
+  --surface: #f0efeb;
+  --card: #faf9f6;
+  --ink: #191713;
+  --muted: #6b675e;
+  --line: #d3d0c7; /* hairline: usually drawn dashed */
+  --line-strong: #a8a496;
+  --well: #faf9f6; /* form fields */
+
+  /* signal is the working accent (links, active states, focus); field is its
+     loud fill twin (highlights, pixel bands, dots); pulse is a decorative
+     counterpoint that never carries meaning. */
+  --signal: #bc4a10;
+  --field: #ff6b2e;
+  --pulse: #7fb5c9;
+  --footer: #171512;
+  --footer-ink: #f0ede6;
+}
+
+[data-theme="dark"] {
+  --surface: #131110;
+  --card: #1b1815;
+  --ink: #efeae3;
+  --muted: #a49c8f;
+  --line: #37312a;
+  --line-strong: #584f43;
+  --well: #100e0c; /* darker than cards so inputs read as wells */
+  --signal: #ff8a50;
+  --field: #ff7038;
+  --pulse: #8fc3d8;
+  --footer: #0f0d0b;
+  --footer-ink: #f0ede6;
+  --shadow-lift: 0 24px 48px -24px rgb(0 0 0 / 0.6);
+  --shadow-overlay: 0 24px 60px -12px rgb(0 0 0 / 0.65);
+}
+
+@theme {
+  --font-sans: "Switzer", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  /* Radius policy: data is square, actions are round. ctl = chips and inputs
+     (3px), card = surfaces (6px); pills and circles use rounded-full. */
+  --radius-ctl: 0.1875rem;
+  --radius-card: 0.375rem;
+
+  /* Shadow policy: borders do the structure. lift = sticky stack cards,
+     overlay = modals and search. Nothing else casts a shadow. */
+  --shadow-lift: 0 24px 48px -24px rgb(23 19 11 / 0.28);
+  --shadow-overlay: 0 24px 60px -12px rgb(23 19 11 / 0.35);
+
+  /* Type scale accents (everything else uses the default scale) */
+  --text-display: clamp(2rem, 1.2rem + 3.4vw, 3.5rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.025em;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.12em;
+}
+
+/* The bridge: every color utility resolves through the raw layer above. */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-well: var(--well);
+  --color-signal: var(--signal);
+  --color-field: var(--field);
+  --color-pulse: var(--pulse);
+  --color-footer: var(--footer);
+  --color-footer-ink: var(--footer-ink);
+}
