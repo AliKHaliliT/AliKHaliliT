@@ -277,3 +277,18 @@ Join key: `trip.country === country.name` (an exact string match, so it must be 
   is polished long-form articles for external readers.
 - **Updates subtypes**: `note` (a short thought), `link` (a link plus commentary), `milestone`
   (a significant event).
+
+## Testing
+
+Three rules hold however broad the suite is. Suites live in `tests/`, mirroring the source
+tree, one suite named after the unit it covers. A collaborator is replaced only at an
+architectural seam, by a hand-written fake satisfying the contract it stands in for, never by
+mocking a module's internals, since a test bound to an implementation voids the
+substitutability the layering exists to provide. And no coverage threshold is imposed, because
+a percentage gate buys assertions that assert nothing, so breadth stays a judgment call while
+placement and substitution do not.
+
+The 9 suites here are characterization tests over the record's schema, seed and store, the site identity and palette, the portfolio snapshot, and the date, skill and text libraries. They contain no module
+mocking at all, which is what made adopting the rule a description of existing practice rather
+than a migration. The reasoning is recorded in
+[decision 0007](decisions/0007-adopt-the-styles-test-contract.md), and the rule itself is owned by the style.

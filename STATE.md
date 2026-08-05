@@ -5,6 +5,12 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Now
 
+- The style's test contract is adopted, and the suites already satisfied it. Suites mirror
+  `src/`, collaborators are substituted only at a seam, no coverage threshold is imposed, and a
+  check found no module mocking anywhere here (2026-08-05). The fifth command is now a named
+  `typecheck` script rather than a bare `tsc -b`, so CI and the guide run the same thing.
+  Decision 0007 carries the reasoning, and two details of this project's CI travelled
+  upstream into the style in exchange.
 - The deployment is level with the refactored template: sliced layers with the layer rule
   checked by ESLint, semantic design tokens behind a `data-theme` attribute, both record
   doors checked against a contract, the style-owned rulebook, and a doc comment on every
