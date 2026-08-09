@@ -10,6 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prose
+        run: |
+          if git grep -PIn "\x{2014}"; then
+            echo "Em dashes are banned in every tracked byte."
+            exit 1
+          fi
+
       - uses: actions/setup-node@v4
         with:
           node-version: "24"

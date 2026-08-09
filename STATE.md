@@ -5,6 +5,8 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Now
 
+- CI greps every tracked byte for an em dash before anything installs, so the prose ban
+  is checked rather than remembered (2026-08-08).
 - The style's test contract is adopted, and the suites already satisfied it. Suites mirror
   `src/`, collaborators are substituted only at a seam, no coverage threshold is imposed, and a
   check found no module mocking anywhere here (2026-08-05). The fifth command is now a named
@@ -27,8 +29,6 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Next
 
-- Enable GitHub Pages (Settings, Pages, Source, GitHub Actions) so the site deploys on
-  push (2026-07-28).
 - Ali supplies: real author lists for the two Iranian conference papers (currently
   "et al."), two pending experience entries when they turn official (details local), any
   competition wins, a rating for The Gambler, and bodies for the anime and movies
