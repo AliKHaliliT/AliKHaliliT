@@ -143,6 +143,15 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        // The stable vendor libraries split into their own cached chunk, so editing
+        // content or app code no longer invalidates the bytes that never changed.
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom", "framer-motion"],
+        },
+      },
+    },
   },
   base: process.env.VITE_BASE_PATH || "/",
 });

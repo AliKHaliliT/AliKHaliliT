@@ -10,7 +10,6 @@ import {
   generatePaletteCss,
   getPreset,
   loadStoredPalette,
-  saveStoredPalette,
   toSeedFileJson,
 } from "@/entities/site/palette";
 
@@ -93,9 +92,12 @@ describe("stored palette round-trip", () => {
     expect(loadStoredPalette()).toBeNull();
   });
 
-  it("round-trips a saved palette", () => {
+  it("reads a palette override the admin wrote", () => {
     const preset = getPreset("blueprint")!;
-    saveStoredPalette({ basedOn: "blueprint", light: preset.light, dark: preset.dark });
+    localStorage.setItem(
+      "os_palette",
+      JSON.stringify({ basedOn: "blueprint", light: preset.light, dark: preset.dark }),
+    );
     const loaded = loadStoredPalette();
     expect(loaded?.basedOn).toBe("blueprint");
     expect(loaded?.dark.signal).toBe(preset.dark.signal);

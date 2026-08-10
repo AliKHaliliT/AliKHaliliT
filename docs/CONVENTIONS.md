@@ -36,13 +36,16 @@ Beyond the spine, documentation grows organically: any further document the proj
 ## Rules for living documents
 
 - Present tense only; describe what is, never what was or how it got here.
-- No dates and no changelog narration (`STATE.md` entries are the one exception: each carries the absolute date it was recorded).
+- No dates and no changelog narration (`STATE.md` entries are the one exception; each carries an absolute date). A `STATE.md` date is the entry's last-verified stamp, not its birthday. Re-dating requires actually re-verifying the entry against the tree or the world; touching the text does not count. An entry older than 90 days is expired, meaning nothing may rely on it or repeat it until it is re-verified and then re-dated or removed, and the docs audit fails on it so the sweep cannot be forgotten.
+- Record intent and decisions, never inventory the tree can answer. A premise like "the app has no icon of its own" is the tree's fact and rots silently the day someone adds one; state the wish and let the tree carry the facts.
+- A sentence in a living document is a claim, not a fact. Verify a claim before relying on it or repeating it, and end every change by sweeping `STATE.md` for entries the change completed or invalidated. Both halves bind agents and humans alike.
 - Rewrite in place; never append-and-preserve. Deleting stale text is the job; git is the archive.
 - Size budget: one comfortable read, roughly 150 lines. A living document that outgrows its budget is split by subject into child documents, each registered in the index. Growth happens by fission, never by accretion.
+- The mechanical half of freshness is checked rather than reviewed. The docs audit verifies that every repository path a living document names exists, that every relative link resolves, and that no `STATE.md` entry has outlived its horizon. Decision records are exempt from every rule in this section; they describe the past, which does not rot.
 
 ### The STATE.md schema
 
-`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). Every entry is one line, ends with the absolute date it was recorded (YYYY-MM-DD), and is deleted, not struck through, when it no longer applies; finished work is git's memory, not STATE.md's.
+`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). Every entry is one line, ends with its last-verified date (YYYY-MM-DD), and is deleted, not struck through, when it no longer applies; finished work is git's memory, not STATE.md's.
 
 ## Rules for records (decision records)
 

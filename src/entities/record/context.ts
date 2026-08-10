@@ -8,8 +8,6 @@
 
 import { createContext } from "react";
 import {
-  AnyContentItem,
-  ContentType,
   UserSettings,
   Project,
   Book,
@@ -52,9 +50,6 @@ export interface ContentContextValue {
   interests: Interest[];
   organizations: Organization[];
   settings: UserSettings;
-  updateContent: (type: ContentType, items: AnyContentItem[]) => void;
-  updateSettings: (settings: UserSettings) => void;
-  deleteItem: (type: ContentType, id: string | number) => void;
   refresh: () => void;
 }
 

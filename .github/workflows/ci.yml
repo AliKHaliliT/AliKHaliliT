@@ -8,7 +8,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Prose
         run: |
@@ -17,7 +17,16 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/setup-node@v4
+      - name: Docs
+        run: node scripts/audit-docs.mjs
+
+      - name: Rulebook
+        # Red here means this copy diverged from the style's rulebook, or the style
+        # moved and this project needs re-alignment; the pin updates with the alignment.
+        run: |
+          echo "e753cf8b77378d7618e68880865d616e3df12e675f0c1b394bab2230b46368c6  docs/CONVENTIONS.md" | sha256sum -c -
+
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: npm

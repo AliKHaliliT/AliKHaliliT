@@ -5,10 +5,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { installLocalStorageMock } from "@/shared/testing/localStorageMock";
 import {
   SEED_SITE,
-  clearStoredSite,
   currentSite,
   loadStoredSite,
-  saveStoredSite,
   toSeedFileJson,
 } from "@/entities/site/identity";
 import {
@@ -101,7 +99,7 @@ describe("siteHeadTags", () => {
   });
 
   it("escapes HTML-sensitive characters for raw splicing", () => {
-    expect(escapeHtml(`R&D <"lab">`)).toBe("R&amp;D &lt;&quot;lab&quot;&gt;");
+    expect(escapeHtml("R&D <\"lab\">")).toBe("R&amp;D &lt;&quot;lab&quot;&gt;");
   });
 });
 
@@ -115,12 +113,12 @@ describe("stored site round-trip", () => {
     expect(currentSite()).toEqual(SEED_SITE);
   });
 
-  it("round-trips a saved identity and clears back to the seed", () => {
+  it("reads an override the admin wrote and falls back once it is cleared", () => {
     const edited = { ...SEED_SITE, name: "My Corner", title: "Me: My Corner" };
-    saveStoredSite(edited);
+    localStorage.setItem("os_site", JSON.stringify(edited));
     expect(loadStoredSite()?.name).toBe("My Corner");
     expect(currentSite().title).toBe("Me: My Corner");
-    clearStoredSite();
+    localStorage.removeItem("os_site");
     expect(loadStoredSite()).toBeNull();
     expect(currentSite()).toEqual(SEED_SITE);
   });

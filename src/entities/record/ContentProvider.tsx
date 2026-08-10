@@ -4,8 +4,6 @@ import { useState, type ReactNode } from "react";
 import { ContentService } from "./store";
 import { ContentContext } from "./context";
 import {
-  AnyContentItem,
-  ContentType,
   UserSettings,
   Project,
   Book,
@@ -117,22 +115,6 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
     setSettings(ContentService.getSettings());
   };
 
-  const updateContent = (type: ContentType, items: AnyContentItem[]) => {
-    ContentService.save(type, items);
-    loadAll();
-  };
-
-  const updateSettings = (newSettings: UserSettings) => {
-    ContentService.saveSettings(newSettings);
-    loadAll();
-  };
-
-  const deleteItem = (type: ContentType, id: string | number) => {
-    const current = ContentService.getAll(type);
-    const updated = current.filter((i) => String(i.id) !== String(id));
-    updateContent(type, updated);
-  };
-
   return (
     <ContentContext.Provider
       value={{
@@ -155,9 +137,6 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         interests,
         organizations,
         settings,
-        updateContent,
-        updateSettings,
-        deleteItem,
         refresh: loadAll,
       }}
     >

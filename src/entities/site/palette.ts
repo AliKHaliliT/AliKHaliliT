@@ -14,7 +14,6 @@
 //      admin (now TABULARIUM, a separate origin), so today it is a hook for
 //      local experiments rather than a user-facing layer.
 
-import { safeSetItem } from "@/shared/lib";
 import { generatePaletteCss, type Palette, type PaletteMode } from "./paletteCss";
 import seedJson from "@/content/settings/palette.json";
 
@@ -173,28 +172,6 @@ export function loadStoredPalette(): StoredPalette | null {
   } catch {
     return null;
   }
-}
-
-/**
- * Writes a palette override for this browser.
- *
- * @param p - The palette to store.
- *
- * @returns True when the write landed, false when storage refused it.
- */
-export function saveStoredPalette(p: StoredPalette): boolean {
-  return safeSetItem(STORAGE_KEY, JSON.stringify(p));
-}
-
-/** Forget the browser override; the build-injected seed shows through. */
-export function clearStoredPalette(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // removal failing is harmless: the override tag is cleared regardless
-  }
-  document.getElementById(STYLE_TAG_ID)?.remove();
-  syncThemeColorMeta(SEED_PALETTE);
 }
 
 /** Inject (or refresh) the override style tag and sync the theme-color meta.

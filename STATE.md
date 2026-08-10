@@ -5,6 +5,16 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Now
 
+- Aligned with the style's 2026-08-10 rulings: the rulebook refreshed and its hash now
+  pinned in CI, the docs audit and its Docs step adopted, the version pinned at 0.0.1,
+  the quotes rule checked by ESLint, doc-comment presence checked by the jsdoc plugin,
+  every workflow on latest stable action majors, and the vendor libraries split into
+  their own cached chunk (2026-08-10). The reasoning lives in the style's decision
+  records, 0013 through 0016 in Helm.
+- The seed-wins rule and the read-only record door arrived with the template mirror, so a
+  redeploy of the real record can never again be shadowed by a stale browser copy
+  (2026-08-10). VITA's decision 0014 carries the reasoning; the adapted loader suite
+  survives per decision 0006.
 - CI greps every tracked byte for an em dash before anything installs, so the prose ban
   is checked rather than remembered (2026-08-08).
 - The style's test contract is adopted, and the suites already satisfied it. Suites mirror
@@ -32,16 +42,16 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 - Ali supplies: real author lists for the two Iranian conference papers (currently
   "et al."), two pending experience entries when they turn official (details local), any
   competition wins, a rating for The Gambler, and bodies for the anime and movies
-  interests (2026-07-28). The Turkey, Toronto, and Calgary dates all landed as April
+  interests; verified still pending (2026-08-10). The Turkey, Toronto, and Calgary dates all landed as April
   2026, month precision by the privacy rule (2026-08-01), and the atlas plus the book
   cover got real, permissively licensed images (2026-08-02).
 - Owner-voice drafts: site description and tagline; the bio is done (2026-07-28).
 
 ## Deferred
 
-- A skills addition waits on a publication going public; details local (2026-07-28).
+- A skills addition waits on a publication going public; details local (2026-08-10).
 - The `/skills` setup notes stay empty until wanted; hardware is deliberately excluded
-  (2026-07-28).
+  (2026-08-10).
 
 ## Blocked
 

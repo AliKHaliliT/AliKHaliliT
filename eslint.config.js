@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import jsdoc from 'eslint-plugin-jsdoc'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
@@ -67,6 +68,33 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      // Where the choice of string delimiter is free, it is double quotes; switching
+      // is only for avoiding escapes. The style's rule, checked here.
+      quotes: ['error', 'double', { avoidEscape: true }],
+      'jsx-quotes': ['error', 'prefer-double'],
+    },
+  },
+  {
+    // Every export carries a doc comment; suites live outside src and are exempt.
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: { jsdoc },
+    rules: {
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          publicOnly: true,
+          require: {
+            ClassDeclaration: true,
+            FunctionDeclaration: true,
+          },
+          contexts: [
+            'ExportNamedDeclaration > VariableDeclaration',
+            'ExportDefaultDeclaration > ArrowFunctionExpression',
+            'ExportNamedDeclaration > TSInterfaceDeclaration',
+            'ExportNamedDeclaration > TSTypeAliasDeclaration',
+          ],
+        },
       ],
     },
   },

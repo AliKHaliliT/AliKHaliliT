@@ -809,6 +809,7 @@ const ElsewhereSection = () => {
 
 /* ── The dossier ──────────────────────────────────────────────────── */
 
+/** The landing page: identity, highlights, and every ledger's front door in one scroll. */
 export const DashboardPage = () => (
   <div className="-mt-8">
     <Hero />
