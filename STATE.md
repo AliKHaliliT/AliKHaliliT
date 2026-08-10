@@ -5,6 +5,11 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Now
 
+- Aligned with the style's document budgets and rule census: the rulebook re-copied and
+  re-pinned, the audit now holding budgets, the index contract, the STATE schema, names,
+  and the raw-palette ban, and ESLint enforcing the env and HTTP homes (2026-08-10).
+- The content model fission arrived with the mirror: a door and five subject files, each
+  under budget and indexed (2026-08-10).
 - Aligned with the style's 2026-08-10 rulings: the rulebook refreshed and its hash now
   pinned in CI, the docs audit and its Docs step adopted, the version pinned at 0.0.1,
   the quotes rule checked by ESLint, doc-comment presence checked by the jsdoc plugin,

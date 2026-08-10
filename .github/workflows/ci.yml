@@ -24,7 +24,7 @@ jobs:
         # Red here means this copy diverged from the style's rulebook, or the style
         # moved and this project needs re-alignment; the pin updates with the alignment.
         run: |
-          echo "e753cf8b77378d7618e68880865d616e3df12e675f0c1b394bab2230b46368c6  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "11b995c995380e7bad5a2506150d532e377bdf0f55193bed145d488fc43440e1  docs/CONVENTIONS.md" | sha256sum -c -
 
       - uses: actions/setup-node@v7
         with:

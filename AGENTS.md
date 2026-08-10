@@ -138,7 +138,12 @@ document about this project (see [docs/BASELINE.md](docs/BASELINE.md)).
 | [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | The documentation rulebook: document species, schemas, naming. Frozen; owned by the style. Read before writing or changing any documentation. |
 | [docs/BASELINE.md](docs/BASELINE.md) | The repository baseline: always-present files, never-tracked files, and their modification rules. Read before adding, removing, or reshaping root-level or dot files. |
 | [docs/THEMING.md](docs/THEMING.md) | The design language: tokens, palettes, type, and motion. Read before touching any of them. |
-| [docs/CONTENT-MODEL.md](docs/CONTENT-MODEL.md) | Field schemas for every content type, and the add-a-type checklist. |
+| [docs/CONTENT-MODEL.md](docs/CONTENT-MODEL.md) | The content model's door: shared fields, frontmatter conventions, and the map of the per-subject schema files. |
+| [docs/CONTENT-PROFILE.md](docs/CONTENT-PROFILE.md) | Field schema of the owner profile. |
+| [docs/CONTENT-CAREER.md](docs/CONTENT-CAREER.md) | Field schemas of the career ledgers. |
+| [docs/CONTENT-COMMUNITY.md](docs/CONTENT-COMMUNITY.md) | Field schemas of the community and credential ledgers. |
+| [docs/CONTENT-GARDEN.md](docs/CONTENT-GARDEN.md) | Field schemas of the garden and writing ledgers. |
+| [docs/CONTENT-TRAVEL.md](docs/CONTENT-TRAVEL.md) | Field schemas of the travel ledgers. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | The feature landscape and standing technical debt. |
 | [docs/SETUP.md](docs/SETUP.md) | First-time environment setup and the GitHub Pages deploy. |
 | [docs/decisions/](docs/decisions/) | Immutable decision records holding the project's "why". Read the relevant record before revisiting a settled topic; never edit an accepted record. |
