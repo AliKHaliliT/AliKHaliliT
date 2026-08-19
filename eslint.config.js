@@ -3,6 +3,7 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import jsdoc from 'eslint-plugin-jsdoc'
+import sonarjs from 'eslint-plugin-sonarjs'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
@@ -116,6 +117,18 @@ export default defineConfig([
     rules: {
       'no-restricted-syntax': 'off',
       'no-restricted-globals': 'off',
+    },
+  },
+  {
+    // A local assigned and then immediately returned is a name that says nothing the
+    // function's own name did not; inline it, and keep the names that explain an
+    // expression. A regular expression that can backtrack exponentially is the same
+    // accident one level down. The style's decisions 0022 and 0023 carry both lines.
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
+    plugins: { sonarjs },
+    rules: {
+      'sonarjs/prefer-immediate-return': 'error',
+      'sonarjs/slow-regex': 'error',
     },
   },
   ...layerRules,

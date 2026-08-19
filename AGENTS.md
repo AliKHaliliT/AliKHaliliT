@@ -44,10 +44,16 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
 - **Prose carries no em dashes.** Not in docs, comments, or UI copy. Use a semicolon to
   join two clauses or parentheses for an aside. CI greps every tracked byte for the
   character; commit messages stay with review.
+- **Commit history speaks in the owner's voice alone.** No attribution trailers, no
+  Co-Authored-By lines, nothing naming a tool or an assistant in a commit message. Held in
+  review, like every commit-message rule.
 - **A STATE entry is a claim, not a fact.** Its date is a last-verified stamp with a
-  90-day expiry the docs audit enforces in CI. Verify an entry before relying on it, and
-  end every change by sweeping STATE.md for entries the change completed or invalidated,
-  agent and human alike.
+  90-day expiry the docs audit enforces in CI. Read STATE.md before starting work, and
+  sweep it before starting anything new, deleting every entry that describes finished work
+  and re-verifying or deleting any entry the tree no longer confirms. An entry earns Now
+  only while its work is genuinely unfinished. Completing work deletes its entry in the
+  same change and never replaces it with a narration of the landing, and every change ends
+  with a sweep for entries it completed or invalidated, agent and human alike.
 - **All prose must read as if a person wrote it.** Never write the clause-colon splice, a
   sentence shaped as claim, colon, elaboration; in prose a colon may only introduce a
   list, a quote, or a label. The softer language-model tells (balanced semicolon
@@ -104,6 +110,31 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
 - **Markdown formatting.** Every fenced block gets a language identifier; lists and fences
   are surrounded by blank lines (MD031, MD032, MD040).
 
+## The delivery gate
+
+A task is not delivered while the gate below has findings. Carry these items from the first line written, because they are cheapest to satisfy while the code is still forming and most expensive as after-the-fact repairs; the closing pass exists to confirm, not to redo.
+
+Closing a task follows one loop: run the checking commands above, weigh the change against every item below, fix what an item names, and repeat. One pass with no findings ends the loop. A finding is a concrete disagreement with a listed item, never general unease; the list is closed, and nothing outside it may generate rework. If the same finding survives three honest fix attempts, stop looping, record the finding and the attempts in STATE.md, and say so plainly when delivering. The names below index a wider literature; where a name's common usage and the rule beside it differ, the rule governs.
+
+- **Cognitive load**: nothing in the change is harder to hold in mind than the task requires.
+- **Granularity**: the size of every new unit (function, file, document, the change itself) is a choice, not an accident.
+- **Growth honesty**: what each loop's or query's cost grows with is a choice, not an accident, and no change buys a worse growth rate where a construction of equal effort exists.
+- **Ubiquitous language**: new names use the vocabulary the tree already speaks.
+- **Single source of truth**: the change introduces no second copy of any fact, and anything derived points at its source.
+- **Least privilege and surface**: nothing gains more access, exports, or dependencies than the task needs.
+- **Boundary honesty**: no data crosses a boundary unchecked, and checking happens at the door, once.
+- **Loud failure**: every new failure path raises a typed error; nothing is swallowed or silently defaulted.
+- **Two hats**: shape changes and behavior changes are separate steps, and no incidental reformatting rides along.
+- **Waste**: nothing speculative and nothing the change orphaned is left behind.
+- **The measured line**: nothing is made faster without a measurement that demanded it, and every optimization that lands records its measurement and its price.
+- **Test honesty**: substitutes stand in only at the declared seams, and time, randomness, and order are controlled.
+- **Point-of-use truth**: the doc comment or docstring each export carries is true, not merely present.
+- **Intent-split placement**: every documentation change lands in the document whose reader it serves, per the rulebook's species.
+- **Decision records**: any choice made here that would be re-litigated without a record gets one now.
+- **Debt**: every shortcut taken is written in STATE.md before delivery, never carried in memory.
+- **The commands**: every checking command above has passed against the final state of the tree.
+- **The hard rules**: the change disagrees with no review-held clause of this guide's Hard rules, re-read now, not recalled.
+
 ## The upstream report
 
 This deployment follows the [VITA template](https://github.com/AliKHaliliT/VITA), which
@@ -148,6 +179,6 @@ document about this project (see [docs/BASELINE.md](docs/BASELINE.md)).
 | [docs/SETUP.md](docs/SETUP.md) | First-time environment setup and the GitHub Pages deploy. |
 | [docs/decisions/](docs/decisions/) | Immutable decision records holding the project's "why". Read the relevant record before revisiting a settled topic; never edit an accepted record. |
 
-There are no assistant-specific instruction files: every assistant reads this file
+There are no assistant-specific instruction files. Every assistant reads this file
 directly. If a tool genuinely cannot read AGENTS.md, give it a one-line shim that imports
 or points to this file and nothing more.

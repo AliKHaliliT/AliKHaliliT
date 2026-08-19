@@ -62,7 +62,7 @@ One-time setup: repo **Settings → Pages → Source → GitHub Actions**.
 - **User/organization page or custom domain**: edit the workflow's
   `VITE_BASE_PATH` to `/`.
 
-Deep links survive hard refreshes on Pages: the build emits a `404.html` that
+Deep links survive hard refreshes on Pages. The build emits a `404.html` that
 redirects unknown paths back to `index.html` with the route encoded in the query
 (the `spaFallback` plugin in `vite.config.ts` + the decode snippet in `index.html`).
 

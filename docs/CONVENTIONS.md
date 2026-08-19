@@ -25,13 +25,13 @@ Every project carries this fixed spine:
 | `docs/CONVENTIONS.md` | Living, frozen | This rulebook. |
 | `docs/decisions/` | Records | The decision log; the durable home of rationale. |
 
-Assistant-specific instruction files (a `CLAUDE.md`, a `GEMINI.md`, tool rule files) do not exist in this project: every assistant reads `AGENTS.md` directly. If a tool ever genuinely cannot read `AGENTS.md`, it gets a one-line shim that does nothing but import or point to `AGENTS.md` in whatever include syntax the tool understands. A shim is not a document: it is not indexed, it carries no content of its own, and it never grows a second line.
+Assistant-specific instruction files (a `CLAUDE.md`, a `GEMINI.md`, tool rule files) do not exist in this project. Every assistant reads `AGENTS.md` directly. If a tool ever genuinely cannot read `AGENTS.md`, it gets a one-line shim that does nothing but import or point to `AGENTS.md` in whatever include syntax the tool understands. A shim is not a document: it is not indexed, it carries no content of its own, and it never grows a second line.
 
-Beyond the spine, documentation grows organically: any further document the project needs is added under `docs/` (UPPERCASE markdown, one subject per file, one species per file) and registered in the index. Growth changes the number of documents, never the species rules of an existing one.
+Beyond the spine, documentation grows organically. Any further document the project needs is added under `docs/` (UPPERCASE markdown, one subject per file, one species per file) and registered in the index. Growth changes the number of documents, never the species rules of an existing one.
 
 ## The index contract
 
-`AGENTS.md` holds the single index of all technical documents, each with a one-line description of what it contains and when to read it. A document that is not listed there does not exist: no reader can be expected to find it, and no agent will. Creating a document and registering it in the index happen in the same change, as does delisting on removal.
+`AGENTS.md` holds the single index of all technical documents, each with a one-line description of what it contains and when to read it. A document that is not listed there does not exist. No reader can be expected to find it, and no agent will. Creating a document and registering it in the index happen in the same change, as does delisting on removal.
 
 ## Rules for living documents
 
@@ -45,7 +45,7 @@ Beyond the spine, documentation grows organically: any further document the proj
 
 ### The STATE.md schema
 
-`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). Every entry is one line, ends with its last-verified date (YYYY-MM-DD), and is deleted, not struck through, when it no longer applies; finished work is git's memory, not STATE.md's.
+`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). An entry earns `Now` only while its work is genuinely unfinished, or while it names a condition future work must honor that no other document carries. Completing the work deletes the entry in the same change, and a narration of the landing never replaces it, because finished work is git's memory, not STATE.md's. Every entry is one line, ends with its last-verified date (YYYY-MM-DD), and is deleted, not struck through, when it no longer applies. The file is swept at both ends of every change. Before starting anything new, delete entries describing finished work and re-verify or delete any entry the tree no longer confirms. After finishing, sweep for entries the change completed or invalidated. The docs audit caps `Now` at five entries, so accretion fails the build instead of accumulating quietly. Re-verifying an entry means re-checking its claim or re-making its choice, never re-stamping; a `Deferred` or `Blocked` entry re-affirmed unchanged across several horizons is a decision record trying to be born, and moves there. After a long absence, expired stamps everywhere are the horizon working as intended, and the first task back is the sweep, not new work.
 
 ## Rules for records (decision records)
 
@@ -63,7 +63,7 @@ The situation that forced a decision, and the constraints that shaped it.
 
 ## Options considered
 
-Each realistic option with the one-or-two-line reason it lost. This section is the highest-value part of the record: it is what stops the same alternative from being re-proposed a year later.
+Each realistic option with the one-or-two-line reason it lost. This section is the highest-value part of the record, because it is what stops the same alternative from being re-proposed a year later.
 
 ## Decision
 
@@ -78,13 +78,14 @@ An accepted record is immutable. When a decision changes, write a new record exp
 
 ## Where a "why" belongs
 
-Rationale has exactly three homes here, chosen by reach:
+Rationale has exactly two homes here, chosen by reach:
 
 1. A "why" that fits in a sentence or two and only explains one change goes in the **commit message body**.
 2. A "why" that will shape future decisions, or that would be re-litigated without a record, becomes a **decision record**.
-3. A "what changed" that a consumer needs when upgrading goes in **`CHANGELOG.md`** where the project versions releases. Where it versions none, upgrade-facing summaries have no home and impact lives in commit subjects.
 
-Chronology itself is never documented: git already is the complete log, and any document that re-narrates it degenerates into a worse git log.
+A changelog exists only where consumers upgrade through releases, so a project that versions none maintains none (the trigger lives in BASELINE.md). A versioned artifact, such as a packaged library, adds `CHANGELOG.md` as a third home, carrying the curated per-release summary for its consumers; it summarizes impact, not reasoning.
+
+Chronology itself is never documented. Git already is the complete log, and any document that re-narrates it degenerates into a worse git log.
 
 ## Naming
 

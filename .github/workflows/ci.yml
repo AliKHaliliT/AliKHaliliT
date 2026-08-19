@@ -8,7 +8,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Prose
         run: |
@@ -17,16 +17,26 @@ jobs:
             exit 1
           fi
 
+      - name: Pins
+        # Red here means a copy diverged from the style, or the style moved and this
+        # project needs re-alignment; both pins update with the alignment. The audit
+        # script is pinned beside the rulebook and checked before it runs, because a
+        # checker the checked project can edit is no checker at all.
+        run: |
+          echo "05a329506f6acf4ed173bfb7e5f6b7284ef69a00c019cd4c41d1ac5ec3dbcd69  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "6c876680d2c8facf2c279ea3e13b9b5e2763af2e59fe0b48b8efb6d6f7593ad0  scripts/audit-docs.mjs" | sha256sum -c -
+
       - name: Docs
         run: node scripts/audit-docs.mjs
 
-      - name: Rulebook
-        # Red here means this copy diverged from the style's rulebook, or the style
-        # moved and this project needs re-alignment; the pin updates with the alignment.
+      - name: Seams
         run: |
-          echo "11b995c995380e7bad5a2506150d532e377bdf0f55193bed145d488fc43440e1  docs/CONVENTIONS.md" | sha256sum -c -
+          if git grep -nE "vi\.mock\(" -- tests; then
+            echo "Module mocking is banned; substitute only at a declared seam."
+            exit 1
+          fi
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
           cache: npm
@@ -45,3 +55,14 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  secrets:
+    name: Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

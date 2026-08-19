@@ -25,6 +25,8 @@ const LIVING = [
 
 /** An entry older than this is expired and must be re-verified before anything relies on it. */
 const HORIZON_DAYS = 90;
+/** Now is for in-flight work only; past this many entries the section is accreting, not tracking. */
+const NOW_CAP = 5;
 /** Bounded documents fail past this; the manual, the map, and the README grow with the system. */
 const BUDGET_LINES = 150;
 const FREE_GROWING = new Set(["AGENTS.md", "docs/ARCHITECTURE.md", "README.md"]);
@@ -35,6 +37,9 @@ const STATE_DATE = /\((\d{4}-\d{2}-\d{2})\)/g;
 const RECORD_NAME = /^\d{4}-[a-z0-9-]+\.md$/;
 const RAW_PALETTE =
   /\b(?:bg|text|border|ring|fill|stroke|from|via|to)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/;
+const FENCE = /```[^\n]*\n([\s\S]*?)```/g;
+const TREE_FILE = /^[A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+)+$/;
+const SKIP_DIRS = new Set([".git", "node_modules", "__pycache__", "dist", "build", ".venv"]);
 
 /** Whether a backticked token is claiming to be a repository path. */
 function looksLikePath(token) {
@@ -57,8 +62,20 @@ function* walk(dir) {
   }
 }
 
+/** Every file basename in the tree, for verifying names drawn in tree diagrams. */
+function* walkAll(dir) {
+  for (const entry of readdirSync(dir)) {
+    if (SKIP_DIRS.has(entry)) continue;
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) yield* walkAll(full);
+    else yield full;
+  }
+}
+
 const problems = [];
 const today = new Date();
+const basenames = new Set();
+for (const file of walkAll(ROOT)) basenames.add(file.split(/[\\/]/).pop());
 
 for (const rel of LIVING) {
   const doc = resolve(ROOT, rel);
@@ -91,6 +108,18 @@ for (const rel of LIVING) {
       problems.push(`${rel}:${lineOf(prose, match.index)}: links to ${target}, which does not resolve`);
     }
   }
+
+  for (const fence of text.matchAll(FENCE)) {
+    const block = fence[1];
+    if (!block.includes("──")) continue;
+    const blockLine = lineOf(text, fence.index);
+    block.split("\n").forEach((raw, offset) => {
+      const entry = raw.split("#")[0].replace(/[│├└─]/g, " ").trim().replace(/\/$/, "");
+      if (entry && TREE_FILE.test(entry) && !basenames.has(entry)) {
+        problems.push(`${rel}:${blockLine + offset + 1}: the tree names ${entry}, which exists nowhere in this repository`);
+      }
+    });
+  }
 }
 
 const statePath = resolve(ROOT, "STATE.md");
@@ -108,6 +137,13 @@ if (existsSync(statePath)) {
         `STATE.md:${lineOf(text, match.index)}: entry last verified ${match[1]}, ${age} days ago; ` +
           `re-verify it against reality, then re-date or remove it`,
       );
+    }
+  }
+  const nowSection = text.match(/^## Now\r?\n([\s\S]*?)(?=^## )/m);
+  if (nowSection) {
+    const entries = [...nowSection[1].matchAll(/^- /gm)].length;
+    if (entries > NOW_CAP) {
+      problems.push(`STATE.md: Now holds ${entries} entries against the cap of ${NOW_CAP}; sweep finished work into git's memory`);
     }
   }
 }
@@ -133,10 +169,18 @@ if (existsSync(docsDir)) {
   }
   const decisions = join(docsDir, "decisions");
   if (existsSync(decisions)) {
+    const numbers = new Map();
     for (const entry of readdirSync(decisions)) {
-      if (entry.endsWith(".md") && !RECORD_NAME.test(entry)) {
+      if (!entry.endsWith(".md")) continue;
+      if (!RECORD_NAME.test(entry)) {
         problems.push(`docs/decisions/${entry}: records are named NNNN-short-kebab-title.md`);
+        continue;
       }
+      const num = entry.slice(0, 4);
+      if (numbers.has(num)) {
+        problems.push(`docs/decisions/: ${numbers.get(num)} and ${entry} share the number ${num}; renumber the newer record`);
+      }
+      numbers.set(num, entry);
     }
   }
 }

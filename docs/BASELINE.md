@@ -2,7 +2,7 @@
 
 The living rulebook for the repository's always-present files: which files must exist,
 which must never be tracked, and how each may be modified. Unlike
-[CONVENTIONS.md](CONVENTIONS.md) this document is not frozen: the baseline evolves with the
+[CONVENTIONS.md](CONVENTIONS.md) this document is not frozen. The baseline evolves with the
 tooling, and a change that reshapes it is recorded as a decision record (the current shape
 arrived with the template alignment in [0006](decisions/0006-track-the-refactored-template.md)).
 
