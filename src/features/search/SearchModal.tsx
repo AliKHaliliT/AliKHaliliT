@@ -232,6 +232,9 @@ export const SearchModal = () => {
     return order.map((type) => ({ type, items: map.get(type)! }));
   }, [results]);
   const flat = useMemo(() => grouped.flatMap((g) => g.items), [grouped]);
+  // One pass to place every result, so the rows below look their position up
+  // instead of scanning the flat list once per row.
+  const flatIndex = useMemo(() => new Map(flat.map((r, i) => [r, i])), [flat]);
 
   // Snap the highlight back to the top whenever the result set changes.
   const [prevResults, setPrevResults] = useState(results);
@@ -334,7 +337,7 @@ export const SearchModal = () => {
               </p>
               {group.items.map((result) => {
                 const Icon = TYPE_ICON[result.type] ?? Search;
-                const index = flat.indexOf(result);
+                const index = flatIndex.get(result) ?? -1;
                 const isSelected = index === selectedIndex;
                 const external = /^https?:\/\//.test(result.href);
                 const Arrow = external ? ArrowUpRight : ArrowRight;
