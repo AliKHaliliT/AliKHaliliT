@@ -4,7 +4,7 @@
  * A living document rots when a sentence that was true at writing stops being true after
  * reality moves through a path that never touches the file. The mechanical kinds of rot are
  * checked here, along with the shapes the rulebook fixes: budgets, the index contract, names,
- * the STATE schema, and the raw-palette ban the token system implies. Decision records are
+ * the STATE schema, the engine floor claims, and the raw-palette ban the token system implies. Decision records are
  * exempt because they describe the past, which does not rot.
  */
 
@@ -40,6 +40,11 @@ const RAW_PALETTE =
 const FENCE = /```[^\n]*\n([\s\S]*?)```/g;
 const TREE_FILE = /^[A-Za-z0-9_\-]+(?:\.[A-Za-z0-9_\-]+)+$/;
 const SKIP_DIRS = new Set([".git", "node_modules", "__pycache__", "dist", "build", ".venv"]);
+/**
+ * Only a claim with the trailing plus is a floor claim; a bare version mention could be
+ * talking about anything, and a check may never imply more than it decides.
+ */
+const FLOOR_CLAIM = /Node(?:\.js)? (\d+(?:\.\d+)?)\+/g;
 
 /** Whether a backticked token is claiming to be a repository path. */
 function looksLikePath(token) {
@@ -198,6 +203,23 @@ if (existsSync(srcDir)) {
         problems.push(`${rel}:${lineOf(text, offset)}: raw palette class "${match[0]}"; colors come from the token utilities`);
       }
       offset += line.length + 1;
+    }
+  }
+}
+
+const pkg = join(ROOT, "package.json");
+if (existsSync(pkg)) {
+  const floor = JSON.parse(readFileSync(pkg, "utf-8")).engines?.node?.match(/>=\s*(\d+(?:\.\d+)*)/)?.[1];
+  if (floor) {
+    for (const rel of LIVING) {
+      const path = join(ROOT, rel);
+      if (!existsSync(path)) continue;
+      const text = readFileSync(path, "utf-8");
+      for (const match of text.matchAll(FLOOR_CLAIM)) {
+        if (match[1] !== floor) {
+          problems.push(`${rel}: claims Node ${match[1]}+ while engines declares ${floor}; the version story is one number`);
+        }
+      }
     }
   }
 }

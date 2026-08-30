@@ -122,13 +122,51 @@ export default defineConfig([
   {
     // A local assigned and then immediately returned is a name that says nothing the
     // function's own name did not; inline it, and keep the names that explain an
-    // expression. A regular expression that can backtrack exponentially is the same
-    // accident one level down. The style's decisions 0022 and 0023 carry both lines.
+    // expression. The style's decision 0022 carries the line.
     files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
     plugins: { sonarjs },
     rules: {
       'sonarjs/prefer-immediate-return': 'error',
-      'sonarjs/slow-regex': 'error',
+    },
+  },
+  {
+    // The mechanical half of security, the part that needs no threat model to judge.
+    // Every rule here fires on a construct that is wrong whoever the attacker is, so
+    // none of them asks this project to guess at a threat model it does not have.
+    // The style's decision 0024 carries why the rest of the security vocabulary stays out.
+    //
+    // The three warnings are advice rather than law. Each guesses from the shape of a
+    // string or a pattern and cannot decide its own question, so it may not gate; it
+    // hands review a candidate instead. The style's decision 0025 carries the principle,
+    // and the agent guide states what a warning obliges. Warnings are read and answered,
+    // never suppressed to make a run look clean.
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
+    plugins: { sonarjs },
+    rules: {
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+      'sonarjs/code-eval': 'error',
+      'sonarjs/no-hardcoded-passwords': 'warn',
+      'sonarjs/no-hardcoded-secrets': 'warn',
+      'sonarjs/slow-regex': 'warn',
+      'sonarjs/no-clear-text-protocols': 'error',
+      'sonarjs/pseudo-random': 'error',
+      'sonarjs/no-weak-cipher': 'error',
+      'sonarjs/no-weak-keys': 'error',
+      'sonarjs/hashing': 'error',
+      'sonarjs/insecure-cookie': 'error',
+      'sonarjs/no-intrusive-permissions': 'error',
+    },
+  },
+  {
+    // The ambient canvas rolls visual jitter only: spawn positions, drift speeds, and
+    // twinkle phases of decorative motes. Nobody is attacking a decoration, so the
+    // weak-randomness rule is waived for this one file instead of dimmed everywhere.
+    files: ['src/shared/ui/AmbientField.tsx'],
+    rules: {
+      'sonarjs/pseudo-random': 'off',
     },
   },
   ...layerRules,

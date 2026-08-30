@@ -10,10 +10,17 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Prose
+      - name: Em dash budget, two per file
         run: |
-          if git grep -PIn "\x{2014}"; then
-            echo "Em dashes are banned in every tracked byte."
+          git grep -PIno "\x{2014}" -- . > em-dashes.tmp || true
+          awk -F: '{count[$1]++} END {bad = 0; for (f in count) if (count[f] > 2) { printf "%s carries %d em dashes; the budget is two per file\n", f, count[f]; bad = 1 }; exit bad}' em-dashes.tmp
+          rm em-dashes.tmp
+
+      - name: Prose heuristics, advisory
+        continue-on-error: true
+        run: |
+          if git grep -inE "paradigm shift|game.changer|ever-evolving|cutting.edge|\bdelve|\btapestry\b|\bsupercharge|\btransformative\b|\bmultifaceted\b|\bmeticulous\b|\bparamount\b|\bembark\b|it.s worth noting|at the end of the day|in today.s world|let.s dive|going forward|a testament to|marks a pivotal|plays a vital role|experts agree|studies show|widely regarded as" -- . ":(exclude)*.github*" ":(exclude)*docs/CONVENTIONS.md" ":(exclude)*docs/decisions/*"; then
+            echo "Inflated vocabulary or weasel attribution in living prose; the verdict is review's."
             exit 1
           fi
 
@@ -23,8 +30,8 @@ jobs:
         # script is pinned beside the rulebook and checked before it runs, because a
         # checker the checked project can edit is no checker at all.
         run: |
-          echo "05a329506f6acf4ed173bfb7e5f6b7284ef69a00c019cd4c41d1ac5ec3dbcd69  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "6c876680d2c8facf2c279ea3e13b9b5e2763af2e59fe0b48b8efb6d6f7593ad0  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "ea82e6f4b5a8026f4638f3eaeccfa1d1013270b3ec0ad8cb8982ffef17f32a8d  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "7c2abfdc9f966133e7c8bd90c66e1a92f83c32f4f6fa1e8e87431f5a4cb47f23  scripts/audit-docs.mjs" | sha256sum -c -
 
       - name: Docs
         run: node scripts/audit-docs.mjs

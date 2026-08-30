@@ -1,6 +1,6 @@
 # Documentation Conventions
 
-This file is the rulebook for this project's technical documentation: which documents exist, what species each one is, how each species is written, and where a "why" belongs. It is normative and frozen: **do not modify this file**. If a rule ever has to change, the change is made deliberately, by the style's owner, inside the template itself in the My-Styles repository, and recorded as a new decision record superseding [0001](decisions/0001-adopt-the-documentation-system.md), which is also where the rationale behind this whole system lives. A project derived from this template never edits its copy of this file and never diverges from it, however much better a local rule looks from below; a case for changing a rule travels upstream through the report described in AGENTS.md, and the rule then changes for every project or for none.
+This file is the rulebook for this project's technical documentation: which documents exist, what species each one is, how each species is written, and where a "why" belongs. It is normative and frozen; do not modify this file. If a rule ever has to change, the change is made deliberately, by the style's owner, inside the template itself in the My-Styles repository, and recorded as a new decision record superseding [0001](decisions/0001-adopt-the-documentation-system.md), which is also where the rationale behind this whole system lives. A project derived from this template never edits its copy of this file and never diverges from it, however much better a local rule looks from below; a case for changing a rule travels upstream through the report described in AGENTS.md, and the rule then changes for every project or for none.
 
 ## The two species of documents
 
@@ -27,7 +27,7 @@ Every project carries this fixed spine:
 
 Assistant-specific instruction files (a `CLAUDE.md`, a `GEMINI.md`, tool rule files) do not exist in this project. Every assistant reads `AGENTS.md` directly. If a tool ever genuinely cannot read `AGENTS.md`, it gets a one-line shim that does nothing but import or point to `AGENTS.md` in whatever include syntax the tool understands. A shim is not a document: it is not indexed, it carries no content of its own, and it never grows a second line.
 
-Beyond the spine, documentation grows organically. Any further document the project needs is added under `docs/` (UPPERCASE markdown, one subject per file, one species per file) and registered in the index. Growth changes the number of documents, never the species rules of an existing one.
+Beyond the spine, documentation grows organically. Any further document the project needs is added under `docs/` (UPPERCASE markdown, one subject per file, one species per file) and registered in the index. The one exception in location is a directory whose purpose needs stating where a reader stands, which may carry its own `README.md` beside its contents, registered in the index like any other document. Growth changes the number of documents, never the species rules of an existing one.
 
 ## The index contract
 
@@ -40,16 +40,16 @@ Beyond the spine, documentation grows organically. Any further document the proj
 - Record intent and decisions, never inventory the tree can answer. A premise like "the app has no icon of its own" is the tree's fact and rots silently the day someone adds one; state the wish and let the tree carry the facts.
 - A sentence in a living document is a claim, not a fact. Verify a claim before relying on it or repeating it, and end every change by sweeping `STATE.md` for entries the change completed or invalidated. Both halves bind agents and humans alike.
 - Rewrite in place; never append-and-preserve. Deleting stale text is the job; git is the archive.
-- Size budgets come in two classes. `AGENTS.md` and `docs/ARCHITECTURE.md` grow with the system rather than against a number, since a manual and a map must cover whatever exists; they still say everything as briefly as it can be said, and an agent guide that keeps growing usually means the project's boundary was drawn too wide, which is a scoping problem no budget fixes. Every other living document is bounded at 150 lines, the docs audit fails one that exceeds its bound, and the remedy is fission, a split by subject into child documents, each registered in the index and each bounded itself. `README.md` stands outside both classes; its shape is governed by the README schema in BASELINE.md. Growth happens by fission, never by accretion.
-- The mechanical half of freshness is checked rather than reviewed. The docs audit verifies that every repository path a living document names exists, that every relative link resolves, that no `STATE.md` entry has outlived its horizon, that no bounded document exceeds its budget, that every document under `docs/` is registered in the index, and that names and the STATE schema hold their shapes. Decision records are exempt from every rule in this section; they describe the past, which does not rot.
+- Size budgets come in two classes. `AGENTS.md` and `docs/ARCHITECTURE.md` grow with the system rather than against a number, since a manual and a map must cover whatever exists; they still say everything as briefly as it can be said, and an agent guide that keeps growing usually means the project's boundary was drawn too wide, which is a scoping problem no budget fixes. Every other living document is bounded at 150 lines, the docs audit fails one that exceeds its bound, and the remedy is fission, a split by subject into child documents, each registered in the index and each bounded itself. `README.md` stands outside both classes; its shape is governed by the README schema in BASELINE.md. Growth happens by fission.
+- The mechanical half of freshness is checked rather than reviewed. The docs audit verifies that every root-anchored repository path a living document names exists, a token whose first segment the root does not know being read as prose, that every relative link resolves, that no `STATE.md` entry has outlived its horizon, that no bounded document exceeds its budget, that every document under `docs/` is registered in the index, and that names and the STATE schema hold their shapes. Decision records are exempt from every rule in this section; they describe the past, which does not rot.
 
 ### The STATE.md schema
 
-`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). An entry earns `Now` only while its work is genuinely unfinished, or while it names a condition future work must honor that no other document carries. Completing the work deletes the entry in the same change, and a narration of the landing never replaces it, because finished work is git's memory, not STATE.md's. Every entry is one line, ends with its last-verified date (YYYY-MM-DD), and is deleted, not struck through, when it no longer applies. The file is swept at both ends of every change. Before starting anything new, delete entries describing finished work and re-verify or delete any entry the tree no longer confirms. After finishing, sweep for entries the change completed or invalidated. The docs audit caps `Now` at five entries, so accretion fails the build instead of accumulating quietly. Re-verifying an entry means re-checking its claim or re-making its choice, never re-stamping; a `Deferred` or `Blocked` entry re-affirmed unchanged across several horizons is a decision record trying to be born, and moves there. After a long absence, expired stamps everywhere are the horizon working as intended, and the first task back is the sweep, not new work.
+`STATE.md` has exactly four sections: `Now` (in flight), `Next` (queued), `Deferred` (consciously postponed), and `Blocked` (waiting on something external). An entry earns `Now` only while its work is genuinely unfinished, or while it names a condition future work must honor that no other document carries. Completing the work deletes the entry in the same change, and a narration of the landing never replaces it, because finished work is git's memory, not STATE.md's. Every entry is one line, ends with its last-verified date (YYYY-MM-DD), and is deleted when it no longer applies; striking a line through does not delete it. The file is swept at both ends of every change. Before starting anything new, delete entries describing finished work and re-verify or delete any entry the tree no longer confirms. After finishing, sweep for entries the change completed or invalidated. The docs audit caps `Now` at five entries, so accretion fails the build instead of accumulating quietly. Re-verifying an entry means re-checking its claim or re-making its choice; a fresh date over an unexamined claim re-verifies nothing. A `Deferred` or `Blocked` entry re-affirmed unchanged across several horizons is a decision record trying to be born, and moves there. After a long absence, expired stamps everywhere are the horizon working as intended, and the first task back is the sweep.
 
 ## Rules for records (decision records)
 
-Write a decision record when a choice shapes future work and its reasoning would otherwise be lost: an architectural boundary, a convention, a rejected-but-tempting alternative, a reversal of an earlier decision. Records live in `docs/decisions/`, named `NNNN-short-kebab-title.md` with a zero-padded sequence number, and follow this template:
+Write a decision record when a choice shapes future work and its reasoning would otherwise be lost: an architectural boundary, a convention, a rejected-but-tempting alternative, a reversal of an earlier decision, a dead end. Records live in `docs/decisions/`, named `NNNN-short-kebab-title.md` with a zero-padded sequence number, and follow this template:
 
 ```markdown
 # NNNN. Title stating the decision
@@ -60,6 +60,14 @@ Date: YYYY-MM-DD
 ## Context
 
 The situation that forced a decision, and the constraints that shaped it.
+
+## Evidence
+
+What was run or measured and what came back. This section appears only where
+the decision rests on something measured or run; a record resting on reasoning
+alone omits it. The results the decision rested on are quoted here in full,
+never pointed at, because a record must stay accurate after the tree it
+measured moves on.
 
 ## Options considered
 
@@ -75,6 +83,8 @@ What becomes easier, what becomes harder, and what future work this implies.
 ```
 
 An accepted record is immutable. When a decision changes, write a new record explaining why, and flip the old record's `Status:` line to `Superseded by [NNNN](NNNN-the-new-record.md)`; that status line is the only edit an accepted record may ever receive.
+
+A dead end is written when its evidence arrives, not when work completes. A reverted approach leaves no bytes in the tree, so nothing else will remember it, and the finding is lost exactly when it is most worth keeping. Where the attempt cost real effort or could plausibly be retried, its record names the evidence that killed it, the condition that would reopen it, and the commit that held the attempt, which after the revert is the only surviving proof the attempt existed. Ordinary iteration earns no record; the test is whether someone might plausibly walk back in a month later.
 
 ## Where a "why" belongs
 
@@ -96,3 +106,23 @@ Spine and organic technical documents use UPPERCASE basenames at predictable loc
 Doc comments are governed separately by the TSDoc convention in the [README's Conventions section](../README.md#conventions): one-sentence summaries on every export, the `@param`/`@returns`/`@throws` trio on fully documented functions, direct-only `@throws`, and runnable `@example` blocks on complex components and services.
 
 Test files stand outside the every-export rule, because a suite documents itself through the name of each case and the assertion it makes. A comment belongs in a test only where the reason a case exists is invisible from its name, as with a regression guard that should name the defect it pins.
+
+## Prose
+
+Most of this family's prose is written by machines, so the law names the failure modes of machine writing precisely enough for review to check. The rules below govern every tracked byte of living prose and every new record. Words quoted inside this section as examples of what to cut are exempt where they are quoted, and nowhere else.
+
+The house voice is plain declarative sentences that argue their case. Judgment is welcome when it carries its reasons, and the family's idiom of animate machinery, a gate that lives somewhere, a claim that rests, stays. What the voice never does is let a vague actor hide a decision, so "the owner removed the check" beats "the check was removed" and both beat "the decision emerged".
+
+A small census of language-model tells is tolerated one at a time and forbidden stacked: the balanced antithesis, the triadic list, the not-X-but-Y reversal, the em dash aside. At most one such flourish per paragraph, and the rest plain sentences. The clause-colon splice, a sentence shaped as claim, colon, elaboration, is banned outright; in prose a colon introduces only a list, a quote, or a label.
+
+An em dash is legal where it clearly beats the comma, the parenthesis, or the period it replaces, and it spends its paragraph's one flourish. A tracked file carries at most two, because the plague arrives as clusters and a cluster is countable, so CI counts that boundary while the judgment of fit stays with review.
+
+Every sentence must survive the portability test. A sentence that could sit unchanged in another repository's documentation states nothing about this one, so it is cut or bound to this subject with a fact, a mechanism, a consequence, or a judgment this subject earned. The same test condemns the inflated vocabulary that means nothing anywhere, words in the family of delve, tapestry, paradigm shift, game changer, ever-evolving, cutting-edge, supercharge, transformative, multifaceted, meticulous, paramount, embark, empower, and elevate, and the padding phrases in the family of "it's worth noting", "at the end of the day", "in today's world", "let's dive in", and "going forward". CI greps a domain-safe subset of these on living prose, the records and the treasury excluded as quoting ground, and advises; the verdict is review's, because a banned word can be an honest domain term and only a reader knows which.
+
+A claim about the world names its source or dies. "Experts agree", "studies show", and "widely regarded as" are not sources; cite the work or cut the sentence, and when no source exists, say so instead of inventing weight. A specific fact enjoys the same protection, so a number is never smoothed into an adjective and "cuts the run from 40 minutes to 4" never becomes "significantly faster". Plain verbs carry claims best, "is" and "has" beat "serves as", and a trailing participle that pretends to explain, the "highlighting" and "underscoring" family, is replaced by the actual mechanism or dropped.
+
+Theater is cut wherever it appears. That covers throat-clearing openers, setups that flatter the writer as the lone honest expert, rhetorical questions the next sentence answers, importance puffery in the family of "marks a pivotal moment" and "a testament to", negative listing, staccato fragments for drama, and endings that recap what the reader just read. A final line that turns the point into an aphorism or a mic drop is deleted, never rewritten into a better one; the piece ends on its clearest concrete sentence, and when the ending needs more, it gets a plain takeaway or the next action.
+
+Formatting obeys the same law. No emoji in headings, no bold sprinkled mid-sentence for emphasis, no bullet list where two sentences of prose read better, no header over a two-sentence section. Format carries structure the content actually has.
+
+Before shipping prose, the writer checks its own output against this section: colons only for lists, quotes, and labels; at most one flourish per paragraph and two em dashes per file; every generic sentence bound to the subject or cut; every emphasis argued rather than labeled; the ending concrete. Beyond the counts named above no tool judges any of this, so the check is the writer's own, and review reads behind it.

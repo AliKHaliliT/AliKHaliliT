@@ -33,6 +33,17 @@ collections are legitimately empty, so it asserts an array for every collection 
 only for the populated ones. Do not replace it with the template's version, which assumes
 the demo seed fills every folder.
 
+The checks report at two levels. A failure is a verdict, it stops the command, and it
+means a rule the tool fully decides has been broken. A warning is advice, it leaves the
+exit status clean, and it comes from a check that cannot decide its own question and so
+is not allowed to gate. Advice is not noise and not optional reading. Every warning is
+looked at and then either fixed or dismissed in writing, in the change that produced it,
+and a warning is never silenced with a suppression comment to make a run look clean. The
+advisory checks here are the credential and regular-expression heuristics in the lint
+configuration, which guess from the shape of a string or a pattern and are wrong often
+enough that they cannot be a gate, and the prose-vocabulary grep in CI, which reads an
+honest domain term the same as a tell and so advises for review.
+
 ## Hard rules
 
 These are non-negotiable. Depth lives in the indexed documents; this is the checklist.
@@ -41,12 +52,40 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
   life data. Never replace it with demo content and never invent entries. A short list of
   confidential projects stays permanently off the site; the names live in the untracked
   `LOCAL.md`.
-- **Prose carries no em dashes.** Not in docs, comments, or UI copy. Use a semicolon to
-  join two clauses or parentheses for an aside. CI greps every tracked byte for the
-  character; commit messages stay with review.
+- **An em dash is legal where it clearly beats the comma, the parenthesis, or the period
+  it replaces**, and it counts as its paragraph's one flourish. A tracked file carries at
+  most two; CI counts that boundary, while the judgment of fit and commit messages stay
+  with review.
 - **Commit history speaks in the owner's voice alone.** No attribution trailers, no
   Co-Authored-By lines, nothing naming a tool or an assistant in a commit message. Held in
   review, like every commit-message rule.
+- **A check may never imply more than it decides.** A green run is a claim, so a check is
+  named for the question it actually settles, and a check that cannot settle its question
+  advises rather than gates. Whatever it leaves undecided is stated beside the rule as
+  review's work, never left to look automated, because the half no tool reaches is the
+  half that rots and it rots faster behind a passing signal. This is why the family
+  carries no coverage threshold, no maturity score, and no metric standing in for a rule
+  it cannot decide.
+- **A check that makes a worker damage the work is worse than no check.** When a rule
+  fights something real, neither bend the work to earn a green run nor rewrite the rule.
+  Pause the work in a state it can resume from, report the conflict, propose the change,
+  and wait for the owner's explicit approval, because a rule change slipped into a busy
+  diff is a decision nobody made. A length rule cuts filler and never information, a
+  repair is verified for its side effects rather than for its intent, and a warning is
+  answered rather than avoided, since an advisory a worker silences has become a gate.
+- **A completeness claim names its boundary.** Saying that every caller was updated or
+  every usage fixed is a fact only when it names the enumerable list it exhausted, a grep,
+  a file list, a suite run, that a reader can re-derive. A claim over a region the
+  claimant drew itself, such as every edge case considered, is offered as judgment rather
+  than fact, because no boundary exists for it to have reached and the claim reports only
+  that the claimant stopped finding things. Review probes the second kind, and trusts the
+  first only as far as its boundary reaches.
+- **A rule binds only where its own text claims to bind.** A length budget governs the
+  document whose budget it is, the prose law governs a tracked byte, and a stage's cap
+  governs that stage; outside that reach a rule does not apply at all. So nothing is spent
+  applying a convention to material it never named, such as trimming or restyling an
+  untracked working file that will never ship, and a count taken of such material is a
+  measurement rather than a finding to fix.
 - **A STATE entry is a claim, not a fact.** Its date is a last-verified stamp with a
   90-day expiry the docs audit enforces in CI. Read STATE.md before starting work, and
   sweep it before starting anything new, deleting every entry that describes finished work
@@ -59,7 +98,8 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
   list, a quote, or a label. The softer language-model tells (balanced semicolon
   antitheses, triadic lists, not-X-but-Y reversals) are fine one at a time and forbidden
   stacked, so allow at most one flourish per paragraph and keep the rest plain declarative
-  sentences.
+  sentences. The full catalog of tells, the vocabulary, and the portability test live in
+  the rulebook's Prose section ([docs/CONVENTIONS.md](docs/CONVENTIONS.md#prose)).
 - **Every tracked byte is public prose.** Confidential facts, private repository names,
   deployment details, and the description of what was withheld and why never enter a
   tracked file or a commit message, even in a private repository, because visibility can
@@ -122,6 +162,7 @@ Closing a task follows one loop: run the checking commands above, weigh the chan
 - **Ubiquitous language**: new names use the vocabulary the tree already speaks.
 - **Single source of truth**: the change introduces no second copy of any fact, and anything derived points at its source.
 - **Least privilege and surface**: nothing gains more access, exports, or dependencies than the task needs.
+- **Adversary honesty**: every change that creates or moves a trust boundary names who it is meant to withstand, and deciding that nobody is attacking it is a decision to write down rather than an assumption to leave implicit.
 - **Boundary honesty**: no data crosses a boundary unchecked, and checking happens at the door, once.
 - **Loud failure**: every new failure path raises a typed error; nothing is swallowed or silently defaulted.
 - **Two hats**: shape changes and behavior changes are separate steps, and no incidental reformatting rides along.
@@ -132,7 +173,7 @@ Closing a task follows one loop: run the checking commands above, weigh the chan
 - **Intent-split placement**: every documentation change lands in the document whose reader it serves, per the rulebook's species.
 - **Decision records**: any choice made here that would be re-litigated without a record gets one now.
 - **Debt**: every shortcut taken is written in STATE.md before delivery, never carried in memory.
-- **The commands**: every checking command above has passed against the final state of the tree.
+- **The commands**: every checking command above has passed against the final state of the tree, and every advisory finding printed along the way has been read and then fixed or dismissed in writing.
 - **The hard rules**: the change disagrees with no review-held clause of this guide's Hard rules, re-read now, not recalled.
 
 ## The upstream report
