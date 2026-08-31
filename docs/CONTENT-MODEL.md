@@ -9,7 +9,8 @@ The field schema of every type lives in its subject file:
 | Profile | `settings` | [CONTENT-PROFILE.md](CONTENT-PROFILE.md) |
 | Career | `experience`, `education`, `awards`, `publications`, `speaking` | [CONTENT-CAREER.md](CONTENT-CAREER.md) |
 | Community | `volunteering`, `certificates`, `references`, `interests`, `organizations` | [CONTENT-COMMUNITY.md](CONTENT-COMMUNITY.md) |
-| Garden | `projects`, `posts`, `books`, `blog`, `updates`, `courses` | [CONTENT-GARDEN.md](CONTENT-GARDEN.md) |
+| Garden | `projects`, `posts`, `blog`, `updates`, `courses` | [CONTENT-GARDEN.md](CONTENT-GARDEN.md) |
+| Library | `books`, `media` | [CONTENT-LIBRARY.md](CONTENT-LIBRARY.md) |
 | Travel | `trips`, `countries` | [CONTENT-TRAVEL.md](CONTENT-TRAVEL.md) |
 
 ## The portfolio snapshot (not a content type)
@@ -56,7 +57,9 @@ strings: the values listed in each section above are common suggestions (they
 get proper labels from `src/entities/record/labels.ts`), but any owner-invented value is
 valid and renders as its Title Case form. An athletics trophy
 (`awardType: athletics`), a patent (`pubType: patent`), or an attended
-conference (`speakingType: attendance`) needs no code change.
+conference (`speakingType: attendance`) needs no code change. The media
+collection's `medium` and `status` are open the same way, and a new `medium`
+value earns its own library shelf (see [CONTENT-LIBRARY.md](CONTENT-LIBRARY.md)).
 
 ---
 

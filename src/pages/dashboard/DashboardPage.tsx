@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { ObfuscatedEmail, SkillMatrix, AmbientField, Badge, PillLink, PixelBand, SectionBlock, TagList, DraftingPlot } from "@/shared/ui";
 import { parseKeyValue, formatMonthYearRange, formatShortDate, excerpt, firstLine, parseProfileLinks, LINK_ICONS } from "@/shared/lib";
-import { useContent, EMPLOYMENT_TYPE_LABEL, typeLabel } from "@/entities/record";
+import { useContent, buildShelves, EMPLOYMENT_TYPE_LABEL, typeLabel } from "@/entities/record";
 import { useSiteIdentity, siteMark } from "@/entities/site";
 
 /** "1 paper", "3 papers": CountCell units read as prose. */
@@ -703,9 +703,10 @@ const NotesSection = () => {
 /* ── 007 Elsewhere ────────────────────────────────────────────────── */
 
 const ElsewhereSection = () => {
-  const { books, countries, trips, interests, volunteering, organizations } = useContent();
-  const reading = books.find((b) => b.status === "Reading");
-  const readCount = books.filter((b) => b.status === "Read").length;
+  const { books, media, countries, trips, interests, volunteering, organizations } = useContent();
+  const shelves = buildShelves(books, media);
+  const libraryCount = books.length + media.length;
+  const inHand = shelves.flatMap((s) => s.items).find((i) => i.stage === "current");
   const interestChips = interests.slice(0, 8);
   const shownCountries = countries.slice(0, 12);
 
@@ -714,10 +715,10 @@ const ElsewhereSection = () => {
   const cells = [
     {
       label: "Library",
-      visible: books.length > 0,
-      count: books.length,
-      unit: `${plural(books.length, "book")} · ${readCount} read`,
-      latest: reading ? `Currently reading ${reading.title}.` : "Status, ratings, and notes for every book.",
+      visible: libraryCount > 0,
+      count: libraryCount,
+      unit: `${libraryCount === 1 ? "entry" : "entries"} · ${shelves.length} ${shelves.length === 1 ? "shelf" : "shelves"}`,
+      latest: inHand ? `In hand: ${inHand.title}.` : "Status, ratings, and notes across every shelf.",
       href: "/library",
       linkText: "Open library",
     },

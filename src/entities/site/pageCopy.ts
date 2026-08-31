@@ -21,7 +21,7 @@ export const PAGE_COPY: Record<string, { label: string; fallback: string }> = {
   blog: { label: "Blog", fallback: "Long-form writing on things I find interesting." },
   garden: { label: "Garden", fallback: "Thoughts, ideas, and essays that grow over time." },
   updates: { label: "Updates", fallback: "Notes, links, and milestones: a running log of what I'm thinking about." },
-  library: { label: "Library", fallback: "Books I've read, am reading, and want to read." },
+  library: { label: "Library", fallback: "Everything taken in and queued up: books, films, series, and games." },
   interests: { label: "Interests", fallback: "Hobbies and pursuits outside of work." },
   travel: { label: "Travel", fallback: "Countries and cities I've explored." },
 };

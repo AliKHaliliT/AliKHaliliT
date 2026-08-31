@@ -31,14 +31,14 @@ A **CV on steroids**: every dimension of a professional and personal life in one
 | Organizations    | `organizations`         | `/organizations` | Professional memberships; memberType badge                          |
 | References       | `references`            | `/references`    | Contact cards with mailto / tel links                               |
 | Projects         | `projects`              | `/projects`      | Featured card + year-grouped ledger                                 |
-| Library          | `books`                 | `/library`       | Status + rating                                                     |
+| Library          | `books` + `media`       | `/library`       | Shelf hub; per-shelf pages; status + rating on every shelf          |
 | Skills           | -                       | `/skills`        | Skill matrix + spoken languages + setup notes (`/uses` redirects)   |
 | Interests        | `interests`             | `/interests`     | Ledger rows grouped by category, story links                        |
 | Travel           | `countries` + `trips`   | `/travel`        | Hierarchical country → city                                         |
 | Garden           | `posts`                 | `/garden`        | Open note kinds (Seedling / Evergreen / List); per-post routes      |
 | Blog             | `blog`                  | `/blog`          | Series, tags, reading time; per-post routes                         |
 | Updates          | `updates`               | `/updates`       | note / link / milestone subtypes                                    |
-| Search           | -                       | Ctrl+K           | `SearchModal` · scored substring match over 16 content types        |
+| Search           | -                       | Ctrl+K           | `SearchModal` · scored substring match over 17 content types        |
 
 ### Profile card (dashboard) displays
 

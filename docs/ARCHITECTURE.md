@@ -138,7 +138,8 @@ that outgrows the model starts rejecting valid content. See
 | `/organizations` | Organizations | `pages/organizations` |
 | `/references` | References | `pages/references` |
 | `/projects` | Projects | `pages/projects` |
-| `/library` | Library | `pages/library` |
+| `/library` | Library hub (a row per shelf) | `pages/library` |
+| `/library/:shelf` | One shelf in full (`books`, or any medium) | `pages/library` |
 | `/skills` | Skills | `pages/skills` |
 | `/uses` | Redirect to `/skills` | (a `Navigate` in `app/router.tsx`) |
 | `/interests` | Interests | `pages/interests` |
@@ -174,7 +175,7 @@ sidebar.
 
 `features/search/SearchModal.tsx`, rendered inside the layout and opened via **Ctrl+K**
 or **Cmd+K** or a custom `open-search` DOM event (dispatched from the header). It is a
-client-side substring match over sixteen content types, scored so a title hit outranks a
+client-side substring match over seventeen content types, scored so a title hit outranks a
 structured-fact hit (institution, venue, company, and so on), which outranks tags, which
 outrank a hit buried in the body; results group by section with a per-type cap. There is
 no search index; it filters the in-memory record directly.

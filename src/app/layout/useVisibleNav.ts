@@ -12,7 +12,7 @@ export function useVisibleNav(): NavGroup[] {
   const {
     settings, experience, education, courses, awards, certificates,
     publications, speaking, volunteering, organizations, references,
-    projects, blog, posts, updates, books, interests, trips, countries,
+    projects, blog, posts, updates, books, media, interests, trips, countries,
   } = useContent();
 
   return useMemo(() => {
@@ -34,7 +34,7 @@ export function useVisibleNav(): NavGroup[] {
       "/blog": blog.length,
       "/garden": posts.length,
       "/updates": updates.length,
-      "/library": books.length,
+      "/library": books.length + media.length,
       "/interests": interests.length,
       "/travel": trips.length + countries.length,
     };
@@ -45,6 +45,6 @@ export function useVisibleNav(): NavGroup[] {
   }, [
     settings, experience, education, courses, awards, certificates,
     publications, speaking, volunteering, organizations, references,
-    projects, blog, posts, updates, books, interests, trips, countries,
+    projects, blog, posts, updates, books, media, interests, trips, countries,
   ]);
 }

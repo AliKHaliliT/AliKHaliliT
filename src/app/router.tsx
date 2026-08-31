@@ -12,7 +12,7 @@ import { env } from "@/shared/config";
 import { NotFoundPage } from "@/pages/not-found";
 import { DashboardPage } from "@/pages/dashboard";
 import { ProjectsPage } from "@/pages/projects";
-import { LibraryPage } from "@/pages/library";
+import { LibraryPage, ShelfPage } from "@/pages/library";
 import { TravelPage } from "@/pages/travel";
 import { TravelCountryPage, TravelCityPage } from "@/pages/travel-detail";
 import { GardenPage } from "@/pages/garden";
@@ -86,6 +86,7 @@ const AppRoutes = () => {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/library" element={<LibraryPage />} />
+        <Route path="/library/:shelf" element={<ShelfPage />} />
         <Route path="/travel" element={<TravelPage />} />
         <Route path="/travel/country/:slug" element={<TravelCountryPage />} />
         <Route path="/travel/city/:slug" element={<TravelCityPage />} />

@@ -6,7 +6,7 @@ import {
   Briefcase, GraduationCap, Trophy, FolderOpen, BookOpen, FileText, Sprout, Zap,
   BookMarked, BadgeCheck, Mic2, Heart, Building2, Smile, MapPin,
 } from "lucide-react";
-import { useContent } from "@/entities/record";
+import { useContent, shelfSlug } from "@/entities/record";
 import { cn, excerpt, formatShortDate, useScrollLock } from "@/shared/lib";
 
 type SearchResult = {
@@ -80,7 +80,7 @@ export const SearchModal = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const {
-    blog, posts, projects, experience, education, awards, books, updates,
+    blog, posts, projects, experience, education, awards, books, media, updates,
     publications, certificates, speaking, volunteering, organizations,
     interests, trips, countries,
   } = useContent();
@@ -184,7 +184,12 @@ export const SearchModal = () => {
       }));
     books.forEach((b) =>
       push(scoreOf(q, { title: b.title, facts: [b.author, b.status], tags: b.tags, body: b.body || b.notes }), {
-        id: b.id, title: b.title, subtitle: b.author, type: "Library", href: "/library",
+        id: b.id, title: b.title, subtitle: b.author, type: "Library", href: `/library/books?item=${b.slug}`,
+      }));
+    media.forEach((item) =>
+      push(scoreOf(q, { title: item.title, facts: [item.creator, item.medium, item.status, item.desc], tags: item.tags, body: item.body }), {
+        id: `media-${item.id}`, title: item.title, subtitle: item.creator || item.medium, type: "Library",
+        href: `/library/${shelfSlug(item.medium)}?item=${item.slug}`,
       }));
     trips.forEach((t) =>
       push(scoreOf(q, { title: t.city, facts: [t.country], tags: t.tags, body: t.body }), {
@@ -214,7 +219,7 @@ export const SearchModal = () => {
         return n < 5;
       })
       .slice(0, 24);
-  }, [query, blog, posts, projects, experience, education, awards, books, updates,
+  }, [query, blog, posts, projects, experience, education, awards, books, media, updates,
       publications, certificates, speaking, volunteering, organizations, interests, trips, countries]);
 
   // Results grouped by type (types ordered by their best match), with a

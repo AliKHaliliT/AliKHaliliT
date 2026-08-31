@@ -44,23 +44,6 @@ Note body in Markdown.
 
 ---
 
-## `books`: Reading list
-
-Folder: `src/content/books/`
-
-```yaml
----
-title: Book Title
-author: Author Name
-cover: https://...
-status: Reading # Reading | Read | To Read
-rating: 4 # 1–5, optional
----
-Notes / review in Markdown.
-```
-
----
-
 ## `blog`: Long-form articles
 
 Folder: `src/content/blog/`

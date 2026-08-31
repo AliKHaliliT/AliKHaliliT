@@ -28,6 +28,11 @@ const files: Record<ContentType, GlobResult> = {
     import: "default",
     eager: true,
   }),
+  media: import.meta.glob("@/content/media/*.md", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  }),
   // Trips now live under travel/cities/
   trips: import.meta.glob("@/content/travel/cities/*.md", {
     query: "?raw",
@@ -135,6 +140,7 @@ const SORT_SPECS: Partial<
   trips: { field: "date", kind: "date" },
   posts: { field: "date", kind: "date" },
   courses: { field: "date", kind: "date" },
+  media: { field: "date", kind: "date" },
 };
 
 /**

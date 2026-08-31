@@ -31,6 +31,7 @@ export const PORTFOLIO_CONTENT_TYPES: PortfolioContentType[] = [
   "blog",
   "updates",
   "books",
+  "media",
   "courses",
   "trips",
   "countries",

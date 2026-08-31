@@ -1,7 +1,7 @@
 ---
 title: Gaming
 category: hobby
-story: /garden/games-i-have-played
+story: /library/game
 ---
 
-Story-driven single player above all, with the occasional strategy detour. The full played list lives in the garden.
+Story-driven single player above all, with the occasional strategy detour. The full played list lives on the library's games shelf.

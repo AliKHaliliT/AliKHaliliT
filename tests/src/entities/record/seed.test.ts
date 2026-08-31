@@ -10,6 +10,7 @@ const ALL_TYPES: ContentType[] = [
   "projects",
   "posts",
   "books",
+  "media",
   "trips",
   "countries",
   "courses",
@@ -49,19 +50,18 @@ describe("loadInitialData: item shape", () => {
     for (const type of ALL_TYPES) {
       expect(Array.isArray(loadInitialData(type)), type).toBe(true);
     }
-    for (const type of ["projects", "blog", "posts", "education", "experience", "publications", "certificates", "interests", "books", "trips", "countries", "speaking", "volunteering", "updates"] as const) {
+    for (const type of ["projects", "blog", "education", "experience", "publications", "certificates", "interests", "books", "media", "trips", "countries", "speaking", "volunteering", "updates"] as const) {
       expect(loadInitialData(type).length, type).toBeGreaterThan(0);
     }
   });
 
-  it("posts: frontmatter `type` maps to postType; the internal type stays 'posts'", () => {
+  // The garden is empty since the played-games list moved to the library's
+  // games shelf, so the postType mapping holds vacuously until a note exists.
+  it("posts: the internal type stays 'posts' for whatever the garden holds", () => {
     const posts = loadInitialData("posts") as unknown as Loose[];
     for (const p of posts) {
       expect(p.type).toBe("posts");
     }
-    const list = posts.find((p) => p.slug === "games-i-have-played") as Loose;
-    expect(list.type).toBe("posts");
-    expect(list.postType).toBe("List");
   });
 
   it("every item's internal type matches the requested content type", () => {
@@ -109,6 +109,7 @@ const SORT_ORACLES: Array<[ContentType, (a: Loose, b: Loose) => number]> = [
   ["trips", byDateDesc("date")],
   ["posts", byDateDesc("date")],
   ["courses", byDateDesc("date")],
+  ["media", byDateDesc("date")],
 ];
 
 describe("loadInitialData: sorting", () => {
