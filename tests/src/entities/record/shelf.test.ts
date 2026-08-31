@@ -105,4 +105,39 @@ describe("shelfFront", () => {
     const front = shelfFront(shelf, 2);
     expect(front.map((i) => i.slug)).toEqual(["now", "done1"]);
   });
+
+  it("pins outrank work in hand", () => {
+    const [shelf] = buildShelves(
+      [],
+      [
+        media({ slug: "now", status: "Watching" }),
+        media({ slug: "chosen", status: "Watched", pin: 1 }),
+      ]
+    );
+    expect(shelfFront(shelf, 2).map((i) => i.slug)).toEqual(["chosen", "now"]);
+  });
+});
+
+describe("per-shelf ordering", () => {
+  // This deployment seeds no ordering.json, so every shelf keeps its
+  // collection order while pins still lead.
+  it("shelves keep collection order with pins lifted while nothing is seeded", () => {
+    const [shelf] = buildShelves(
+      [],
+      [
+        media({ slug: "zeppelin", title: "Zeppelin", medium: "game", date: "2026-01" }),
+        media({ slug: "anvil", title: "Anvil", medium: "game", date: "2020-01" }),
+        media({ slug: "keep", title: "Keep", medium: "game", pin: 1 }),
+      ]
+    );
+    expect(shelf.items.map((i) => i.slug)).toEqual(["keep", "zeppelin", "anvil"]);
+  });
+
+  it("a shelf without a seeded policy keeps its collection order", () => {
+    const [shelf] = buildShelves(
+      [],
+      [media({ slug: "z", medium: "film" }), media({ slug: "a", medium: "film" })]
+    );
+    expect(shelf.items.map((i) => i.slug)).toEqual(["z", "a"]);
+  });
 });

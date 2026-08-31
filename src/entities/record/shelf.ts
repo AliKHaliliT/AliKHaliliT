@@ -13,6 +13,8 @@
 
 import { Book, MediaItem } from "./model";
 import { typeLabel } from "./labels";
+import { OrderingPolicy } from "./order";
+import { orderingFor } from "./seed";
 
 /** Where a status label places an item: in hand, waiting, or finished. */
 export type ShelfStage = "current" | "done" | "queued";
@@ -33,6 +35,7 @@ export interface ShelfItem {
   body?: string;
   story?: string;
   tags?: string[];
+  pin?: number;
 }
 
 /** One category of the library, addressable at /library/:slug. */
@@ -79,6 +82,7 @@ const bookToItem = (b: Book): ShelfItem => ({
   body: b.body || b.notes,
   story: b.story,
   tags: b.tags,
+  pin: b.pin,
 });
 
 const mediaToItem = (item: MediaItem): ShelfItem => ({
@@ -95,10 +99,37 @@ const mediaToItem = (item: MediaItem): ShelfItem => ({
   body: item.body,
   story: item.story,
   tags: item.tags,
+  pin: item.pin,
 });
+
+const pinOf = (item: ShelfItem): number | undefined =>
+  Number.isFinite(Number(item.pin)) ? Number(item.pin) : undefined;
+
+/** Per-shelf ordering, mirroring the collection rule on the normalized shape:
+    pins lead ascending, the policy orders the rest, and chronological lets
+    undated entries close the list alphabetically instead of failing. */
+function orderShelfItems(items: ShelfItem[], policy?: OrderingPolicy): ShelfItem[] {
+  const time = (i: ShelfItem) => {
+    const n = new Date(i.date || 0).getTime();
+    return Number.isNaN(n) ? 0 : n;
+  };
+  const base = [...items];
+  if (policy === "alphabetical") base.sort((a, b) => a.title.localeCompare(b.title));
+  if (policy === "chronological") {
+    base.sort((a, b) => time(b) - time(a) || a.title.localeCompare(b.title));
+  }
+  const pinned = base.filter((i) => pinOf(i) !== undefined);
+  if (pinned.length === 0) return base;
+  pinned.sort((a, b) => (pinOf(a) as number) - (pinOf(b) as number));
+  return [...pinned, ...base.filter((i) => pinOf(i) === undefined)];
+}
 
 /**
  * Assembles every shelf the record currently holds.
+ *
+ * Each shelf arrives in its collection's order (the owner's seeded policy or
+ * the type default, pins first), and a media shelf with its own seeded policy
+ * under the key `media/<slug>` reorders behind its pins.
  *
  * @param books - The book collection.
  * @param media - The media collection, whatever mediums it names.
@@ -119,23 +150,24 @@ export function buildShelves(books: Book[], media: MediaItem[]): Shelf[] {
   const mediaShelves = [...byMedium.entries()].map(([slug, items]) => ({
     slug,
     label: SHELF_LABELS[slug] ?? typeLabel({}, items[0].medium || "other"),
-    items: items.map(mediaToItem),
+    items: orderShelfItems(items.map(mediaToItem), orderingFor(`media/${slug}`)),
   }));
   mediaShelves.sort((a, b) => a.label.localeCompare(b.label));
   return [...shelves, ...mediaShelves];
 }
 
 /**
- * The hub's selection for one shelf: everything in hand first, then the rest
- * in collection order, capped.
+ * The hub's selection for one shelf: pinned entries first, then everything in
+ * hand, then the rest in shelf order, capped.
  *
  * @param shelf - The shelf to pick from.
  * @param cap - How many entries the hub row holds.
  *
- * @returns At most `cap` items, work in hand leading.
+ * @returns At most `cap` items, pins leading.
  */
 export function shelfFront(shelf: Shelf, cap: number): ShelfItem[] {
-  const current = shelf.items.filter((i) => i.stage === "current");
-  const rest = shelf.items.filter((i) => i.stage !== "current");
-  return [...current, ...rest].slice(0, cap);
+  const pinned = shelf.items.filter((i) => pinOf(i) !== undefined);
+  const current = shelf.items.filter((i) => pinOf(i) === undefined && i.stage === "current");
+  const rest = shelf.items.filter((i) => pinOf(i) === undefined && i.stage !== "current");
+  return [...pinned, ...current, ...rest].slice(0, cap);
 }

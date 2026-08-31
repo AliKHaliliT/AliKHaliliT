@@ -38,6 +38,7 @@ interface BaseContent {
   tags?: string[];
   date?: string;
   story?: string; // route of the long-form piece about this item
+  pin?: number; // pinned entries lead their section, ascending
 }
 ```
 
@@ -49,6 +50,25 @@ consistent "read the story" affordance; interests, books, and travel cities
 show it today, and other surfaces adopt it as needed. This is how a one-line
 record (a game, a book, a city) connects to real writing without every
 content type growing its own long-form body.
+
+### Pinning and ordering
+
+Any entry may carry `pin: 1` (2, 3, ...), and pinned entries lead their
+section in ascending pin order, in the capped previews and on the full pages
+alike, so choosing what a section fronts is frontmatter rather than code.
+Behind the pins, each collection follows its ordering policy: dated types read
+newest first and everything else alphabetically by default, and the optional
+seed `src/content/settings/ordering.json` overrides that per section, mapping
+a content type (or a library shelf as `media/<slug>`) to `"alphabetical"` or
+`"chronological"`. Both degrade gracefully rather than demanding complete
+data: chronological sorts whatever carries the type's date field newest first
+and lets undated entries close the list alphabetically, an unusable `pin`
+value is treated as no pin, and an absent or broken ordering file means the
+defaults. The loader applies all of this once, so every page, capped preview,
+and export sees the same order. Two boundaries: a grouped page (projects by
+year, garden by kind) groups over the ordered list, so pins and policies act
+within groups rather than across them, and the travel atlas orders itself
+hierarchically, so `trips` and `countries` ignore the seed.
 
 ### Open type fields
 

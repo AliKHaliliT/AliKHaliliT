@@ -11,6 +11,13 @@ counts as work in hand and leads its shelf, a label starting with "To " counts
 as queued, and anything else counts as done. Stats and filter pills always show
 the exact labels; the stages only order and select.
 
+Shelf order follows the record's pinning-and-ordering rule (see
+[CONTENT-MODEL.md](CONTENT-MODEL.md)): pinned entries lead, then the hub row
+boosts work in hand, then the shelf's policy orders the rest. The book shelf
+takes its policy from the `books` key of `settings/ordering.json`, and a media
+shelf from its own `media/<slug>` key, so the games shelf can read
+alphabetically while the films shelf stays newest first.
+
 ---
 
 ## `books`: Reading list

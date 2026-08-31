@@ -8,6 +8,7 @@
 
 import frontMatter from "front-matter";
 import { AnyContentItem, ContentType, UserSettings } from "./model";
+import { DATE_FIELDS, OrderingPolicy, isOrderingPolicy, orderItems } from "./order";
 import { validateSeedItem } from "./schema";
 
 type GlobResult = Record<string, unknown>;
@@ -118,30 +119,44 @@ const files: Record<ContentType, GlobResult> = {
 
 type Frontmatter = Record<string, unknown>;
 
-// Newest-first sort per type: which frontmatter field orders the list, and
-// whether it holds a date string or a bare year.
-const SORT_SPECS: Partial<
-  Record<ContentType, { field: string; kind: "date" | "year" }>
-> = {
-  updates: { field: "date", kind: "date" },
-  blog: { field: "date", kind: "date" },
-  awards: { field: "date", kind: "date" },
-  speaking: { field: "date", kind: "date" },
-  certificates: { field: "date", kind: "date" },
-  experience: { field: "startDate", kind: "date" },
-  education: { field: "startDate", kind: "date" },
-  volunteering: { field: "startDate", kind: "date" },
-  organizations: { field: "startDate", kind: "date" },
-  publications: { field: "year", kind: "year" },
-  // Capped previews (home runner-ups, "last logged" cells) must surface the
-  // newest entries, so these lists are recency-ordered too; undated items
-  // sort as 0 and close the list.
-  projects: { field: "year", kind: "year" },
-  trips: { field: "date", kind: "date" },
-  posts: { field: "date", kind: "date" },
-  courses: { field: "date", kind: "date" },
-  media: { field: "date", kind: "date" },
-};
+// The ordering seed: the owner's chosen policy per section, an optional JSON
+// beside the other settings seeds. An absent file, a broken one, or an
+// unknown value all mean the defaults, so the record never fails to order.
+const ORDERING_FILES = import.meta.glob("@/content/settings/ordering.json", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
+const orderingSeed: Record<string, unknown> = (() => {
+  const raw = Object.values(ORDERING_FILES)[0];
+  if (!raw) return {};
+  try {
+    const parsed: unknown = JSON.parse(String(raw));
+    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+})();
+
+/**
+ * The owner's chosen ordering for one section, when a valid one is seeded.
+ *
+ * @param key - A content type ("projects"), or a library shelf ("media/game").
+ *
+ * @returns The seeded policy, or undefined for the section's default.
+ */
+export function orderingFor(key: string): OrderingPolicy | undefined {
+  const value = orderingSeed[key];
+  return isOrderingPolicy(value) ? value : undefined;
+}
+
+/** The order a collection reads in when the owner has not chosen one: dated
+    types newest first, everything else alphabetically. */
+const defaultPolicy = (type: ContentType): OrderingPolicy =>
+  DATE_FIELDS[type] ? "chronological" : "alphabetical";
 
 /**
  * Reads one collection out of the bundled markdown.
@@ -193,42 +208,9 @@ export function loadInitialData(type: ContentType): AnyContentItem[] {
     }
   );
 
-  // Sorting reads fields that only some collections carry, so the dynamic
-  // lookup is confined to this one helper instead of loosening the item type.
-  const fieldOf = (item: AnyContentItem, field: string): unknown =>
-    (item as unknown as Frontmatter)[field];
-
-  // The universal ordering rule: dated types read newest-first with an
-  // alphabetical tie-break; everything else reads alphabetically. Nothing
-  // is ever left in arbitrary glob order.
-  const alphaValue = (item: AnyContentItem): string =>
-    String(
-      fieldOf(item, "title") ??
-        fieldOf(item, "name") ??
-        fieldOf(item, "city") ??
-        item.slug ??
-        ""
-    );
-  const spec = SORT_SPECS[type];
-  if (spec) {
-    // Malformed dates/years sort as 0 (oldest) instead of poisoning the
-    // comparator with NaN, which would leave the list in undefined order.
-    const sortValue = (item: AnyContentItem): number => {
-      const raw = fieldOf(item, spec.field);
-      const n =
-        spec.kind === "year"
-          ? parseInt(String(raw || "0"), 10)
-          : new Date((raw as string) || 0).getTime();
-      return Number.isNaN(n) ? 0 : n;
-    };
-    parsedItems.sort(
-      (a, b) => sortValue(b) - sortValue(a) || alphaValue(a).localeCompare(alphaValue(b)),
-    );
-  } else {
-    parsedItems.sort((a, b) => alphaValue(a).localeCompare(alphaValue(b)));
-  }
-
-  return parsedItems;
+  // Nothing is ever left in arbitrary glob order: the owner's seeded policy
+  // wins, the type's default stands otherwise, and pins lead either way.
+  return orderItems(parsedItems, type, orderingFor(type) ?? defaultPolicy(type));
 }
 
 /** Cheap fingerprint of the bundled markdown for a type (paths + sizes).

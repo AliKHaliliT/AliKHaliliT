@@ -7,8 +7,9 @@
  * recorded beside it; the site never renders unchecked or stale data.
  */
 
-import { loadInitialData, loadSettings, seedFingerprint } from "./seed";
+import { loadInitialData, loadSettings, orderingFor, seedFingerprint } from "./seed";
 import { AnyContentItem, ContentType, UserSettings } from "./model";
+import { orderItems } from "./order";
 import { validateItems, validateSettings } from "./schema";
 
 const STORAGE_PREFIX = "os_content_";
@@ -62,7 +63,13 @@ export const ContentService = {
         if (seedChangedSince(type)) {
           dropStaleOverride(type);
         } else {
-          return validateItems(JSON.parse(stored), type, `localStorage "${key}"`);
+          // An override keeps the order it was saved in unless the owner
+          // seeded a policy; pins lead either way, matching the file door.
+          return orderItems(
+            validateItems(JSON.parse(stored), type, `localStorage "${key}"`),
+            type,
+            orderingFor(type)
+          );
         }
       }
     } catch (e) {

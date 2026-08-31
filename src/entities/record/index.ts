@@ -5,7 +5,9 @@ export { AWARD_TYPE_LABEL, EMPLOYMENT_TYPE_LABEL, PUB_TYPE_LABEL, SPEAKING_TYPE_
 export type { AnyContentItem, Award, BaseContent, BlogPost, Book, Certificate, ContentType, Country, Course, Education, Experience, Interest, MediaItem, Organization, Post, Project, Publication, Reference, SpeakingEvent, Trip, Update, UserSettings, Volunteering } from "./model";
 export type { Shelf, ShelfItem, ShelfStage } from "./shelf";
 export { buildShelves, shelfFront, shelfSlug, stageOf } from "./shelf";
+export type { OrderingPolicy } from "./order";
+export { DATE_FIELDS, comparatorFor, isOrderingPolicy, orderItems } from "./order";
 export { RecordContractError } from "./schema";
-export { loadInitialData, loadSettings, seedFingerprint } from "./seed";
+export { loadInitialData, loadSettings, orderingFor, seedFingerprint } from "./seed";
 export { ContentService } from "./store";
 export { CityCard } from "./ui/CityCard";
