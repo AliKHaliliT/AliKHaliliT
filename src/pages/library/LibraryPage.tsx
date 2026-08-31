@@ -1,10 +1,10 @@
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { m } from "framer-motion";
 import { Library } from "lucide-react";
+import { ItemModal } from "./ItemModal";
 import { ShelfCard } from "./ShelfCard";
 import { shelfIcon } from "./shelfIcon";
-import { useContent, buildShelves, shelfFront, Shelf } from "@/entities/record";
+import { useContent, buildShelves, shelfFront, Shelf, ShelfItem } from "@/entities/record";
 import { PageHeader, EmptyState, SectionBlock } from "@/shared/ui";
 import { usePageDescription } from "@/entities/site";
 
@@ -26,12 +26,15 @@ const stageLine = (shelf: Shelf): string => {
 
 /**
  * The library as a hall of shelves: one chapter per category, fronting a few
- * covers each, with the exhaustive list one link away on the shelf's own page.
+ * covers each. A cover opens its detail here, in place; only the chapter's
+ * "All N" link leaves for the shelf's own page, so the back button never has
+ * to undo a peek.
  */
 export const LibraryPage = () => {
   const { books, media } = useContent();
   const shelves = useMemo(() => buildShelves(books, media), [books, media]);
   const total = shelves.reduce((n, s) => n + s.items.length, 0);
+  const [selected, setSelected] = useState<{ item: ShelfItem; shelfSlug: string } | null>(null);
 
   return (
     <div className="pb-12">
@@ -65,9 +68,9 @@ export const LibraryPage = () => {
                 >
                   <div className="grid grid-cols-2 gap-6 pt-4 sm:grid-cols-3 md:grid-cols-5">
                     {front.map((item) => (
-                      <Link key={item.slug} to={`/library/${shelf.slug}?item=${item.slug}`}>
+                      <div key={item.slug} onClick={() => setSelected({ item, shelfSlug: shelf.slug })}>
                         <ShelfCard item={item} icon={Icon} />
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 </SectionBlock>
@@ -76,6 +79,13 @@ export const LibraryPage = () => {
           </div>
         )}
       </m.div>
+
+      <ItemModal
+        item={selected?.item ?? null}
+        icon={shelfIcon(selected?.shelfSlug ?? "")}
+        isOpen={!!selected}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 };
