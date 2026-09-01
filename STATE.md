@@ -16,6 +16,9 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
   2026, month precision by the privacy rule (2026-08-01), and the atlas plus the book
   cover got real, permissively licensed images (2026-08-02).
 - Owner-voice drafts: site description and tagline; the bio is done (2026-07-28).
+- Ali supplies the EXIST grant's award month and the venture's co-founder start and end
+  months (the venture's public name is optional; details local); the award entry then
+  gets its date and a co-founder experience entry can land (2026-08-31).
 
 ## Deferred
 
