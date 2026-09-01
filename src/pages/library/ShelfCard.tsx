@@ -1,9 +1,9 @@
 import { Star, type LucideIcon } from "lucide-react";
-import { Badge, SafeImage } from "@/shared/ui";
+import { Badge, SafeImage, SpineArt } from "@/shared/ui";
 import { ShelfItem } from "@/entities/record";
 
 /**
- * One cover on a shelf: the image (or the shelf's glyph), the status, the
+ * One cover on a shelf: the image (or its drawn spine), the status, the
  * title, the byline, and the rating. Purely presentational; the hub wraps it
  * in a link and the shelf page in a button.
  */
@@ -14,11 +14,7 @@ export const ShelfCard = ({ item, icon: Icon }: { item: ShelfItem; icon: LucideI
         src={item.image}
         alt={item.title}
         className="transition-transform duration-200 group-hover:scale-[1.02]"
-        fallback={
-          <div className="flex h-full w-full items-center justify-center text-muted">
-            <Icon size={32} strokeWidth={1.5} />
-          </div>
-        }
+        fallback={<SpineArt title={item.title} byline={item.byline} seed={item.slug} icon={Icon} />}
       />
     </div>
 

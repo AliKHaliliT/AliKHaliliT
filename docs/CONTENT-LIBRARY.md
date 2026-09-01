@@ -9,7 +9,9 @@ with a full page at `/library/<shelf>`. Statuses drive a stage heuristic shared
 by the hub and the shelf pages: a label ending in "ing" ("Reading", "Watching")
 counts as work in hand and leads its shelf, a label starting with "To " counts
 as queued, and anything else counts as done. Stats and filter pills always show
-the exact labels; the stages only order and select.
+the exact labels; the stages only order and select. An entry
+without an image wears a spine drawn from its title and the palette, so a shelf never
+shows a broken frame and needs no licensed cover art to look finished.
 
 Shelf order follows the record's pinning-and-ordering rule (see
 [CONTENT-MODEL.md](CONTENT-MODEL.md)): pinned entries lead, then the hub row

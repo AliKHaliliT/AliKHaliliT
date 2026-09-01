@@ -14,6 +14,7 @@ export { PixelBand } from "./PixelBand";
 export { SafeImage } from "./SafeImage";
 export { SectionBlock } from "./SectionBlock";
 export { SkillMatrix } from "./SkillMatrix";
+export { SpineArt } from "./SpineArt";
 export { StoryLink } from "./StoryLink";
 export { TagInput } from "./TagInput";
 export { TagList } from "./TagList";

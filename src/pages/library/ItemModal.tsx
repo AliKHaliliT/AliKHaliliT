@@ -1,5 +1,5 @@
 import { ArrowUpRight, Star, X, type LucideIcon } from "lucide-react";
-import { Modal, Badge, Markdown, SafeImage, StoryLink } from "@/shared/ui";
+import { Modal, Badge, Markdown, SafeImage, SpineArt, StoryLink } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib";
 import { ShelfItem } from "@/entities/record";
 
@@ -34,11 +34,7 @@ export const ItemModal = ({ item, icon: Icon, isOpen, onClose }: ItemModalProps)
             <SafeImage
               src={item.image}
               alt={item.title}
-              fallback={
-                <div className="flex h-full w-full items-center justify-center text-muted">
-                  <Icon size={40} strokeWidth={1.5} />
-                </div>
-              }
+              fallback={<SpineArt title={item.title} byline={item.byline} seed={item.slug} icon={Icon} />}
             />
           </div>
         </div>
