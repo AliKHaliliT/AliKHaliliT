@@ -5,6 +5,7 @@ location: Tabriz, Iran
 startDate: "2018-09"
 endDate: "2021-09"
 link: https://tabrizu.ac.ir/en
+desc: Built embedded and vision systems for farm machinery, from firmware and edge hardware to a patented seed drill monitor.
 tags:
   - Python
   - C/C++
