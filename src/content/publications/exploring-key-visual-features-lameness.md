@@ -1,5 +1,5 @@
 ---
-title: "Exploring Key Visual Features for Early Lameness Detection · Toward Transparent Intelligence"
+title: "Exploring Key Visual Features for Early Lameness Detection: Toward Transparent Intelligence"
 authors: "Ali Khalili Tazehkandgheshlagh, Ali Jafari, Seyed Saeid Mohtasebi, Hossein Navid"
 venue: "Biomechanism and Bioenergy Research"
 year: "2025"

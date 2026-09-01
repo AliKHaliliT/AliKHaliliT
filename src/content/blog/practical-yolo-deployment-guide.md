@@ -1,5 +1,5 @@
 ---
-title: From Raw Outputs to Optimized Deployment · A Practical YOLO Guide
+title: "From Raw Outputs to Optimized Deployment: A Practical YOLO Guide"
 slug: practical-yolo-deployment-guide
 date: "2025-12-19"
 excerpt: The .pt file on your disk feels finished. It is not. A practical walk from raw YOLO outputs to an optimized, deployable model.

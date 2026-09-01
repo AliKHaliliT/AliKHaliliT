@@ -1,5 +1,5 @@
 ---
-title: "Performance evaluation of multivariate deep-time convolution neural architectures for short-term electricity forecasting · Findings and failures"
+title: "Performance evaluation of multivariate deep-time convolution neural architectures for short-term electricity forecasting: Findings and failures"
 authors: "Flavian Emmanuel Sapnken, Ali Khalili Tazehkandgheshlagh, Mohammed Hamaidi, Prosper Gopdjim Noumo, Jean Gaston Tamba"
 venue: "Energy 360 (Elsevier)"
 year: "2024"

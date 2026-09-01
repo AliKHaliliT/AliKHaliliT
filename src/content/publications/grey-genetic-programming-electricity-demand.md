@@ -1,5 +1,5 @@
 ---
-title: "Improving electricity demand forecasting accuracy · a novel grey-genetic programming approach using GMC(1,N) and residual sign estimation"
+title: "Improving electricity demand forecasting accuracy: a novel grey-genetic programming approach using GMC(1,N) and residual sign estimation"
 authors: "Flavian Emmanuel Sapnken, Benjamin Salomon Diboma, Ali Khalili Tazehkandgheshlagh, Mohammed Hamaidi, Prosper Gopdjim Noumo, Yong Wang, Jean Gaston Tamba"
 venue: "Grey Systems: Theory and Application (Emerald)"
 year: "2024"

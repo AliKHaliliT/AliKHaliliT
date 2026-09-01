@@ -1,5 +1,5 @@
 ---
-title: From Ancient Tombs to Agentic AI · The Evolution of the "Answerer"
+title: 'From Ancient Tombs to Agentic AI: The Evolution of the "Answerer"'
 slug: from-ancient-tombs-to-agentic-ai
 date: "2026-02-10"
 excerpt: A room full of engineers had no problem with the technical stuff; they were stuck on a question closer to philosophy. What actually is an agent? The answer starts four thousand years ago.
