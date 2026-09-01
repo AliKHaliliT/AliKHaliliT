@@ -155,6 +155,8 @@ export interface Experience extends BaseContent {
   endDate?: string;
   employmentType?: "full-time" | "part-time" | "internship" | "contract" | "freelance";
   link?: string;
+  /** One-line summary for previews; the body's first line stands in when absent. */
+  desc?: string;
 }
 
 /** A degree or programme, with the institution that granted it. */

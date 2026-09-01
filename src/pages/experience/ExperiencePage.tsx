@@ -74,6 +74,12 @@ function ExperienceCard({ item }: { item: ExperienceType }) {
               )}
             </div>
 
+            {item.desc && (
+              <p className="mt-2 max-w-[64ch] text-sm leading-relaxed text-muted">
+                {item.desc}
+              </p>
+            )}
+
             <TagList tags={item.tags} className="mt-2.5" />
           </div>
 

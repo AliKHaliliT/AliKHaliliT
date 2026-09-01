@@ -17,6 +17,7 @@ startDate: "2022-06"
 endDate: "2024-01" # omit for current role (shows "Present")
 employmentType: full-time # full-time | part-time | internship | contract | freelance
 link: https://...
+desc: One-line summary shown on previews; the body's first line stands in when absent.
 tags:
   - React
   - Python

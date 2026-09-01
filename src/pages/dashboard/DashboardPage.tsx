@@ -383,9 +383,9 @@ const CareerSection = () => {
                 )}
               </span>
             </div>
-            {firstLine(item.body) && (
+            {(item.desc || firstLine(item.body)) && (
               <p className="mt-3 max-w-[64ch] text-[15px] leading-relaxed text-muted">
-                {firstLine(item.body)}
+                {item.desc || firstLine(item.body)}
               </p>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
@@ -404,9 +404,18 @@ const CareerSection = () => {
 
         {education.length > 0 && (
           <Rise className="mt-10">
-            <p className="mb-1 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted">
-              Education
-            </p>
+            <div className="mb-1 flex items-baseline justify-between gap-4">
+              <p className="m-0 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted">
+                Education
+              </p>
+              <Link
+                to="/education"
+                className="group flex items-center gap-1.5 border-b border-line-strong pb-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted transition-colors hover:border-signal hover:text-signal"
+              >
+                All {education.length}
+                <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
             <div className="border-t border-dashed border-line">
               {degrees.map((e) => (
                 <div
@@ -424,15 +433,6 @@ const CareerSection = () => {
                   <RowOut link={e.link} label={e.institution} />
                 </div>
               ))}
-              {education.length > degrees.length && (
-                <Link
-                  to="/education"
-                  className="group flex items-center gap-2 border-b border-dashed border-line px-1 py-3.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted transition-colors hover:bg-field/5 hover:text-signal"
-                >
-                  +{education.length - degrees.length} more · all education
-                  <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-                </Link>
-              )}
             </div>
           </Rise>
         )}
