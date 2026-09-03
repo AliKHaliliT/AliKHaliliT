@@ -34,7 +34,7 @@ jobs:
         # checker the checked project can edit is no checker at all.
         run: |
           echo "a8cfa14879b46ce4b9a34996fc68d776d92e06bcda8216a2ff99baf40191c743  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "98eaa92761e223eefb1ca0894658d25475ecf40b827fc0f01366c9a25cc0c359  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "6455248a1a855855eb208c9ef339973b6c9ac7cc04f6bda2ba13f4768d0c96dc  scripts/audit-docs.mjs" | sha256sum -c -
 
       - name: Seams
         run: |

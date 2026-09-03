@@ -65,7 +65,10 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
   review's work, never left to look automated, because the half no tool reaches is the
   half that rots and it rots faster behind a passing signal. This is why the family
   carries no coverage threshold, no maturity score, and no metric standing in for a rule
-  it cannot decide.
+  it cannot decide. A check that reads history binds from the arrival of its
+  own scope, found in the tree's own history and dated by the sentence that states that
+  scope, never by a name a child's past could already carry, because a commit cannot be
+  unmade and a rule reaching behind its arrival can never go green.
 - **A check that makes a worker damage the work is worse than no check.** When a rule
   fights something real, neither bend the work to earn a green run nor rewrite the rule.
   Pause the work in a state it can resume from, report the conflict, propose the change,
@@ -202,7 +205,9 @@ template gained since the last alignment, because every rule change carries one;
 files the style owns verbatim, the rulebook, the docs audit, and the tool-configuration
 blocks with their project names re-adapted, since the lint and type-check settings and the
 comments giving their reasons are style-owned law like the rulebook; re-adapt from a diff
-whatever was adapted before; and run every checking command above. No changelog is kept,
+whatever was adapted before; for every rule this configuration
+has that the style's does not, sweep out what that rule required, since its absence upstream
+is a refusal rather than an oversight; and run every checking command above. No changelog is kept,
 because the records are the changelog and a summary would be a lossy copy of them.
 
 ## Documentation index

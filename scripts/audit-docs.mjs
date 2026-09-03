@@ -60,6 +60,12 @@ const FLOOR_CLAIM = /Node(?:\.js)? (\d+(?:\.\d+)?)\+/g;
  * lookahead and skipped by name where the diff is read.
  */
 const ILLEGAL_RECORD_EDIT = /^[-+](?![-+])(?!Status: )/;
+/**
+ * This sentence dates the immutability rule's arrival in the tree's own history, so it is what
+ * the check searches for, never a function's name, which a child's past may already carry.
+ * Changing what the check covers changes this sentence, and the anchor moves forward with it.
+ */
+const IMMUTABILITY_SCOPE = "records held immutable beyond their Status line: every file below a subfolder of docs/";
 
 /** One git call against the repository this file lives in; empty when git says no. */
 function git(...args) {
@@ -299,17 +305,18 @@ if (existsSync(archPath)) {
 }
 
 // A record changes only on its Status line, in the working tree and in every commit since this
-// check arrived. The rule binds from the commit that brought the check into the tree, found in
-// git's own history, so an adopting project is held from its adoption forward and never
-// re-litigates a past it did not write under the rule. A shallow clone cannot show that
-// history, so it fails rather than quietly checking less.
+// scope arrived. The rule binds from the commit that brought its current scope sentence into
+// the tree, found in git's own history, so an adopting project is held from its adoption
+// forward, never re-litigates a past it did not write under the rule, and is never caught by
+// a widened scope reaching behind its own arrival. A shallow clone cannot show that history,
+// so it fails rather than quietly checking less.
 // Every subfolder of docs/ is a record folder, so the diff is read over docs/ and only files
 // below a subfolder count; the flat living documents at the top change freely.
 if (existsSync(resolve(ROOT, "docs"))) {
   if (git("rev-parse", "--is-shallow-repository").trim() === "true") {
     problems.push("the clone is shallow, so record history cannot be checked; fetch the full history");
   } else {
-    const arrivals = git("log", "--reverse", "--format=%H", "-S", "ILLEGAL_RECORD_EDIT", "--", "scripts/audit-docs.mjs").split(/\s+/).filter(Boolean);
+    const arrivals = git("log", "--reverse", "--format=%H", "-S", IMMUTABILITY_SCOPE, "--", "scripts/audit-docs.mjs").split(/\s+/).filter(Boolean);
     const diffs = [["the working tree", git("diff", "HEAD", "--unified=0", "--diff-filter=M", "--", "docs")]];
     if (arrivals.length > 0) {
       const later = git("log", "--format=%H", `${arrivals[0]}..HEAD`, "--diff-filter=M", "--", "docs").split(/\s+/).filter(Boolean);
