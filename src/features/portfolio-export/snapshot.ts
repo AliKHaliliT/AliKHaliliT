@@ -14,7 +14,7 @@ import {
 /**
  * Gathers the whole record into one snapshot.
  *
- * @param nowIso - The export moment, passed in so the builder stays pure.
+ * @param exportedAt - The export moment, passed in so the builder stays pure.
  *
  * @returns The snapshot, carrying every collection plus the profile and the
  *   palette currently in force.

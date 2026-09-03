@@ -90,10 +90,13 @@ export default defineConfig([
     },
   },
   {
-    // Every export carries a doc comment; suites live outside src and are exempt.
+    // Every export carries a doc comment; the one-sentence minimum is the rulebook's
+    // code-level convention. Suites live outside src and are exempt. Where a comment
+    // documents parameters, the names must be the signature's, which a machine decides.
     files: ['src/**/*.{ts,tsx}'],
     plugins: { jsdoc },
     rules: {
+      'jsdoc/check-param-names': ['error', { checkDestructured: false }],
       'jsdoc/require-jsdoc': [
         'error',
         {

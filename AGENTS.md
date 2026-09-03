@@ -123,11 +123,13 @@ These are non-negotiable. Depth lives in the indexed documents; this is the chec
   seam, by a hand-written fake satisfying the contract it stands in for, and never by mocking a
   module's internals, because a test bound to an implementation voids the substitutability the
   layers exist to provide while still passing green. No coverage threshold is imposed, so
-  breadth stays a judgment call while placement and substitution do not. See
-  [decision 0007](docs/decisions/0007-adopt-the-styles-test-contract.md).
-- **Follow the doc-comment convention** in the [template's Conventions section](https://github.com/AliKHaliliT/VITA#conventions)
-  and the documentation rules in [docs/CONVENTIONS.md](docs/CONVENTIONS.md); the latter is
-  frozen and must not be edited.
+  breadth stays a judgment call while placement and substitution do not. An invariant with
+  no observable output, such as work done once rather than twice, is observed through a
+  counting fake at the seam it crosses, and where no seam exists the invariant is asking for
+  one. See [decision 0007](docs/decisions/0007-adopt-the-styles-test-contract.md).
+- **Follow the doc-comment convention** in the rulebook's code-level section and the
+  documentation rules in [docs/CONVENTIONS.md](docs/CONVENTIONS.md); that file is frozen
+  and must not be edited.
 - **The documentation rulebook is owned by the style.** [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
   changes only in the Helm template inside the My-Styles repository, never here, and this
   deployment never diverges from its copy. A rule believed wrong or missing goes upstream
@@ -194,6 +196,12 @@ alignment check that follows integration, is defined in the style's AGENTS.md.
 Improvements travel in the other direction too. This repository is a deployment rather than
 a fork of a fork, so template changes are applied here deliberately, and a commit that does
 so says which template change it carries.
+
+Re-alignment is one refactor, not a trickle. Read the decision records the style and the
+template gained since the last alignment, because every rule change carries one; recopy the
+files the style owns verbatim, the rulebook and the docs audit; re-adapt from a diff
+whatever was adapted before; and run every checking command above. No changelog is kept,
+because the records are the changelog and a summary would be a lossy copy of them.
 
 ## Documentation index
 
