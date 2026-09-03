@@ -33,8 +33,8 @@ jobs:
         # script is pinned beside the rulebook and checked before it runs, because a
         # checker the checked project can edit is no checker at all.
         run: |
-          echo "871c37fc6306e2b1f9bbf2f77945a1665b38dfe4f312e1bd6185a028bd256d76  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "dc3079b69cb7db164d876117a2c1a436a962613e06bedd6ab4a5371110199c9b  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "a8cfa14879b46ce4b9a34996fc68d776d92e06bcda8216a2ff99baf40191c743  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "98eaa92761e223eefb1ca0894658d25475ecf40b827fc0f01366c9a25cc0c359  scripts/audit-docs.mjs" | sha256sum -c -
 
       - name: Seams
         run: |

@@ -44,6 +44,7 @@ const BACKTICK = /`([^`\n]+)`/g;
 const LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
 const STATE_DATE = /\((\d{4}-\d{2}-\d{2})\)/g;
 const RECORD_NAME = /^\d{4}-[a-z0-9-]+\.md$/;
+const DATED_RECORD_NAME = /^\d{4}-\d{2}-\d{2}-[a-z0-9-]+\.md$/;
 const RAW_PALETTE =
   /\b(?:bg|text|border|ring|fill|stroke|from|via|to)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/;
 const FENCE = /```[^\n]*\n([\s\S]*?)```/g;
@@ -237,17 +238,27 @@ if (existsSync(docsDir)) {
       numbers.set(num, entry);
     }
   }
-  // Everything else under docs/ is a document with a room or it does not exist. A file below a
-  // subdirectory is registered by its own path or by its directory's row in the index; a file
-  // that is not markdown has no species and no room here at all.
+  // Below the top level, docs/ holds record folders only: decisions/ with its numbered records,
+  // and dated folders such as briefings or progress reports, each registered by its own row. A
+  // living document belongs at the top as a flat UPPERCASE file, where the naming and budget
+  // rules can see it, so anything else below a subfolder fails.
   for (const path of trackedFiles()) {
     if (!path.startsWith("docs/") || path.startsWith("docs/decisions/")) continue;
-    if (path.split("/").length === 2 && path.endsWith(".md")) continue;
+    if (path.split("/").length === 2) {
+      if (!path.endsWith(".md")) {
+        problems.push(`${path}: docs/ holds markdown documents only; assets live where the baseline sends them`);
+      }
+      continue;
+    }
     const folder = path.split("/").slice(0, 2).join("/");
-    if (!path.endsWith(".md")) {
-      problems.push(`${path}: docs/ holds markdown documents only; assets live where the baseline sends them`);
-    } else if (!agents.includes(`(${path})`) && !agents.includes(`(${folder}/)`)) {
-      problems.push(`${path}: lives under docs/ but is neither the spine, a record, nor registered in the index; give it a room or fold it`);
+    if (!agents.includes(`(${folder}/)`)) {
+      problems.push(`${path}: ${folder}/ has no row in the AGENTS.md index; a subfolder of docs/ is a registered record folder or it does not exist`);
+    }
+    if (!DATED_RECORD_NAME.test(path.split("/").pop())) {
+      problems.push(
+        `${path}: a file below a docs/ subfolder is a dated record named YYYY-MM-DD-short-kebab-title.md; ` +
+          `a living document is a flat UPPERCASE file at the top of docs/`,
+      );
     }
   }
 }
@@ -292,16 +303,18 @@ if (existsSync(archPath)) {
 // git's own history, so an adopting project is held from its adoption forward and never
 // re-litigates a past it did not write under the rule. A shallow clone cannot show that
 // history, so it fails rather than quietly checking less.
-if (existsSync(resolve(ROOT, "docs/decisions"))) {
+// Every subfolder of docs/ is a record folder, so the diff is read over docs/ and only files
+// below a subfolder count; the flat living documents at the top change freely.
+if (existsSync(resolve(ROOT, "docs"))) {
   if (git("rev-parse", "--is-shallow-repository").trim() === "true") {
     problems.push("the clone is shallow, so record history cannot be checked; fetch the full history");
   } else {
     const arrivals = git("log", "--reverse", "--format=%H", "-S", "ILLEGAL_RECORD_EDIT", "--", "scripts/audit-docs.mjs").split(/\s+/).filter(Boolean);
-    const diffs = [["the working tree", git("diff", "HEAD", "--unified=0", "--diff-filter=M", "--", "docs/decisions")]];
+    const diffs = [["the working tree", git("diff", "HEAD", "--unified=0", "--diff-filter=M", "--", "docs")]];
     if (arrivals.length > 0) {
-      const later = git("log", "--format=%H", `${arrivals[0]}..HEAD`, "--diff-filter=M", "--", "docs/decisions").split(/\s+/).filter(Boolean);
+      const later = git("log", "--format=%H", `${arrivals[0]}..HEAD`, "--diff-filter=M", "--", "docs").split(/\s+/).filter(Boolean);
       for (const sha of [arrivals[0], ...later]) {
-        diffs.push([sha.slice(0, 12), git("show", sha, "--format=", "--unified=0", "-M", "--diff-filter=M", "--", "docs/decisions")]);
+        diffs.push([sha.slice(0, 12), git("show", sha, "--format=", "--unified=0", "-M", "--diff-filter=M", "--", "docs")]);
       }
     }
     for (const [where, diff] of diffs) {
@@ -310,8 +323,11 @@ if (existsSync(resolve(ROOT, "docs/decisions"))) {
       for (const line of diff.split("\n")) {
         if (line.startsWith("+++ b/")) {
           current = line.slice(6);
+          const below = current.includes("docs/") ? current.split("docs/")[1] : "";
+          if (!below.includes("/")) current = "";
           continue;
         }
+        if (!current) continue;
         if (/^(--- |\+\+\+ |@@|diff |index |similarity |rename )/.test(line)) continue;
         if (ILLEGAL_RECORD_EDIT.test(line) && !flagged.has(current)) {
           flagged.add(current);
