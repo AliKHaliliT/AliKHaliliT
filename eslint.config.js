@@ -65,11 +65,6 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // Match the TypeScript convention: underscore-prefixed = intentionally unused.
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
       // Where the choice of string delimiter is free, it is double quotes; switching
       // is only for avoiding escapes. The style's rule, checked here.
       quotes: ['error', 'double', { avoidEscape: true }],
