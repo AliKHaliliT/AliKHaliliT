@@ -45,6 +45,18 @@ const LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
 const STATE_DATE = /\((\d{4}-\d{2}-\d{2})\)/g;
 const RECORD_NAME = /^\d{4}-[a-z0-9-]+\.md$/;
 const DATED_RECORD_NAME = /^\d{4}-\d{2}-\d{2}-[a-z0-9-]+\.md$/;
+// The numbered record folders: decisions/, this project's own, and inherited/, the template's own
+// carried whole in a project built from it, keeping the template's numbers so the two sequences
+// never meet. A template has no inherited folder.
+const NUMBERED_RECORD_FOLDERS = ["decisions", "inherited"];
+// The upstream file a project built from the template carries: one Open section, entries dated by
+// heading with a kind, a pin, and four labeled parts, expiring on the same horizon as STATE.
+const UPSTREAM_ENTRY = /^### (\d{4}-\d{2}-\d{2}) (.+)$/gm;
+const UPSTREAM_KIND = /^Kind: (improvement|defect)$/m;
+const UPSTREAM_PIN = /^Pin: [0-9a-f]{7,40}$/m;
+const UPSTREAM_PARTS = ["**What it is", "**How the work surfaced it", "**Records checked"];
+const UPSTREAM_WHY = ["**Why it is believed better", "**What was worked around"];
+const UPSTREAM_ALIGNED = /^Aligned to .+ at (`?[0-9a-f]{7,40}`?|the host's own commit)\.?$/m;
 const RAW_PALETTE =
   /\b(?:bg|text|border|ring|fill|stroke|from|via|to)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/;
 const FENCE = /```[^\n]*\n([\s\S]*?)```/g;
@@ -221,33 +233,38 @@ if (existsSync(docsDir)) {
     if (entry.replace(/-/g, "").replace(/\.md$/, "") !== entry.replace(/-/g, "").replace(/\.md$/, "").toUpperCase()) {
       problems.push(`docs/${entry}: organic documents are UPPERCASE markdown`);
     }
-    if (!["ARCHITECTURE.md", "CONVENTIONS.md", "BASELINE.md"].includes(entry)) {
+    if (!["ARCHITECTURE.md", "CONVENTIONS.md", "BASELINE.md", "UPSTREAM.md"].includes(entry)) {
       const lines = readFileSync(full, "utf-8").split("\n").length;
       if (lines > BUDGET_LINES) {
         problems.push(`docs/${entry}: ${lines} lines against the ${BUDGET_LINES}-line budget; split by fission`);
       }
     }
   }
-  const decisions = join(docsDir, "decisions");
-  if (existsSync(decisions)) {
+  for (const folderName of NUMBERED_RECORD_FOLDERS) {
+    const records = join(docsDir, folderName);
+    if (!existsSync(records)) continue;
+    // Numbers are unique within a folder and never compared across the two, which is the point
+    // of the split; a duplicate in the inherited folder means the copy is no longer the
+    // template's folder.
+    const advice = folderName === "decisions" ? "renumber the newer record" : "recopy the folder whole from the template";
     const numbers = new Map();
-    for (const entry of readdirSync(decisions)) {
+    for (const entry of readdirSync(records)) {
       if (!entry.endsWith(".md")) continue;
       if (!RECORD_NAME.test(entry)) {
-        problems.push(`docs/decisions/${entry}: records are named NNNN-short-kebab-title.md`);
+        problems.push(`docs/${folderName}/${entry}: records are named NNNN-short-kebab-title.md`);
         continue;
       }
       const num = entry.slice(0, 4);
       if (numbers.has(num)) {
-        problems.push(`docs/decisions/: ${numbers.get(num)} and ${entry} share the number ${num}; renumber the newer record`);
+        problems.push(`docs/${folderName}/: ${numbers.get(num)} and ${entry} share the number ${num}; ${advice}`);
       }
       numbers.set(num, entry);
     }
   }
-  // Below the top level, docs/ holds record folders only: decisions/ with its numbered records,
-  // and dated folders such as briefings or progress reports, each registered by its own row. A
-  // living document belongs at the top as a flat UPPERCASE file, where the naming and budget
-  // rules can see it, so anything else below a subfolder fails.
+  // Below the top level, docs/ holds record folders only: the numbered folders above, and dated
+  // folders such as briefings or progress reports, each registered by its own row. A living
+  // document belongs at the top as a flat UPPERCASE file, where the naming and budget rules can
+  // see it, so anything else below a subfolder fails.
   for (const path of trackedFiles()) {
     if (!path.startsWith("docs/") || path.startsWith("docs/decisions/")) continue;
     if (path.split("/").length === 2) {
@@ -260,7 +277,7 @@ if (existsSync(docsDir)) {
     if (!agents.includes(`(${folder}/)`)) {
       problems.push(`${path}: ${folder}/ has no row in the AGENTS.md index; a subfolder of docs/ is a registered record folder or it does not exist`);
     }
-    if (!DATED_RECORD_NAME.test(path.split("/").pop())) {
+    if (folder !== "docs/inherited" && !DATED_RECORD_NAME.test(path.split("/").pop())) {
       problems.push(
         `${path}: a file below a docs/ subfolder is a dated record named YYYY-MM-DD-short-kebab-title.md; ` +
           `a living document is a flat UPPERCASE file at the top of docs/`,
@@ -268,6 +285,50 @@ if (existsSync(docsDir)) {
     }
   }
 }
+
+// The upstream file's schema and horizon, where a project carries one.
+function checkUpstream() {
+  const path = join(ROOT, "docs", "UPSTREAM.md");
+  if (!existsSync(path)) return;
+  const text = readFileSync(path, "utf-8");
+  if (!UPSTREAM_ALIGNED.test(text)) {
+    problems.push("docs/UPSTREAM.md: no Aligned line naming the template and the commit the project is aligned to");
+  }
+  if (!text.includes("## Open")) {
+    problems.push("docs/UPSTREAM.md: no ## Open section");
+    return;
+  }
+  const body = text.split("## Open")[1];
+  const entries = [...body.matchAll(UPSTREAM_ENTRY)];
+  if (entries.length === 0 && !body.includes("Nothing open.")) {
+    problems.push("docs/UPSTREAM.md: Open holds entries or the words Nothing open.");
+  }
+  if (entries.length > 0 && body.includes("Nothing open.")) {
+    problems.push("docs/UPSTREAM.md: says Nothing open. beside open entries");
+  }
+  entries.forEach((entry, index) => {
+    const end = index + 1 < entries.length ? entries[index + 1].index : body.length;
+    const chunk = body.slice(entry.index + entry[0].length, end);
+    const label = `docs/UPSTREAM.md: entry ${entry[1]} ${entry[2].slice(0, 40)}`;
+    if (!UPSTREAM_KIND.test(chunk)) problems.push(`${label}: no Kind line reading improvement or defect`);
+    if (!UPSTREAM_PIN.test(chunk)) problems.push(`${label}: no Pin line naming the template commit`);
+    for (const part of UPSTREAM_PARTS) {
+      if (!chunk.includes(part)) problems.push(`${label}: part ${part}** missing`);
+    }
+    if (!UPSTREAM_WHY.some((why) => chunk.includes(why))) {
+      problems.push(`${label}: neither Why it is believed better nor What was worked around`);
+    }
+    const age = Math.floor((today - new Date(`${entry[1]}T00:00:00`)) / 86_400_000);
+    if (age > HORIZON_DAYS) {
+      problems.push(
+        `${label}: past the ${HORIZON_DAYS}-day horizon; re-verify against the template and re-date, ` +
+          "or make it the project's own decision and delete it",
+      );
+    }
+  });
+}
+
+checkUpstream();
 
 // Every tracked directory at the root and one level below src/, and every root file, has a room
 // in the map or the baseline; that is the depth the form draws, and deeper structure is the

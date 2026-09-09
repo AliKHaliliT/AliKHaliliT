@@ -33,13 +33,21 @@ jobs:
         # script is pinned beside the rulebook and checked before it runs, because a
         # checker the checked project can edit is no checker at all.
         run: |
-          echo "a8cfa14879b46ce4b9a34996fc68d776d92e06bcda8216a2ff99baf40191c743  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "6455248a1a855855eb208c9ef339973b6c9ac7cc04f6bda2ba13f4768d0c96dc  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "602f0da5a9efa6b0d14b1414c6f682d2925429f7c25cabbab036435e90963500  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "423ccc3eccdfb8ab3e77b257586e8035c9ad03381df3da76d8be947789b1f4fb  scripts/audit-docs.mjs" | sha256sum -c -
 
       - name: Seams
         run: |
           if git grep -nE "vi\.mock\(" -- tests; then
             echo "Module mocking is banned; substitute only at a declared seam."
+            exit 1
+          fi
+
+      - name: Spelling, advisory
+        continue-on-error: true
+        run: |
+          if ! pipx run codespell==2.4.3 --skip ".git,node_modules,dist,package-lock.json,*.svg,*.png,*.ico,*.woff,*.woff2,*.map,decisions,inherited" --ignore-words-list "accreting,afterall" .; then
+            echo "Misspellings in living prose or code; correct each, or name a domain term in the ignore list."
             exit 1
           fi
 

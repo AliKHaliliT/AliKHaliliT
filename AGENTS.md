@@ -41,8 +41,8 @@ looked at and then either fixed or dismissed in writing, in the change that prod
 and a warning is never silenced with a suppression comment to make a run look clean. The
 advisory checks here are the credential and regular-expression heuristics in the lint
 configuration, which guess from the shape of a string or a pattern and are wrong often
-enough that they cannot be a gate, and the prose-vocabulary grep in CI, which reads an
-honest domain term the same as a tell and so advises for review.
+enough that they cannot be a gate, and the prose-vocabulary grep and the spell check in CI, which
+read an honest domain term the same as a tell or a typo and so advise for review.
 
 ## Hard rules
 
@@ -173,42 +173,69 @@ Closing a task follows one loop: run the checking commands above, weigh the chan
 - **Two hats**: shape changes and behavior changes are separate steps, and no incidental reformatting rides along.
 - **Waste**: nothing speculative and nothing the change orphaned is left behind.
 - **The measured line**: nothing is made faster without a measurement that demanded it, and every optimization that lands records its measurement and its price.
-- **Test honesty**: substitutes stand in only at the declared seams, and time, randomness, and order are controlled.
+- **Test honesty**: substitutes stand in only at the declared seams, time, randomness, and order are controlled, and where an optional dependency sits behind a port with a fallback implementation, the suite executes both paths and holds them to a tolerance a decision record states with the measurement that set it, over a fixture on which the two can disagree.
 - **Point-of-use truth**: the doc comment or docstring each export carries is true, not merely present.
 - **Intent-split placement**: every documentation change lands in the document whose reader it serves, per the rulebook's species.
 - **Decision records**: any choice made here that would be re-litigated without a record gets one now.
 - **Debt**: every shortcut taken is written in STATE.md before delivery, never carried in memory.
+- **Upstream honesty**: every workaround of template-owned bytes or template-prescribed behavior, and every improvement that qualified, is an entry in [docs/UPSTREAM.md](docs/UPSTREAM.md) before delivery, nameless as to this project, and the closing note names each entry added by its heading, or says there is none.
 - **The commands**: every checking command above has passed against the final state of the tree, and every advisory finding printed along the way has been read and then fixed or dismissed in writing.
 - **The hard rules**: the change disagrees with no review-held clause of this guide's Hard rules, re-read now, not recalled.
 
-## The upstream report
+## The upstream file
 
-This deployment follows the [VITA template](https://github.com/AliKHaliliT/VITA), which
-follows the Helm client style in the [My-Styles](https://github.com/AliKHaliliT/My-Styles)
-repository, and the rulebook both live under is owned there. When work here surfaces
-something the template or the style should have had, the improvement is not kept as a local
-advantage. Check the decision records upstream first, and if the idea was already considered
-and rejected there, drop it unless new evidence exists. Otherwise write a self-contained
-report entry stating what the improvement is, how it surfaced, why it is believed better
-than what the template does today, and that the upstream logs hold no prior ruling, and
-close it by telling the receiver to verify the claim with research before adopting it. Then
-send it upstream, to the template for app-shaped improvements and to My-Styles for
-style-shaped ones. The full workflow, including the qualification gate and the final
-alignment check that follows integration, is defined in the style's AGENTS.md.
+This repository is a deployment of the [VITA template](https://github.com/AliKHaliliT/VITA),
+which follows the Helm client style in the
+[My-Styles](https://github.com/AliKHaliliT/My-Styles) repository, and the rulebook both live
+under is owned there. A template stays one statement of its form only if what a deployment
+learns flows back, so an improvement is never kept as a local advantage, and the same road
+carries defects: a workaround of the template's own bytes or prescribed behavior that nobody
+reports leaves every later deployment to hit it.
 
-Improvements travel in the other direction too. This repository is a deployment rather than
-a fork of a fork, so template changes are applied here deliberately, and a commit that does
-so says which template change it carries.
+[docs/UPSTREAM.md](docs/UPSTREAM.md) is the one living document for this, registered in the
+index below. It opens with the template and the commit this deployment is aligned to, and holds
+one `## Open` section carrying either the words `Nothing open.` or entries. Each entry is a
+heading of the form `### YYYY-MM-DD` and a title, then a `Kind:` line reading `improvement` or
+`defect`, a `Pin:` line naming the template commit it was written against, and four parts under
+the bold labels **What it is**, **How the work surfaced it**, **Why it is believed better** or
+**What was worked around**, and **Records checked**. An entry names nothing that identifies
+this deployment, no person, no host, no path that points at it, and no fact about the record
+beyond what the entry needs, because the file is handed to a public repository and may be
+quoted verbatim into its records.
 
-Re-alignment is one refactor, not a trickle. Read the decision records the style and the
-template gained since the last alignment, because every rule change carries one; recopy the
-files the style owns verbatim, the rulebook, the docs audit, and the tool-configuration
-blocks with their project names re-adapted, since the lint and type-check settings and the
-comments giving their reasons are style-owned law like the rulebook; re-adapt from a diff
-whatever was adapted before; for every rule this configuration
-has that the style's does not, sweep out what that rule required, since its absence upstream
-is a refusal rather than an oversight; and run every checking command above. No changelog is kept,
-because the records are the changelog and a summary would be a lossy copy of them.
+Entries come in two kinds and only the first is judged. An improvement earns an entry when it
+is genuinely better rather than differently shaped, the template lacks it, and neither the
+template's records under [docs/inherited/](docs/inherited/) nor this deployment's own show it
+considered and rejected; an improvement invented to have something to send is worse than none.
+A defect is never judged: anything worked around, patched, suppressed, or left unworkable in
+template-owned bytes or behavior earns an entry however small the fix was, and an entry may say
+plainly that the writer could not tell a defect from a misunderstanding, because the maintainer
+decides that. An adaptation the template itself asks a deployment to make, the real record in
+place of the demo seed and the loader suite that follows it, is not a workaround and earns no
+entry. App-shaped entries travel to the template and style-shaped ones to My-Styles.
+
+The work is finished as specified first, and an entry is never written instead of finishing.
+Each entry is written in the same change that closes the work which produced it, and that
+delivery's closing note names each entry added by its heading, or says none was. No reply is
+owed and nothing waits for one. Every open entry is resolved at the next re-alignment against
+the new pin and the records the template gained: an entry the template now carries is deleted
+and its form taken, an entry a record refuses is deleted with this deployment conforming or
+turned into a decision record of its own where the matter is this deployment's to decide, and
+an entry the template is silent on stays, re-verified and re-dated once past its horizon.
+
+Re-alignment is one refactor, not a trickle. Read the decision records the template and the
+style gained since the pin, because every rule change carries one; recopy the files the style
+owns verbatim, the rulebook, the docs audit, the inherited records as one folder, and the
+tool-configuration blocks with their project names re-adapted, since the lint and type-check
+settings and the comments giving their reasons are style-owned law like the rulebook, a line
+marked `Stack binding` excepted; re-adapt from a diff whatever was adapted before; for every
+rule this configuration has that the style's does not, sweep out what that rule required, since
+its absence upstream is a refusal rather than an oversight; resolve every open entry of the
+upstream file as above; run every checking command above; and move the pin on the first line of
+that file. A commit that carries a template change says which one it carries. A history-reading
+check binds this deployment from the commit its scope sentence arrived in, the re-alignment
+commit itself, so a red gate over older commits is a defect to send upstream rather than a
+reason to rewrite history.
 
 ## Documentation index
 
@@ -234,6 +261,8 @@ document about this project (see [docs/BASELINE.md](docs/BASELINE.md)).
 | [docs/CONTENT-TRAVEL.md](docs/CONTENT-TRAVEL.md) | Field schemas of the travel ledgers. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | The feature landscape and standing technical debt. |
 | [docs/SETUP.md](docs/SETUP.md) | First-time environment setup and the GitHub Pages deploy. |
+| [docs/UPSTREAM.md](docs/UPSTREAM.md) | What is pending between this project and its style: the alignment pin and every open improvement or workaround. Read before writing an upstream entry. |
+| [docs/inherited/](docs/inherited/) | The style's own decision records, carried whole at the alignment pin and never edited here. Read one before proposing a rule the style may already have ruled on. |
 | [docs/decisions/](docs/decisions/) | Immutable decision records holding the project's "why". Read the relevant record before revisiting a settled topic; never edit an accepted record. |
 
 There are no assistant-specific instruction files. Every assistant reads this file
