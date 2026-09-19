@@ -207,50 +207,6 @@ body {
   font-weight: 400;
 }
 
-/* --- FIX 1: ROBUST DATE PICKER STYLES --- */
-input[type="date"] {
-  background-color: var(--well);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  display: block;
-  width: 100%;
-  color-scheme: light dark;
-  position: relative;
-}
-
-/* We hide the default inconsistent browser icon and use a specific SVG background */
-::-webkit-calendar-picker-indicator {
-  background: transparent;
-  bottom: 0;
-  color: transparent;
-  cursor: pointer;
-  height: auto;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: auto;
-}
-
-/* Custom Icon logic using background-image on the input wrapper logic */
-/* Actually, standard practice for consistency is styling the indicator directly with an SVG mask or background */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  position: static;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%235c6b7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 20px;
-  height: 20px;
-  opacity: 1; /* Force visible */
-}
-
-/* Dark Mode Icon: Bright White */
-[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23e9eef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-}
-
 /* --- SCROLLBAR --- */
 ::-webkit-scrollbar {
   width: 8px;
