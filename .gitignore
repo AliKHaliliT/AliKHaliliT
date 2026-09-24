@@ -21,6 +21,10 @@ build
 .env.test.local
 .env.production.local
 
+# Working trees
+.worktrees/
+.claude/worktrees/
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json

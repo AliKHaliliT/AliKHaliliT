@@ -29,8 +29,9 @@ import {
   Interest,
   Organization,
 } from "./model";
+import type { RefusedCopy } from "./store";
 
-/** Every collection of the record, plus the writes an editing surface makes. */
+/** Every collection of the record, the saved copies it set aside, and a reread. */
 export interface ContentContextValue {
   projects: Project[];
   posts: Post[];
@@ -52,6 +53,8 @@ export interface ContentContextValue {
   interests: Interest[];
   organizations: Organization[];
   settings: UserSettings;
+  /** Saved copies in this browser that failed their check, empty for every visitor. */
+  refused: RefusedCopy[];
   refresh: () => void;
 }
 

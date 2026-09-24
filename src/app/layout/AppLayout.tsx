@@ -5,6 +5,7 @@ import { AmbientField } from "@/shared/ui";
 import { SearchModal } from "@/features/search";
 import { TopBar } from "./TopBar";
 import { Footer } from "./Footer";
+import { RefusedCopyNotice } from "./RefusedCopyNotice";
 
 /**
  * Draws the dossier shell around whatever the router renders.
@@ -38,5 +39,6 @@ export const AppLayout = ({ children }: { children: ReactNode }) => (
     </main>
     <Footer />
     <SearchModal />
+    <RefusedCopyNotice />
   </div>
 );

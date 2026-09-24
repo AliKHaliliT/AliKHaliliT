@@ -65,8 +65,6 @@ A **CV on steroids**: every dimension of a professional and personal life in one
 
 | Item                      | Priority | Notes                                                                                                               |
 | ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| Seed shadowing            | Medium   | Runtime edits shadow bundled markdown; redeploys only trigger a console warning · merge/choose UI is a product call |
-| Runtime schema validation | Low      | Loaders trust frontmatter/localStorage shapes; tests pin behavior but nothing validates at runtime                  |
 | Bundle size               | Low      | One main chunk ~590 kB min / 180 kB gzip; `react-markdown` code-split; further `manualChunks` splits possible       |
 | `courses` route           | Low      | No dedicated page · intentionally shown under `/education`. Could add `/courses` if needed.                         |
 

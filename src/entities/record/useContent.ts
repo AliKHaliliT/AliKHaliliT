@@ -6,7 +6,8 @@ import { ContentContext, type ContentContextValue } from "./context";
 /**
  * Reads the record from the nearest provider.
  *
- * @returns Every collection of the record and the writers that edit it.
+ * @returns Every collection of the record, the saved copies it set aside, and
+ *   the reread.
  *
  * @throws Error When called outside a `ContentProvider`, since a silent empty
  * record would look like missing content rather than a wiring mistake.

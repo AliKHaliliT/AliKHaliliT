@@ -143,6 +143,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         interests,
         organizations,
         settings,
+        refused: ContentService.refused(),
         refresh: loadAll,
       }}
     >

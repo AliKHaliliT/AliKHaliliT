@@ -13,41 +13,30 @@ jobs:
           # Record immutability is checked against history, so the clone cannot be shallow.
           fetch-depth: 0
 
-      - name: Em dash budget, two per file
+      - name: Landed branches are gone
         run: |
-          git grep -PIno "\x{2014}" -- . > em-dashes.tmp || true
-          awk -F: '{count[$1]++} END {bad = 0; for (f in count) if (count[f] > 2) { printf "%s carries %d em dashes; the budget is two per file\n", f, count[f]; bad = 1 }; exit bad}' em-dashes.tmp
-          rm em-dashes.tmp
-
-      - name: Prose heuristics, advisory
-        continue-on-error: true
-        run: |
-          if git grep -inE "paradigm shift|game.changer|ever-evolving|cutting.edge|\bdelve|\btapestry\b|\bsupercharge|\btransformative\b|\bmultifaceted\b|\bmeticulous\b|\bparamount\b|\bembark\b|it.s worth noting|at the end of the day|in today.s world|let.s dive|going forward|a testament to|marks a pivotal|plays a vital role|experts agree|studies show|widely regarded as" -- . ":(exclude)*.github*" ":(exclude)*docs/CONVENTIONS.md" ":(exclude)*docs/decisions/*"; then
-            echo "Inflated vocabulary or weasel attribution in living prose; the verdict is review's."
+          git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          stale=$(git branch -r --merged origin/main | grep -vE 'origin/(main|HEAD)$' || true)
+          if [ -n "$stale" ]; then
+            echo "$stale"
+            echo "A landed branch outlives its landing; delete it locally and on the remote in the push that moves main."
             exit 1
           fi
 
       - name: Pins
         # Red here means a copy diverged from the style, or the style moved and this
-        # project needs re-alignment; both pins update with the alignment. The audit
-        # script is pinned beside the rulebook and checked before it runs, because a
-        # checker the checked project can edit is no checker at all.
+        # project needs re-alignment; the pins update with the alignment. The audit
+        # script and its selftest are pinned beside the rulebook and checked before
+        # they run, because a checker the checked project can edit is no checker at all.
         run: |
-          echo "602f0da5a9efa6b0d14b1414c6f682d2925429f7c25cabbab036435e90963500  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "423ccc3eccdfb8ab3e77b257586e8035c9ad03381df3da76d8be947789b1f4fb  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "f45f0f2bef76fa82d46bdd73a897801575b86d55e6d1897e2cb3ff7ac1c43a65  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "54280b0fcf2e6d76351f7d4c667618e053f67245529064e354c9a860cc1a5569  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "6477e80b5b041960736759b6addc917f2ccf8568255b639849cce5b566728034  scripts/audit-docs-selftest.mjs" | sha256sum -c -
 
       - name: Seams
         run: |
           if git grep -nE "vi\.mock\(" -- tests; then
             echo "Module mocking is banned; substitute only at a declared seam."
-            exit 1
-          fi
-
-      - name: Spelling, advisory
-        continue-on-error: true
-        run: |
-          if ! pipx run codespell==2.4.3 --skip ".git,node_modules,dist,package-lock.json,*.svg,*.png,*.ico,*.woff,*.woff2,*.map,decisions,inherited" --ignore-words-list "accreting,afterall" .; then
-            echo "Misspellings in living prose or code; correct each, or name a domain term in the ignore list."
             exit 1
           fi
 
@@ -57,7 +46,13 @@ jobs:
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: |
+          npm ci
+          # The docs audit's spelling advisory runs where codespell is installed.
+          pipx install codespell
+
+      - name: Audit selftest
+        run: node scripts/audit-docs-selftest.mjs
 
       - name: Docs
         run: node scripts/audit-docs.mjs

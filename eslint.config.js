@@ -69,6 +69,10 @@ export default defineConfig([
       // is only for avoiding escapes. The style's rule, checked here.
       quotes: ['error', 'double', { avoidEscape: true }],
       'jsx-quotes': ['error', 'prefer-double'],
+      // Nothing prints from product code or its suites. A diagnostic surfaces as a typed error
+      // at the boundary, and the scripts, which are .mjs and lint under their own block, keep
+      // console because their output is their purpose.
+      'no-console': 'error',
       // The environment is read only through shared/config, and HTTP lives only in its
       // documented home; both rules are checked here, with the homes excepted below.
       'no-restricted-syntax': [
@@ -156,6 +160,18 @@ export default defineConfig([
       'sonarjs/hashing': 'error',
       'sonarjs/insecure-cookie': 'error',
       'sonarjs/no-intrusive-permissions': 'error',
+    },
+  },
+  {
+    // The three function-shape limits, gated because a count decides itself: ten paths
+    // through a function, five nested blocks, fifty statements. The style's decision 0054
+    // carries why these three and why ten. The audit script is held to them like
+    // everything else.
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}', 'scripts/**/*.mjs'],
+    rules: {
+      complexity: ['error', 10],
+      'max-depth': ['error', 5],
+      'max-statements': ['error', 50],
     },
   },
   {

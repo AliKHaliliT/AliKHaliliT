@@ -3,7 +3,6 @@ export { LINK_ICONS, LINK_ICON_NAMES } from "./linkIcons";
 export { isMacLike, searchShortcutLabel } from "./platform";
 export type { SkillGroup } from "./skills";
 export { parseKeyValue, skillIcon } from "./skills";
-export { safeSetItem } from "./storage";
 export type { ProfileLink } from "./text";
 export { countryCode, excerpt, firstLine, hostLabel, obfuscateEmail, parseProfileLinks, stripMarkdown } from "./text";
 export { useScrollLock } from "./useScrollLock";

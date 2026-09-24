@@ -45,9 +45,9 @@ layer instead of reaching sideways, which is why the portfolio export is a featu
 it reads both the record and the site's palette.
 
 The reasoning behind the shape is recorded in
-[the template's decision 0007](https://github.com/AliKHaliliT/VITA/blob/main/docs/decisions/0007-build-the-site-as-one-way-sliced-layers.md), and the
-choice to keep the record as a single entity slice in
-[the template's decision 0008](https://github.com/AliKHaliliT/VITA/blob/main/docs/decisions/0008-keep-the-record-as-one-entity-slice.md).
+[the template's decision 0007, Build the site as one-way sliced layers](inherited/0007-build-the-site-as-one-way-sliced-layers.md),
+and the choice to keep the record as a single entity slice in
+[the template's decision 0008, Keep the record as one entity slice](inherited/0008-keep-the-record-as-one-entity-slice.md).
 
 ```text
 vita/
@@ -63,6 +63,7 @@ vita/
 │
 ├── scripts/                    # Tracked repository tooling
 │   ├── audit-docs.mjs          # The docs audit; the gate's Docs command
+│   ├── audit-docs-selftest.mjs # Proves every rule of the audit against a planted defect
 │   ├── make-icon.mjs           # Renders the pixel-mark to PNG
 │   └── profile-art.mjs         # Draws the profile page's SVG art
 │
@@ -74,7 +75,7 @@ vita/
 │   │   ├── App.tsx             # Providers wrapped around the router
 │   │   ├── providers.tsx       # Motion runtime and the record provider
 │   │   ├── router.tsx          # The route table and the route transitions
-│   │   ├── layout/             # AppLayout, TopBar, Footer, theme, nav visibility
+│   │   ├── layout/             # AppLayout, TopBar, Footer, saved-copy notice, theme, nav visibility
 │   │   └── styles/             # index.css (base) and tokens.css (the tokens)
 │   ├── pages/                  # One slice per route
 │   ├── features/               # search, portfolio-export
@@ -86,6 +87,7 @@ vita/
 │   └── content/                # The record itself, as Markdown and JSON
 │
 └── tests/                      # Vitest suites mirroring the src structure
+    ├── setup.ts                # Refuses any connection that would leave the loopback
     └── src/
 ```
 
@@ -97,23 +99,23 @@ vita/
 src/content/**/*.md
   -> entities/record/seed.ts     import.meta.glob at build time; parses and checks frontmatter
   -> entities/record/store.ts    checks localStorage first, falls back to the parsed files
-  -> entities/record/context.ts  React context; provides typed collections + writers
+  -> entities/record/context.ts  React context; provides typed collections and refused copies
   -> pages and components        consume via useContent()
 ```
 
 **Persistence model:**
 
 - Markdown files are seed data only. They are read at build time via `import.meta.glob`.
-- Runtime edits (written by a same-origin editing surface) are stored in
-  `localStorage` under `os_content_<type>` and `os_settings` and shadow the seed.
+- Runtime edits are written by a same-origin editing surface, the companion admin, into
+  `localStorage` under `os_content_<type>` and `os_settings`, where they shadow the seed.
+  This site reads them and writes nothing.
 - Clearing browser storage resets everything to the Markdown seed. This is intentional.
-- Saves also record a fingerprint of the bundled seed (`os_content_seed_<type>`); if a
-  redeploy changes the markdown under a shadowed type, `getAll` logs a console warning
-  naming the key to clear.
-- All localStorage writes go through `safeSetItem` (`src/shared/lib/storage.ts`): quota or
-  unavailability surfaces as a console error and a one-time alert instead of an unhandled throw.
-- `ContentService.downloadMarkdown(item)` exports any item as a `.md` file so it can be
-  committed back to the repo as seed data.
+- The admin records a fingerprint of the bundled seed beside each edit
+  (`os_content_seed_<type>`). When a redeploy changes the markdown under an edit, the
+  deployment wins and the stale copy is dropped, under
+  [the template's decision 0014, Let a changed seed win over a stale override](inherited/0014-let-a-changed-seed-win-over-a-stale-override.md).
+- A saved copy that fails its check never reaches a page. The store sets it aside, and the
+  shell shows a notice naming the key to clear, which only a browser holding such a copy sees.
 
 ---
 
@@ -128,10 +130,11 @@ The two doors are treated differently on purpose. Bundled markdown is committed
 content, so a file whose frontmatter cannot produce a valid item is an authoring
 bug and the loader throws with the path. The localStorage override is written by a
 separate application in the same browser, so a malformed value is not this site's
-bug to fail on; the store reports the key to clear and serves the committed seed
-instead. Only invariants the whole site depends on are checked, because a guard
-that outgrows the model starts rejecting valid content. See
-[the template's decision 0009](https://github.com/AliKHaliliT/VITA/blob/main/docs/decisions/0009-guard-the-record-with-hand-written-validators.md).
+bug to fail on; the store sets it aside, serves the committed seed instead, and the
+shell names the key to clear in a notice. Only invariants the whole site depends on are
+checked, because a guard that outgrows the model starts rejecting valid content. See
+[the template's decision 0009, Guard the record with hand-written validators](inherited/0009-guard-the-record-with-hand-written-validators.md)
+and [the template's decision 0025, Name a refused saved copy on the page](inherited/0025-name-a-refused-saved-copy-on-the-page.md).
 
 ---
 
@@ -179,7 +182,9 @@ a sticky **TopBar**: grouped dropdowns from `NAV_GROUPS`, the command-palette
 trigger, the theme toggle, and a full-screen mobile index. The **Footer** is the
 dossier back cover: a complete sitemap, socials from settings, and the pixel band.
 Content sits in a centered 1180px rail with dashed hairline edges. There is no
-sidebar.
+sidebar. A browser holding a saved copy the record refused also gets a small notice
+at the foot of the viewport naming each key to clear and why; every other browser
+renders nothing there.
 
 ---
 
@@ -197,7 +202,7 @@ no search index; it filters the in-memory record directly.
 ## The ecosystem boundary
 
 VITA is one of **three repositories**: this public site, the admin panel, and the resume
-builder (decision [0004](decisions/0004-three-repo-ecosystem.md)). This repo ships zero
+builder, under [the template's decision 0004, A three-repository ecosystem bridged by files](inherited/0004-three-repo-ecosystem.md). This repo ships zero
 editing machinery. The companions carry their own copies of whatever they share with the
 site, so nothing here imports from them or vice versa. They talk to each other through
 files:
@@ -230,26 +235,31 @@ the shared UI atoms) lives in [THEMING.md](THEMING.md).
 
 ## Site identity
 
-The site's own name and metadata follow the same three-layer file-seed model as the palette
-(decision [0002](decisions/0002-file-seeded-appearance-and-identity.md)):
+The site's own name and metadata follow the same three-layer file-seed model as the palette,
+under [the template's decision 0002, Appearance and identity follow the content model as file seeds](inherited/0002-file-seeded-appearance-and-identity.md):
 
-1. **Seed**: `src/content/settings/site.json` (`name` is the wordmark, `title` is the base
-   document title, plus `description`, `author`, `url`, and three optional owner-voice fields:
-   `mark` for the oversized hero monogram, falling back to the name's initials via `siteMark()`;
-   `tagline` for the footer's big serif sign-off, newline-separated with the last line in the
-   accent, falling back to "Built from {city}, logged everywhere."; and `colophon` for the
-   footer's bottom line, falling back to "A dossier by {owner}". An optional `pageCopy`
-   record overrides any page-header description, keyed per page with fallbacks in
-   `src/entities/site/pageCopy.ts`). The `siteSeed`
-   plugin in `vite.config.ts` rewrites the `<title>` and description meta and injects the Open
-   Graph and Twitter tags at build time; the literals in `index.html` are neutral template
-   defaults.
+1. **Seed**: `src/content/settings/site.json`, whose fields the table below lists. The
+   `siteSeed` plugin in `vite.config.ts` rewrites the `<title>` and description meta and
+   injects the Open Graph and Twitter tags at build time; the literals in `index.html` are
+   neutral template defaults.
 2. **Override**: `localStorage.os_site`, written by the companion admin panel's Site identity
    editor (per-browser; clearing it falls back to the deployed seed file).
 3. `src/entities/site/meta.ts` is the dependency-free model and head-tag generator shared with
    the Vite plugin; `src/entities/site/identity.ts` adds persistence and the `useSiteIdentity()`
    hook, consumed by the TopBar wordmark, the Footer colophon, and `TitleSync` (which sets
    `document.title` per route via `pageLabel()` in `src/shared/config/nav.ts`).
+
+| Field | What it sets | When it is empty |
+| --- | --- | --- |
+| `name` | The wordmark | Required |
+| `title` | The base document title, which pages prefix with their own label | Required |
+| `description` | The description meta and the Open Graph description | Required |
+| `author` | The author meta, and the colophon's owner when the profile names none | Required |
+| `url` | The canonical origin for `og:url` | The tag is left out |
+| `mark` | The oversized hero monogram | The name's initials, via `siteMark()` |
+| `tagline` | The footer's big serif sign-off, newline-separated with the last line in the accent | "Built from {city}, logged everywhere." |
+| `colophon` | The footer's bottom line | "A dossier by {owner}" |
+| `pageCopy` | Any page-header description, keyed per page | The fallbacks in `src/entities/site/pageCopy.ts` |
 
 The build reaching into an entity slice is the one deliberate exception to the layer
 rule: `meta.ts` and `paletteCss.ts` are dependency-free by design precisely so the Vite
@@ -293,18 +303,27 @@ Join key: `trip.country === country.name` (an exact string match, so it must be 
 
 ## Testing
 
-Three rules hold however broad the suite is. Suites live in `tests/`, mirroring the source
+Five rules hold however broad the suite is. Suites live in `tests/`, mirroring the source
 tree, one suite named after the unit it covers. A collaborator is replaced only at an
 architectural seam, by a hand-written fake satisfying the contract it stands in for, never by
 mocking a module's internals, since a test bound to an implementation voids the
 substitutability the layering exists to provide. And no coverage threshold is imposed, because
 a percentage gate buys assertions that assert nothing, so breadth stays a judgment call while
-placement and substitution do not.
+placement and substitution do not. And a test is proved by the failure it catches, named
+before it is written, watched failing against a mutation after, and watched failing again when
+the fix it guards is reverted, because a test that has never failed has proved only that it
+runs. And no request leaves the loopback, `tests/setup.ts` refusing any connection to another
+host before its socket opens and a test that must reach a host naming it in the open, because
+an adapter that resolves its credentials from the environment is a working adapter on a
+machine that has them. The suite runs in a shuffled order under a seed the run prints, so a
+test that leans on its neighbour fails on the day it is written.
 
-The 9 suites here are characterization tests over the record's schema, seed and store, the site identity and palette, the portfolio snapshot, and the date, skill and text libraries. They contain no module
-mocking at all, which is what made adopting the rule a description of existing practice rather
-than a migration. The reasoning is recorded in
-[decision 0007](decisions/0007-adopt-the-styles-test-contract.md), and the rule itself is owned by the style.
+The 11 suites here are characterization and unit tests over the record's schema, seed, store,
+shelves, and ordering, the site identity and palette, the portfolio snapshot, and the date,
+skill and text libraries. They contain no module mocking at all, which is what made adopting
+the rule a description of existing practice rather than a migration. The reasoning is recorded
+in [decision 0007, Adopt the style's test contract](decisions/0007-adopt-the-styles-test-contract.md),
+and the rule itself is owned by the style.
 
 ## Exemplars
 

@@ -4,7 +4,8 @@ The living rulebook for the repository's always-present files: which files must 
 which must never be tracked, and how each may be modified. Unlike
 [CONVENTIONS.md](CONVENTIONS.md) this document is not frozen. The baseline evolves with the
 tooling, and a change that reshapes it is recorded as a decision record (the current shape
-arrived with the template alignment in [0006](decisions/0006-track-the-refactored-template.md)).
+arrived with the template alignment in
+[decision 0006, Track the refactored template](decisions/0006-track-the-refactored-template.md)).
 
 Two entries below are deliberate divergences from the template's baseline rather than
 oversights, and both are recorded here because this file is where a project states the facts
@@ -54,9 +55,14 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
   neutral pointer such as "details local". Screenshots get the same review before being
   embedded, since a tracked image is as permanent as tracked text. When it is unclear
   whether a fact is sensitive, surface it to the owner rather than recording it (adopted
-  in [decision 0005](decisions/0005-write-tracked-content-for-a-public-audience.md)).
+  in [decision 0005, Write tracked content for a public audience](decisions/0005-write-tracked-content-for-a-public-audience.md)).
 - Anything regenerable: `node_modules/`, `dist/`, coverage, caches, and the icon exports
   (`pixel-mark-*.png`).
+- The directory a second working tree occupies, `.worktrees/` by the family's convention and
+  `.claude/worktrees/` where that harness creates one. The branch protocol gives every session
+  its own working tree, and one created inside the repository is a nested checkout that a
+  careless `git add` records as an embedded repository, so the directory is ignored before the
+  tree is created and the docs audit holds `.gitignore` to the entry.
 - Operating-system junk: `.DS_Store`, `Thumbs.db`, `Desktop.ini`.
 - Browser-automation scratch: `.playwright-mcp/`.
 

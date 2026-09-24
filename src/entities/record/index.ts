@@ -9,5 +9,6 @@ export type { OrderingPolicy } from "./order";
 export { DATE_FIELDS, comparatorFor, isOrderingPolicy, orderItems } from "./order";
 export { RecordContractError } from "./schema";
 export { loadInitialData, loadSettings, orderingFor, seedFingerprint } from "./seed";
+export type { RefusedCopy } from "./store";
 export { ContentService } from "./store";
 export { CityCard } from "./ui/CityCard";

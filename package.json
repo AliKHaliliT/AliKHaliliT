@@ -11,6 +11,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "docs": "node scripts/audit-docs.mjs",
+    "docs:selftest": "node scripts/audit-docs-selftest.mjs",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "preview": "vite preview",

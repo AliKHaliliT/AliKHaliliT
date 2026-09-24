@@ -19,9 +19,9 @@ The resume builder lives in its own repo and does **not** add a content type her
 repo owns is the export contract it consumes: `src/features/portfolio-export/contract.ts` defines
 `portfolio.json` (format `vita-portfolio`, versioned: settings plus every content collection),
 and `src/features/portfolio-export/snapshot.ts` builds it. The snapshot doubles as a full backup of
-the record. See the ecosystem boundary in [ARCHITECTURE.md](ARCHITECTURE.md) and decisions
-[0003](decisions/0003-self-contained-resume-builder.md) and
-[0004](decisions/0004-three-repo-ecosystem.md).
+the record. See the ecosystem boundary in [ARCHITECTURE.md](ARCHITECTURE.md),
+[the template's decision 0003, The resume builder is a self-contained app with a file bridge](inherited/0003-self-contained-resume-builder.md),
+and [the template's decision 0004, A three-repository ecosystem bridged by files](inherited/0004-three-repo-ecosystem.md).
 
 ---
 
@@ -53,33 +53,41 @@ content type growing its own long-form body.
 
 ### Pinning and ordering
 
-Any entry may carry `pin: 1` (2, 3, ...), and pinned entries lead their
-section in ascending pin order, in the capped previews and on the full pages
-alike, so choosing what a section fronts is frontmatter rather than code.
-Behind the pins, each collection follows its ordering policy: dated types read
-newest first and everything else alphabetically by default, and the optional
-seed `src/content/settings/ordering.json` overrides that per section, mapping
-a content type (or a library shelf as `media/<slug>`) to `"alphabetical"` or
-`"chronological"`. Both degrade gracefully rather than demanding complete
-data: chronological sorts whatever carries the type's date field newest first
-and lets undated entries close the list alphabetically, an unusable `pin`
-value is treated as no pin, and an absent or broken ordering file means the
-defaults. The loader applies all of this once, so every page, capped preview,
-and export sees the same order. Two boundaries: a grouped page (projects by
-year, garden by kind) groups over the ordered list, so pins and policies act
-within groups rather than across them, and the travel atlas orders itself
-hierarchically, so `trips` and `countries` ignore the seed.
+Choosing what a section fronts is frontmatter rather than code, and the loader
+applies the order once, so every page, capped preview, and export sees the same
+one. The rules:
+
+- Any entry may carry `pin: 1` (2, 3, ...), and pinned entries lead their
+  section in ascending pin order, in the capped previews and on the full pages
+  alike. An unusable `pin` value is treated as no pin.
+- Behind the pins, dated types read newest first and everything else
+  alphabetically by default. Chronological order sorts whatever carries the
+  type's date field newest first and lets undated entries close the list
+  alphabetically.
+- The optional seed `src/content/settings/ordering.json` overrides the default
+  per section, mapping a content type, or a library shelf as `media/<slug>`, to
+  `"alphabetical"` or `"chronological"`. An absent or broken file means the
+  defaults.
+- A grouped page, projects by year or garden by kind, groups over the ordered
+  list, so pins and policies act within groups rather than across them.
+- The travel atlas orders itself hierarchically, so `trips` and `countries`
+  ignore the seed.
 
 ### Open type fields
 
-`awardType`, `pubType`, `speakingType`, `certType`, and `memberType` are open
-strings: the values listed in each section above are common suggestions (they
-get proper labels from `src/entities/record/labels.ts`), but any owner-invented value is
-valid and renders as its Title Case form. An athletics trophy
-(`awardType: athletics`), a patent (`pubType: patent`), or an attended
-conference (`speakingType: attendance`) needs no code change. The media
-collection's `medium` and `status` are open the same way, and a new `medium`
-value earns its own library shelf (see [CONTENT-LIBRARY.md](CONTENT-LIBRARY.md)).
+Five type fields are open strings. The values listed in each section above are
+common suggestions that get proper labels from `src/entities/record/labels.ts`,
+but any owner-invented value is valid and renders as its Title Case form, so a new
+kind needs no code change.
+
+- `awardType`, where `athletics` files an athletics trophy
+- `pubType`, where `patent` files a patent
+- `speakingType`, where `attendance` files an attended conference
+- `certType`
+- `memberType`
+
+The media collection's `medium` and `status` are open the same way, and a new
+`medium` value earns its own library shelf (see [CONTENT-LIBRARY.md](CONTENT-LIBRARY.md)).
 
 ---
 

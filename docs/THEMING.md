@@ -49,8 +49,8 @@ The color rule: taxonomies stay **neutral** chips, with one working accent per p
 ## Palettes
 
 The whole token set is swappable, in three layers that mirror the content model (files are
-the seed, localStorage overrides). This is the file-seed model from decision
-[0002](decisions/0002-file-seeded-appearance-and-identity.md).
+the seed, localStorage overrides). This is the file-seed model from
+[the template's decision 0002, Appearance and identity follow the content model as file seeds](inherited/0002-file-seeded-appearance-and-identity.md).
 
 1. **Seed**: `src/content/settings/palette.json` is the deployed default. A Vite plugin
    (`paletteSeed` in `vite.config.ts`) bakes it into `index.html` at build time (an
@@ -127,9 +127,18 @@ the signature elements behave like a powered-on instrument.
 
 ## Shared atoms (`src/shared/ui/`)
 
-`Badge` (the annotation chip: square, mono, optional field-green glow dot), `PillLink` and
-`PillButton` (round actions), `PixelBand` (mosaic divider), `SectionBlock` (numbered dossier
-chapter scaffold), `PageHeader` (mono eyebrow plus Fraunces title plus track), `GroundTrack`,
-`FilterBar` (pills, ink-solid active), `TagList` (mono `#tags`), `EmptyState`, `Modal`, and
-`Markdown` (a code-split renderer). The nav map lives in `src/shared/config/nav.ts`, shared by TopBar,
-Footer, and GroundTrack.
+| Atom | What it is |
+| --- | --- |
+| `Badge` | The annotation chip, square and mono, with an optional field-green glow dot |
+| `PillLink`, `PillButton` | The round actions |
+| `PixelBand` | The mosaic divider |
+| `SectionBlock` | The numbered dossier chapter scaffold |
+| `PageHeader` | A mono eyebrow over a Fraunces title and the track |
+| `GroundTrack` | The track that encodes a page's place in the site map |
+| `FilterBar` | Pills, the active one solid ink |
+| `TagList` | Mono `#tags` |
+| `EmptyState` | What a page shows with nothing to list |
+| `Modal` | The dialog shell |
+| `Markdown` | A code-split renderer |
+
+The nav map lives in `src/shared/config/nav.ts`, shared by TopBar, Footer, and GroundTrack.
