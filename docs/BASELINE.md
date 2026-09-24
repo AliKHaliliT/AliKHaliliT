@@ -40,6 +40,7 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
 | `util_resources/` | The repository carries tracked assets. `readme/` holds the profile page's SVG art (hero, enter plate, ticker, footnote, each in dark and light), self-contained files with no external references, rebuilt deterministically by `npm run profile-art`. |
 | `.github/workflows/deploy.yml` | The site deploys through GitHub Actions to Pages. |
 | `.env.example` | Anything reads a `.env`; nothing does today. |
+| `.codespellignore` | The spelling advisory names a real term of this project's domain. One word per line, the project's own list from adoption on and never recopied at re-alignment; the docs audit passes it to codespell when it exists. |
 
 ## Never tracked
 

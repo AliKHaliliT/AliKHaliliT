@@ -128,8 +128,10 @@ const VOCABULARY = /paradigm shift|game.changer|ever-evolving|cutting.edge|\bdel
 // What the two advisories skip: the workflows, the rulebook that lists the tells, and this
 // script, which carries the list; a record is skipped by its depth under docs/.
 const VOCABULARY_SKIP = [".github/", "docs/CONVENTIONS.md", "scripts/audit-docs.mjs", "scripts/audit-docs-selftest.mjs"];
-const CODESPELL_SKIP = ".git,node_modules,.hypothesis,__pycache__,dist,package-lock.json,*.svg,*.png,*.ico,*.woff,*.woff2,*.map,decisions,claims,reviews,inherited,mockServiceWorker.js";
-const CODESPELL_IGNORE = "accreting,afterall";
+// The audits are skipped as quoting ground, because they carry the banned-word list the vocabulary advisory reads.
+const CODESPELL_SKIP = ".git,node_modules,.hypothesis,__pycache__,dist,package-lock.json,*.svg,*.png,*.ico,*.woff,*.woff2,*.map,decisions,claims,reviews,inherited,mockServiceWorker.js,audit_docs.py,audit-docs.mjs,audit_inquiry.py";
+// The project's own terms, one word per line, beside the check and never recopied at re-alignment.
+const IGNORE_FILE = ".codespellignore";
 // A prose paragraph that names this many references or more is an enumeration wearing prose, a
 // list or a table with its rows run together; measured over the family and over a project built
 // from it, everything at this count was a schema stated as prose or a set of bindings, and
@@ -759,17 +761,38 @@ function unlandedRecords() {
   return [...paths].filter((p) => p && isRecord(p) && !p.startsWith("docs/inherited/") && existsSync(join(ROOT, p))).sort();
 }
 
-// Each prose line where a colon closes a clause of three words or more and a lowercase letter follows, with that clause.
-function spliceCandidates(text) {
-  const found = [];
+// The prose of a record as blocks of numbered lines, a block ending at a blank line, a heading, a table row, a fence or a list marker.
+function proseBlocks(text) {
+  const blocks = [];
   let fence = false;
   text.split(/\r?\n/).forEach((line, index) => {
     if (line.startsWith("```")) fence = !fence;
-    else if (!fence && !/^(#|\||Status:|Date:)/.test(line)) {
-      const clauses = [...line.replace(BACKTICK, " ").matchAll(SPLICE)].map((m) => m[1].trim()).filter((c) => c.split(/\s+/).length >= 3);
-      if (clauses.length > 0) found.push([index + 1, clauses[0].slice(-40)]);
-    }
+    else if (fence || !line.trim() || /^(#|\||Status:|Date:)/.test(line)) blocks.push([]);
+    else if (/^[-*] /.test(line) || blocks.length === 0) blocks.push([[index + 1, line]]);
+    else blocks[blocks.length - 1].push([index + 1, line]);
   });
+  return blocks.filter((block) => block.length > 0);
+}
+
+// Each colon in a record's prose that closes a clause of three words or more and opens a lowercase one, with the
+// colon's line and its clause. A block's lines are joined before matching, because a wrapped line can carry the
+// colon while the line above carries the clause, and a rule that read one line at a time passed exactly that shape.
+function spliceCandidates(text) {
+  const found = [];
+  for (const block of proseBlocks(text)) {
+    const starts = [];
+    let joined = "";
+    for (const [, line] of block) {
+      starts.push(joined.length);
+      joined += `${line.replace(BACKTICK, " ")} `;
+    }
+    for (const match of joined.matchAll(SPLICE)) {
+      if (match[1].trim().split(/\s+/).length < 3) continue;
+      const colon = match.index + match[0].length - 2;
+      const at = starts.reduce((best, start, i) => (start <= colon ? i : best), 0);
+      found.push([block[at][0], match[1].trim().slice(-40)]);
+    }
+  }
   return found;
 }
 
@@ -793,9 +816,10 @@ function codespellPresent() {
 // so it runs once per audit command, and the selftest proves it by the audit's own output.
 function adviseSpelling() {
   if (!codespellPresent()) return;
-  const done = spawnSync("codespell", ["--skip", CODESPELL_SKIP, "--ignore-words-list", CODESPELL_IGNORE, "."], { cwd: ROOT, encoding: "utf-8" });
+  const ownTerms = existsSync(join(ROOT, IGNORE_FILE)) ? ["--ignore-words", IGNORE_FILE] : [];
+  const done = spawnSync("codespell", ["--skip", CODESPELL_SKIP, ...ownTerms, "."], { cwd: ROOT, encoding: "utf-8" });
   for (const line of `${done.stdout}`.split("\n")) {
-    if (line.trim()) advice.push(`${line.trim()}; correct it, or name a domain term in the ignore list`);
+    if (line.trim()) advice.push(`${line.trim()}; correct it, or name a real term of the domain in ${IGNORE_FILE}, one word per line`);
   }
 }
 adviseVocabulary();

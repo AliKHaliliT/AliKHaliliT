@@ -46,14 +46,15 @@ it so and needs no repetition. The advisory checks here are the credential and
 regular-expression heuristics in the lint configuration, which guess from the shape of a
 string or a pattern and are wrong often enough that they cannot be a gate, the docs audit's
 vocabulary advisory, which reads an honest domain term the same as a tell and so advises for
-review, its spelling advisory, which runs where codespell is installed and names itself as
-not run elsewhere, and its form advisory, which counts the references a prose paragraph
-names and cannot tell an enumeration from an argument, so it advises a list or a table and
-gates nothing. Its splice advisory names a colon that opens a lowercase clause in a record
-main does not hold yet, because a list colon and a spliced one look alike to a machine, and
-it falls silent once the record has landed, since a defect found in a merged record stays. A
-check the tree gave nothing to run is named as not run, with what it needs, so a clean
-verdict never hides a check that never looked.
+review, its spelling advisory, which runs where codespell is installed, reads the project's
+own terms from `.codespellignore`, and names itself as not run elsewhere, and its form
+advisory, which counts the references a prose paragraph names and cannot tell an enumeration
+from an argument, so it advises a list or a table and gates nothing. Its splice advisory
+names a colon that opens a lowercase clause in a record main does not hold yet, because a
+list colon and a spliced one look alike to a machine, and it falls silent once the record
+has landed, since a defect found in a merged record stays. A check the tree gave nothing to
+run is named as not run, with what it needs, so a clean verdict never hides a check that
+never looked.
 
 ## Hard rules
 

@@ -363,15 +363,15 @@ function proveVocabularyPlant() {
   }
 }
 
-/** A spliced clause in a record main does not hold is advised once, the label and the list intro beside it are not, and the record leaves. */
+/** Two spliced clauses in a record main does not hold are advised, one across a wrap, the label and the list intro are not, and the record leaves. */
 function proveSpliceAdvice() {
   const number = freeNumber();
   const name = `${number}-planted-splice.md`;
   const path = join(ROOT, "docs", "decisions", name);
-  writeFileSync(path, `# ${number}. Planted splice\n\nStatus: Accepted\nDate: 2026-01-01\n\n## Context\n\nThe reader found the second defect, which is why: the dot was gone.\n- **A label.** Rejected: it duplicates what the tree records.\nThe audit gains three checks:\n`);
+  writeFileSync(path, `# ${number}. Planted splice\n\nStatus: Accepted\nDate: 2026-01-01\n\n## Context\n\nThe reader found the second defect, which is why: the dot was gone.\n- **A label.** Rejected: it duplicates what the tree records.\nThe audit gains three checks:\n\nReproduced in a fresh environment with the seat's development\nrequirements: the revealed type was nothing.\n`);
   try {
     const found = adviceLines().filter((line) => line.includes(name) && line.includes("lowercase clause"));
-    if (found.length !== 1 || !found[0].includes(`${name}:8:`)) wrong(`a planted splice was advised ${found.length} time(s) instead of once at line 8`);
+    if (found.length !== 2 || !found[0].includes(`${name}:8:`) || !found[1].includes(`${name}:13:`)) wrong(`the planted splices were advised ${found.length} time(s) instead of once each at lines 8 and 13`);
   } finally {
     unlinkSync(path);
   }
@@ -605,6 +605,27 @@ function proveIgnorePlant() {
 }
 
 
+/** A misspelling named in the project's own ignore file is not advised, and both files come back. */
+function proveIgnoredTerm() {
+  if (spawnSync("codespell", ["--version"], { encoding: "utf-8" }).status !== 0) {
+    console.log("ignored term plant skipped: codespell is not on PATH");
+    return;
+  }
+  const readme = join(ROOT, "README.md");
+  const ignore = join(ROOT, ".codespellignore");
+  const original = readFileSync(readme);
+  const had = existsSync(ignore) ? readFileSync(ignore) : null;
+  writeFileSync(readme, Buffer.concat([original, Buffer.from("\nThe reciever waits here.\n")])); // codespell:ignore reciever
+  writeFileSync(ignore, Buffer.concat([had ?? Buffer.alloc(0), Buffer.from("reciever\n")])); // codespell:ignore reciever
+  try {
+    if (adviceLines().some((line) => line.includes("reciever ==> receiver"))) wrong("a misspelling named in .codespellignore was still advised"); // codespell:ignore reciever
+  } finally {
+    writeFileSync(readme, original);
+    if (had === null) unlinkSync(ignore);
+    else writeFileSync(ignore, had);
+  }
+}
+
 /** A local branch already merged into main is reported, and the branch is removed again. */
 function proveStaleBranch() {
   if (git("rev-parse", "--verify", "--quiet", "refs/heads/main").trim() === "") {
@@ -657,7 +678,7 @@ if (baseline.length > 0) {
   for (const p of baseline.slice(0, 5)) console.log(`  ${p}`);
   process.exit(1);
 }
-for (const proof of [proveFilePlants, proveTrackedPlants, proveRecordDashes, proveAppendedPlants, proveInvariantPlants, proveStatePlants, proveUpstreamPlants, provePalettePlant, proveCitationPlant, proveDensePlant, proveVocabularyPlant, proveSpliceAdvice, proveSpellingPlant, proveImmutability, proveBulletEdit, proveLinkRepair, proveIgnoredPath, proveRecordLinkPlant, proveAnchors, proveTemplateCopy, proveDisposition, proveIgnorePlant, proveStaleBranch, proveNoRemoteReport, proveUnrunReport]) {
+for (const proof of [proveFilePlants, proveTrackedPlants, proveRecordDashes, proveAppendedPlants, proveInvariantPlants, proveStatePlants, proveUpstreamPlants, provePalettePlant, proveCitationPlant, proveDensePlant, proveVocabularyPlant, proveSpliceAdvice, proveSpellingPlant, proveIgnoredTerm, proveImmutability, proveBulletEdit, proveLinkRepair, proveIgnoredPath, proveRecordLinkPlant, proveAnchors, proveTemplateCopy, proveDisposition, proveIgnorePlant, proveStaleBranch, proveNoRemoteReport, proveUnrunReport]) {
   proof();
 }
 console.log(failures === 0 ? "every rule fires" : `${failures} rule(s) do not work`);

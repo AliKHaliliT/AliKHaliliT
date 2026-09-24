@@ -29,9 +29,9 @@ jobs:
         # script and its selftest are pinned beside the rulebook and checked before
         # they run, because a checker the checked project can edit is no checker at all.
         run: |
-          echo "f45f0f2bef76fa82d46bdd73a897801575b86d55e6d1897e2cb3ff7ac1c43a65  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "54280b0fcf2e6d76351f7d4c667618e053f67245529064e354c9a860cc1a5569  scripts/audit-docs.mjs" | sha256sum -c -
-          echo "6477e80b5b041960736759b6addc917f2ccf8568255b639849cce5b566728034  scripts/audit-docs-selftest.mjs" | sha256sum -c -
+          echo "b43956e7cd0a89a593b88a64dd1d36c1f75142852a8a3dcf54af11b8b583de11  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "b78e085b296e38a5c6e543de4bfd4c43b8cf60f247caa881806a9f6858a96ba8  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "2e98c4d3dc5dca487bb151d3f704ce94d8f8b4f5add56388e393dec82fb83395  scripts/audit-docs-selftest.mjs" | sha256sum -c -
 
       - name: Seams
         run: |
