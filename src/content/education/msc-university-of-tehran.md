@@ -1,11 +1,11 @@
 ---
-title: M.Sc. Mechanical Engineering of Biosystems · Design and Fabrication
+title: M.Sc. Mechanical Engineering · Design and Fabrication
 institution: University of Tehran
 location: Tehran, Iran
 startDate: "2021-09"
 endDate: "2024-05"
 degree: Master
-field: Mechanical Engineering of Biosystems (Design and Fabrication)
+field: Mechanical Engineering (Design and Fabrication)
 gpa: "3.73 / 4 (18 / 20)"
 link: https://ut.ac.ir/en
 tags:

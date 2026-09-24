@@ -1,11 +1,11 @@
 ---
-title: B.Sc. Mechanical Engineering of Biosystems
+title: B.Sc. Mechanical Engineering
 institution: University of Tabriz
 location: Tabriz, Iran
 startDate: "2017-09"
 endDate: "2021-09"
 degree: Bachelor
-field: Mechanical Engineering of Biosystems
+field: Mechanical Engineering
 gpa: "3.16 / 4 (16.28 / 20)"
 link: https://tabrizu.ac.ir/en
 tags:
