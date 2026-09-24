@@ -50,7 +50,7 @@ describe("loadInitialData: item shape", () => {
     for (const type of ALL_TYPES) {
       expect(Array.isArray(loadInitialData(type)), type).toBe(true);
     }
-    for (const type of ["projects", "blog", "education", "experience", "publications", "certificates", "interests", "books", "media", "trips", "countries", "speaking", "volunteering", "updates"] as const) {
+    for (const type of ["projects", "blog", "education", "experience", "publications", "certificates", "interests", "books", "media", "trips", "countries", "speaking", "volunteering"] as const) {
       expect(loadInitialData(type).length, type).toBeGreaterThan(0);
     }
   });
@@ -72,6 +72,8 @@ describe("loadInitialData: item shape", () => {
     }
   });
 
+  // The updates feed is empty since its one milestone came out, so the updateType
+  // check holds vacuously until an update exists.
   it("only updates carry an updateType (defaulting to 'note')", () => {
     for (const b of loadInitialData("books") as unknown as Loose[]) {
       expect(b.postType).toBeUndefined();
