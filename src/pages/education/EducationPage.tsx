@@ -13,6 +13,62 @@ const says = (title: string, value: string) => {
   return norm(title).includes(norm(value));
 };
 
+// The month range, where a missing start reads as a question mark.
+const MonthRange = ({ start, end }: { start?: string; end?: string }) => (
+  <>
+    {start ? formatMonthYear(start) : "?"}
+    {" – "}
+    {end ? formatMonthYear(end) : "Present"}
+  </>
+);
+
+// The card's first line, carrying the dates, the grade, or both.
+const EducationWhen = ({ item }: { item: Education }) => {
+  const range = item.startDate || item.endDate;
+  if (!(range || item.gpa)) return null;
+  return (
+    <p className="font-mono text-[11px] text-muted mb-1.5">
+      {range && <MonthRange start={item.startDate} end={item.endDate} />}
+      {item.gpa && (
+        <>
+          {range && " · "}
+          GPA {item.gpa}
+        </>
+      )}
+    </p>
+  );
+};
+
+// Where it happened: the institution, the field unless the title says it, and the place.
+const EducationWhere = ({ item }: { item: Education }) => (
+  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+    <span className="font-medium text-ink">
+      {item.link ? (
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 hover:text-signal transition-colors duration-150"
+        >
+          {item.institution}
+          <ExternalLink size={11} className="opacity-60" />
+        </a>
+      ) : (
+        item.institution
+      )}
+    </span>
+    {item.field && !says(item.title, item.field) && (
+      <span className="text-xs">{item.field}</span>
+    )}
+    {item.location && (
+      <span className="flex items-center gap-1 text-xs">
+        <MapPin size={11} />
+        {item.location}
+      </span>
+    )}
+  </div>
+);
+
 function EducationCard({ item }: { item: Education }) {
   const ongoing = !item.endDate;
 
@@ -33,23 +89,7 @@ function EducationCard({ item }: { item: Education }) {
 
       <div className="rounded-card border border-line bg-card p-5">
         <div className="flex-1 min-w-0">
-          {(item.startDate || item.endDate || item.gpa) && (
-            <p className="font-mono text-[11px] text-muted mb-1.5">
-              {(item.startDate || item.endDate) && (
-                <>
-                  {item.startDate ? formatMonthYear(item.startDate) : "?"}
-                  {" – "}
-                  {item.endDate ? formatMonthYear(item.endDate) : "Present"}
-                </>
-              )}
-              {item.gpa && (
-                <>
-                  {(item.startDate || item.endDate) && " · "}
-                  GPA {item.gpa}
-                </>
-              )}
-            </p>
-          )}
+          <EducationWhen item={item} />
 
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <h3 className="font-serif font-semibold text-ink text-base leading-snug">
@@ -58,32 +98,7 @@ function EducationCard({ item }: { item: Education }) {
             {item.degree && !says(item.title, item.degree) && <Badge>{item.degree}</Badge>}
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
-            <span className="font-medium text-ink">
-              {item.link ? (
-                <a
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-signal transition-colors duration-150"
-                >
-                  {item.institution}
-                  <ExternalLink size={11} className="opacity-60" />
-                </a>
-              ) : (
-                item.institution
-              )}
-            </span>
-            {item.field && !says(item.title, item.field) && (
-              <span className="text-xs">{item.field}</span>
-            )}
-            {item.location && (
-              <span className="flex items-center gap-1 text-xs">
-                <MapPin size={11} />
-                {item.location}
-              </span>
-            )}
-          </div>
+          <EducationWhere item={item} />
 
           <TagList tags={item.tags} className="mt-2.5" />
         </div>
@@ -136,23 +151,60 @@ function CourseCard({ item }: { item: Course }) {
   );
 }
 
-/** The education history, newest first. */
-export const EducationPage = () => {
-  const { education, courses } = useContent();
+// "Certificate"-typed entries share the timeline but shouldn't be counted
+// (or headed) as degrees.
+const countCertificates = (education: Education[]) =>
+  education.filter((e) => (e.degree || "").toLowerCase() === "certificate").length;
 
-  // "Certificate"-typed entries share the timeline but shouldn't be counted
-  // (or headed) as degrees.
-  const certCount = education.filter(
-    (e) => (e.degree || "").toLowerCase() === "certificate"
-  ).length;
+const educationMeta = (education: Education[], courses: Course[], certCount: number) => {
   const degreeCount = education.length - certCount;
-  const meta = [
+  return [
     degreeCount > 0 && `${degreeCount} degree${degreeCount !== 1 ? "s" : ""}`,
     certCount > 0 && `${certCount} certificate${certCount !== 1 ? "s" : ""}`,
     courses.length > 0 && `${courses.length} course${courses.length !== 1 ? "s" : ""}`,
   ]
     .filter(Boolean)
     .join(" · ");
+};
+
+const DegreesSection = ({ education, certCount }: { education: Education[]; certCount: number }) =>
+  education.length > 0 ? (
+    <section className="space-y-5">
+      <h2 className="font-mono text-eyebrow uppercase text-muted">
+        {certCount > 0 ? "Degrees & Certificates" : "Degrees"}
+      </h2>
+      <div className="relative">
+        {/* Vertical timeline line */}
+        <div className="absolute left-0 top-6 bottom-6 w-px bg-line" />
+        <div className="space-y-5">
+          {education.map((item) => (
+            <EducationCard key={item.id} item={item} />
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null;
+
+// Certificates proper live at /certificates.
+const CoursesSection = ({ courses }: { courses: Course[] }) =>
+  courses.length > 0 ? (
+    <section className="space-y-4">
+      <h2 className="font-mono text-eyebrow uppercase text-muted">
+        Courses & Continued Learning
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {courses.map((item) => (
+          <CourseCard key={item.id} item={item} />
+        ))}
+      </div>
+    </section>
+  ) : null;
+
+/** The education history, newest first. */
+export const EducationPage = () => {
+  const { education, courses } = useContent();
+  const certCount = countCertificates(education);
+  const meta = educationMeta(education, courses, certCount);
 
   return (
     <m.div
@@ -175,37 +227,9 @@ export const EducationPage = () => {
         />
       ) : (
         <div className="space-y-10">
-          {/* Degrees */}
-          {education.length > 0 && (
-            <section className="space-y-5">
-              <h2 className="font-mono text-eyebrow uppercase text-muted">
-                {certCount > 0 ? "Degrees & Certificates" : "Degrees"}
-              </h2>
-              <div className="relative">
-                {/* Vertical timeline line */}
-                <div className="absolute left-0 top-6 bottom-6 w-px bg-line" />
-                <div className="space-y-5">
-                  {education.map((item) => (
-                    <EducationCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
+          <DegreesSection education={education} certCount={certCount} />
 
-          {/* Courses (certificates proper live at /certificates) */}
-          {courses.length > 0 && (
-            <section className="space-y-4">
-              <h2 className="font-mono text-eyebrow uppercase text-muted">
-                Courses & Continued Learning
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {courses.map((item) => (
-                  <CourseCard key={item.id} item={item} />
-                ))}
-              </div>
-            </section>
-          )}
+          <CoursesSection courses={courses} />
         </div>
       )}
     </m.div>

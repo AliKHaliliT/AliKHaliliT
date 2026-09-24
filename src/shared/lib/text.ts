@@ -45,6 +45,13 @@ export interface ProfileLink {
   icon?: string;
 }
 
+// A link line's label and optional icon, read from the text before its first colon.
+function linkHead(line: string, colon: number): { head: string; icon?: string } {
+  const rawHead = colon > 0 ? line.slice(0, colon).trim() : "";
+  const iconMatch = rawHead.match(/^(.*?)\s*\[([a-z0-9-]+)\]$/i);
+  return iconMatch ? { head: iconMatch[1].trim(), icon: iconMatch[2].toLowerCase() } : { head: rawHead };
+}
+
 /** Parse the free-form profile `links` field: one link per line, either
  *  `Label: https://url`, `Label [icon]: https://url` (icon names resolve via
  *  the LINK_ICONS registry), or a bare URL (labeled by its hostname). Nothing
@@ -56,10 +63,7 @@ export function parseProfileLinks(raw?: string): ProfileLink[] {
     .filter(Boolean)
     .flatMap((line) => {
       const colon = line.indexOf(":");
-      const rawHead = colon > 0 ? line.slice(0, colon).trim() : "";
-      const iconMatch = rawHead.match(/^(.*?)\s*\[([a-z0-9-]+)\]$/i);
-      const head = iconMatch ? iconMatch[1].trim() : rawHead;
-      const icon = iconMatch ? iconMatch[2].toLowerCase() : undefined;
+      const { head, icon } = linkHead(line, colon);
       const bare = !head || /^(https?|mailto|tel)$/i.test(head);
       const target = bare ? line : line.slice(colon + 1).trim();
       if (!target) return [];

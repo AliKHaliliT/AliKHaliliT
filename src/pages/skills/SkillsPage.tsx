@@ -5,6 +5,43 @@ import { PageHeader, EmptyState, Markdown, SkillMatrix } from "@/shared/ui";
 import { parseKeyValue } from "@/shared/lib";
 import { usePageDescription } from "@/entities/site";
 
+const SpokenLanguages = ({ languages }: { languages: ReturnType<typeof parseKeyValue> }) =>
+  languages.length > 0 ? (
+    <section>
+      <h2 className="mb-3 font-mono text-eyebrow uppercase text-muted">
+        Spoken languages
+      </h2>
+      <div className="border-t border-dashed border-line">
+        {languages.map((l) => (
+          <div
+            key={l.category}
+            className="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b border-dashed border-line px-1 py-3"
+          >
+            <span className="w-28 shrink-0 font-serif text-lg tracking-[-0.01em] text-ink">
+              {l.category}
+            </span>
+            <span className="font-mono text-xs tracking-[0.02em] text-muted">
+              {l.items.join(" · ")}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  ) : null;
+
+// The owner's setup notes, when written.
+const SetupNotes = ({ uses }: { uses?: string }) =>
+  uses ? (
+    <section>
+      <h2 className="mb-3 font-mono text-eyebrow uppercase text-muted">
+        The setup
+      </h2>
+      <div className="prose dark:prose-invert prose-essay">
+        <Markdown>{uses}</Markdown>
+      </div>
+    </section>
+  ) : null;
+
 /**
  * The dedicated home of the toolkit: every skill category from the profile,
  * spoken languages, and (when written) the owner's setup notes. The home
@@ -37,39 +74,9 @@ export const SkillsPage = () => {
           <div className="space-y-10">
             <SkillMatrix skills={skills} />
 
-            {languages.length > 0 && (
-              <section>
-                <h2 className="mb-3 font-mono text-eyebrow uppercase text-muted">
-                  Spoken languages
-                </h2>
-                <div className="border-t border-dashed border-line">
-                  {languages.map((l) => (
-                    <div
-                      key={l.category}
-                      className="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b border-dashed border-line px-1 py-3"
-                    >
-                      <span className="w-28 shrink-0 font-serif text-lg tracking-[-0.01em] text-ink">
-                        {l.category}
-                      </span>
-                      <span className="font-mono text-xs tracking-[0.02em] text-muted">
-                        {l.items.join(" · ")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            <SpokenLanguages languages={languages} />
 
-            {uses && (
-              <section>
-                <h2 className="mb-3 font-mono text-eyebrow uppercase text-muted">
-                  The setup
-                </h2>
-                <div className="prose dark:prose-invert prose-essay">
-                  <Markdown>{uses}</Markdown>
-                </div>
-              </section>
-            )}
+            <SetupNotes uses={uses} />
           </div>
         )}
       </m.div>

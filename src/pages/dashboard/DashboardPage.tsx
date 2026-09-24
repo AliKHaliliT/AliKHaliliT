@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { ObfuscatedEmail, SkillMatrix, AmbientField, Badge, PillLink, PixelBand, SectionBlock, TagList, DraftingPlot } from "@/shared/ui";
 import { parseKeyValue, formatMonthYearRange, formatShortDate, excerpt, firstLine, parseProfileLinks, LINK_ICONS } from "@/shared/lib";
-import { useContent, buildShelves, EMPLOYMENT_TYPE_LABEL, typeLabel } from "@/entities/record";
+import { useContent, buildShelves, EMPLOYMENT_TYPE_LABEL, typeLabel, type ContentContextValue, type Country, type Interest, type Project, type UserSettings } from "@/entities/record";
 import { useSiteIdentity, siteMark } from "@/entities/site";
 
 /** "1 paper", "3 papers": CountCell units read as prose. */
@@ -53,14 +53,10 @@ const Rise = ({ children, className }: { children: ReactNode; className?: string
 
 /* ── Hero ─────────────────────────────────────────────────────────── */
 
-const Hero = () => {
-  const { settings } = useContent();
-  const site = useSiteIdentity();
-  const year = new Date().getFullYear();
-
-  // Email is deliberately NOT a mailto link (scraper bait): it renders as an
-  // obfuscated copy-chip after the icon squares instead.
-  const socials = [
+// Email is deliberately NOT a mailto link (scraper bait), so it renders as an
+// obfuscated copy-chip after the icon squares instead.
+const heroSocials = (settings: UserSettings) =>
+  [
     { icon: Phone, link: settings.phone ? `tel:${settings.phone}` : undefined, label: "Phone" },
     { icon: Globe, link: settings.website, label: "Website" },
     { icon: Github, link: settings.github, label: "GitHub" },
@@ -71,15 +67,141 @@ const Hero = () => {
     { icon: Link2, link: settings.orcid, label: "ORCID" },
   ].filter((s) => s.link);
 
-  // Owner-defined links (Kaggle, Hugging Face, anything): labeled chips
-  // alongside the icon squares. The hero shows at most 12; a "+N" chip
-  // points at the footer, where the complete set always lives.
+const HeroBadges = ({ settings, year }: { settings: UserSettings; year: number }) => (
+  <m.div
+    initial={{ opacity: 0, y: 14 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, ease: [0.2, 0.7, 0.2, 1] }}
+    className="flex flex-wrap items-center gap-2.5"
+  >
+    {settings.avatar && (
+      <img
+        src={settings.avatar}
+        alt={settings.name || "Profile"}
+        className="h-9 w-9 rounded-ctl border border-line-strong object-cover"
+      />
+    )}
+    <Badge>Dossier · {year}</Badge>
+    {settings.role && <Badge>Role · {settings.role}</Badge>}
+    {settings.location && (
+      <Badge>
+        <MapPin size={10} aria-hidden="true" /> {settings.location}
+        {settings.nationality ? ` · ${settings.nationality}` : ""}
+      </Badge>
+    )}
+    {settings.workMode && <Badge>{settings.workMode}</Badge>}
+    {settings.availability && <Badge tone="signal">{settings.availability}</Badge>}
+  </m.div>
+);
+
+const HeroName = ({ name }: { name?: string }) => {
+  const [firstName, ...rest] = (name || "Your Name").split(" ");
+  const restName = rest.join(" ");
+  return (
+    <h1 className="mt-8 font-serif font-semibold leading-[0.98] tracking-[-0.035em] text-ink">
+      {/* pb + negative mb widen the reveal mask so serif descenders
+          (g, y) survive the leading-[0.98] line box. */}
+      <span className="-mb-[0.15em] block overflow-hidden pb-[0.15em] text-[clamp(3rem,8.5vw,6.5rem)]">
+        <m.span
+          className="block"
+          initial={{ y: "115%" }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.65, ease: [0.2, 0.7, 0.2, 1] }}
+        >
+          {firstName} {restName.split(" ")[0] || ""}
+        </m.span>
+      </span>
+      {restName.split(" ").length > 1 && (
+        <span className="-mb-[0.15em] block overflow-hidden pb-[0.15em] text-[clamp(2rem,5.8vw,4.5rem)] text-muted">
+          <m.span
+            className="block"
+            initial={{ y: "115%" }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.65, delay: 0.08, ease: [0.2, 0.7, 0.2, 1] }}
+          >
+            {restName.split(" ").slice(1).join(" ")}
+          </m.span>
+        </span>
+      )}
+    </h1>
+  );
+};
+
+// Owner-defined links (Kaggle, Hugging Face, anything) render as labeled chips
+// alongside the icon squares. The hero shows at most 12; a "+N" chip
+// points at the footer, where the complete set always lives.
+const HeroLinks = ({ settings }: { settings: UserSettings }) => {
+  const socials = heroSocials(settings);
   const allCustomLinks = parseProfileLinks(settings.links);
   const customLinks = allCustomLinks.slice(0, 12);
   const hiddenLinks = allCustomLinks.length - customLinks.length;
+  if (socials.length === 0 && customLinks.length === 0) return null;
+  return (
+    <span className="ml-1 flex flex-wrap gap-1.5">
+      {socials.map((s) => (
+        <a
+          key={s.label}
+          href={s.link || "#"}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={s.label}
+          className="flex h-9 w-9 items-center justify-center rounded-ctl border border-line-strong text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95"
+        >
+          <s.icon size={14} />
+        </a>
+      ))}
+      {settings.email && (
+        <ObfuscatedEmail
+          email={settings.email}
+          className="flex h-9 items-center rounded-ctl border border-line-strong px-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95"
+        />
+      )}
+      {customLinks.map((l) => {
+        const Icon = l.icon ? LINK_ICONS[l.icon] : undefined;
+        const base =
+          "flex h-9 items-center rounded-ctl border border-line-strong text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95";
+        const chip = `${base} px-2.5 font-mono text-[10px] uppercase tracking-[0.1em]`;
+        if (l.url.startsWith("mailto:")) {
+          return (
+            <ObfuscatedEmail
+              key={`${l.label}-${l.url}`}
+              email={l.url.slice(7)}
+              title={`${l.label} · click to copy`}
+              className={chip}
+            />
+          );
+        }
+        return (
+          <a
+            key={`${l.label}-${l.url}`}
+            href={l.url}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={Icon ? l.label : undefined}
+            title={Icon ? l.label : undefined}
+            className={Icon ? `${base} w-9 justify-center` : chip}
+          >
+            {Icon ? <Icon size={14} /> : l.label}
+          </a>
+        );
+      })}
+      {hiddenLinks > 0 && (
+        <a
+          href="#site-footer"
+          title="All links live in the footer"
+          className="flex h-9 items-center rounded-ctl border border-dashed border-line-strong px-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95"
+        >
+          +{hiddenLinks}
+        </a>
+      )}
+    </span>
+  );
+};
 
-  const [firstName, ...rest] = (settings.name || "Your Name").split(" ");
-  const restName = rest.join(" ");
+const Hero = () => {
+  const { settings } = useContent();
+  const site = useSiteIdentity();
+  const year = new Date().getFullYear();
 
   return (
     <section className="relative overflow-hidden pb-14 pt-10 md:pb-20 md:pt-16">
@@ -93,57 +215,9 @@ const Hero = () => {
       </div>
 
       <div className="relative">
-        <m.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.2, 0.7, 0.2, 1] }}
-          className="flex flex-wrap items-center gap-2.5"
-        >
-          {settings.avatar && (
-            <img
-              src={settings.avatar}
-              alt={settings.name || "Profile"}
-              className="h-9 w-9 rounded-ctl border border-line-strong object-cover"
-            />
-          )}
-          <Badge>Dossier · {year}</Badge>
-          {settings.role && <Badge>Role · {settings.role}</Badge>}
-          {settings.location && (
-            <Badge>
-              <MapPin size={10} aria-hidden="true" /> {settings.location}
-              {settings.nationality ? ` · ${settings.nationality}` : ""}
-            </Badge>
-          )}
-          {settings.workMode && <Badge>{settings.workMode}</Badge>}
-          {settings.availability && <Badge tone="signal">{settings.availability}</Badge>}
-        </m.div>
+        <HeroBadges settings={settings} year={year} />
 
-        <h1 className="mt-8 font-serif font-semibold leading-[0.98] tracking-[-0.035em] text-ink">
-          {/* pb + negative mb widen the reveal mask so serif descenders
-              (g, y) survive the leading-[0.98] line box. */}
-          <span className="-mb-[0.15em] block overflow-hidden pb-[0.15em] text-[clamp(3rem,8.5vw,6.5rem)]">
-            <m.span
-              className="block"
-              initial={{ y: "115%" }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.65, ease: [0.2, 0.7, 0.2, 1] }}
-            >
-              {firstName} {restName.split(" ")[0] || ""}
-            </m.span>
-          </span>
-          {restName.split(" ").length > 1 && (
-            <span className="-mb-[0.15em] block overflow-hidden pb-[0.15em] text-[clamp(2rem,5.8vw,4.5rem)] text-muted">
-              <m.span
-                className="block"
-                initial={{ y: "115%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.65, delay: 0.08, ease: [0.2, 0.7, 0.2, 1] }}
-              >
-                {restName.split(" ").slice(1).join(" ")}
-              </m.span>
-            </span>
-          )}
-        </h1>
+        <HeroName name={settings.name} />
 
         {(settings.bio || settings.body) && (
           <m.p
@@ -166,66 +240,7 @@ const Hero = () => {
           <PillLink to="/blog" variant="ghost">
             Read the writing
           </PillLink>
-          {(socials.length > 0 || customLinks.length > 0) && (
-            <span className="ml-1 flex flex-wrap gap-1.5">
-              {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.link || "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={s.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-ctl border border-line-strong text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95"
-                >
-                  <s.icon size={14} />
-                </a>
-              ))}
-              {settings.email && (
-                <ObfuscatedEmail
-                  email={settings.email}
-                  className="flex h-9 items-center rounded-ctl border border-line-strong px-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95"
-                />
-              )}
-              {customLinks.map((l) => {
-                const Icon = l.icon ? LINK_ICONS[l.icon] : undefined;
-                const base =
-                  "flex h-9 items-center rounded-ctl border border-line-strong text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95";
-                const chip = `${base} px-2.5 font-mono text-[10px] uppercase tracking-[0.1em]`;
-                if (l.url.startsWith("mailto:")) {
-                  return (
-                    <ObfuscatedEmail
-                      key={`${l.label}-${l.url}`}
-                      email={l.url.slice(7)}
-                      title={`${l.label} · click to copy`}
-                      className={chip}
-                    />
-                  );
-                }
-                return (
-                  <a
-                    key={`${l.label}-${l.url}`}
-                    href={l.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={Icon ? l.label : undefined}
-                    title={Icon ? l.label : undefined}
-                    className={Icon ? `${base} w-9 justify-center` : chip}
-                  >
-                    {Icon ? <Icon size={14} /> : l.label}
-                  </a>
-                );
-              })}
-              {hiddenLinks > 0 && (
-                <a
-                  href="#site-footer"
-                  title="All links live in the footer"
-                  className="flex h-9 items-center rounded-ctl border border-dashed border-line-strong px-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-signal hover:text-signal active:scale-95"
-                >
-                  +{hiddenLinks}
-                </a>
-              )}
-            </span>
-          )}
+          <HeroLinks settings={settings} />
         </m.div>
       </div>
     </section>
@@ -544,92 +559,109 @@ const FeaturedCardShell = ({ link, children }: { link?: string; children: React.
   );
 };
 
+// The featured card's facts row: role, year, and stats, each when present.
+const FeaturedFacts = ({ project }: { project: Project }) => (
+  <div className="mt-auto flex flex-wrap gap-2 pt-2">
+    {project.role && <Badge>Role · {project.role}</Badge>}
+    {project.year && <Badge>Since · {project.year}</Badge>}
+    {project.stats && <Badge>{project.stats}</Badge>}
+  </div>
+);
+
+// The featured card's picture, the project's image or a drafted plot in its place.
+const FeaturedArt = ({ project }: { project: Project }) => (
+  <div
+    aria-hidden={project.image ? undefined : true}
+    className="relative min-h-56 border-t border-dashed border-line bg-[color-mix(in_srgb,var(--field)_10%,var(--card))] [background-image:linear-gradient(color-mix(in_srgb,var(--line)_55%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_srgb,var(--line)_55%,transparent)_1px,transparent_1px)] [background-size:26px_26px] md:border-l md:border-t-0"
+  >
+    {project.image ? (
+      <img src={project.image} alt={project.title} className="absolute inset-0 h-full w-full object-cover" />
+    ) : (
+      <DraftingPlot title={project.title} year={project.year} />
+    )}
+  </div>
+);
+
+const FeaturedWork = ({ featured }: { featured: Project }) => {
+  const featuredDesc = featured.desc || firstLine(featured.body || featured.fullDesc, 180);
+  return (
+    <Rise>
+      {/* The whole card is one click target, the project's own link when
+          it has one and the projects record otherwise. */}
+      <FeaturedCardShell link={featured.link}>
+        <div className="flex flex-col gap-4 p-7 md:p-9">
+          <div className="flex items-start justify-between gap-4">
+            <Badge tone="signal">Featured</Badge>
+            {featured.link ? (
+              <ArrowUpRight
+                size={18}
+                className="text-muted transition-colors group-hover:text-signal"
+              />
+            ) : (
+              <ArrowRight
+                size={18}
+                className="text-muted transition-colors group-hover:text-signal"
+              />
+            )}
+          </div>
+          <h3 className="m-0 font-serif text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-[-0.02em] transition-colors duration-150 group-hover:text-signal">
+            {featured.title}
+          </h3>
+          {featuredDesc && (
+            <p className="m-0 max-w-[52ch] text-[15px] leading-relaxed text-muted">
+              {featuredDesc}
+            </p>
+          )}
+          <FeaturedFacts project={featured} />
+        </div>
+        <FeaturedArt project={featured} />
+      </FeaturedCardShell>
+    </Rise>
+  );
+};
+
+// The next few projects as ledger rows, with a count of the rest.
+const MoreWork = ({ rest, total }: { rest: Project[]; total: number }) => (
+  <Rise>
+    <div className="mb-2 border-t border-dashed border-line">
+      {rest.map((p) => (
+        <div
+          key={p.id}
+          className="group relative grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dashed border-line px-1 py-3.5 transition-colors hover:bg-field/5 sm:grid-cols-[1fr_auto_auto]"
+        >
+          <Link to="/projects" aria-label="All projects" className="absolute inset-0" />
+          <span className="truncate font-serif text-lg tracking-[-0.01em]">
+            {p.title}
+            {p.role && <span className="text-muted"> · {p.role}</span>}
+          </span>
+          {p.year && (
+            <span className="hidden font-mono text-[11px] tabular-nums text-muted sm:block">
+              {p.year}
+            </span>
+          )}
+          <RowOut link={p.link} label={p.title} />
+        </div>
+      ))}
+      {total > rest.length + 1 && (
+        <p className="mb-0 px-1 py-3 font-mono text-[11px] text-muted">
+          + {total - rest.length - 1} more in the record
+        </p>
+      )}
+    </div>
+  </Rise>
+);
+
 const WorkSection = () => {
   const { projects } = useContent();
   const featured = projects.find((p) => p.featured) ?? projects[0];
   const rest = projects.filter((p) => p !== featured).slice(0, 3);
-  const featuredDesc = featured?.desc || firstLine(featured?.body || featured?.fullDesc, 180);
 
   if (projects.length === 0) return null;
 
   return (
     <SectionBlock no="004" label="Selected work" title="Projects" href="/projects" linkText="All projects">
-      {featured && (
-        <Rise>
-          {/* The whole card is one click target: the project's own link when
-              it has one, the projects record otherwise. */}
-          <FeaturedCardShell link={featured.link}>
-            <div className="flex flex-col gap-4 p-7 md:p-9">
-              <div className="flex items-start justify-between gap-4">
-                <Badge tone="signal">Featured</Badge>
-                {featured.link ? (
-                  <ArrowUpRight
-                    size={18}
-                    className="text-muted transition-colors group-hover:text-signal"
-                  />
-                ) : (
-                  <ArrowRight
-                    size={18}
-                    className="text-muted transition-colors group-hover:text-signal"
-                  />
-                )}
-              </div>
-              <h3 className="m-0 font-serif text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-[-0.02em] transition-colors duration-150 group-hover:text-signal">
-                {featured.title}
-              </h3>
-              {featuredDesc && (
-                <p className="m-0 max-w-[52ch] text-[15px] leading-relaxed text-muted">
-                  {featuredDesc}
-                </p>
-              )}
-              <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                {featured.role && <Badge>Role · {featured.role}</Badge>}
-                {featured.year && <Badge>Since · {featured.year}</Badge>}
-                {featured.stats && <Badge>{featured.stats}</Badge>}
-              </div>
-            </div>
-            <div
-              aria-hidden={featured.image ? undefined : true}
-              className="relative min-h-56 border-t border-dashed border-line bg-[color-mix(in_srgb,var(--field)_10%,var(--card))] [background-image:linear-gradient(color-mix(in_srgb,var(--line)_55%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_srgb,var(--line)_55%,transparent)_1px,transparent_1px)] [background-size:26px_26px] md:border-l md:border-t-0"
-            >
-              {featured.image ? (
-                <img src={featured.image} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" />
-              ) : (
-                <DraftingPlot title={featured.title} year={featured.year} />
-              )}
-            </div>
-          </FeaturedCardShell>
-        </Rise>
-      )}
-      {rest.length > 0 && (
-        <Rise>
-          <div className="mb-2 border-t border-dashed border-line">
-            {rest.map((p) => (
-              <div
-                key={p.id}
-                className="group relative grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dashed border-line px-1 py-3.5 transition-colors hover:bg-field/5 sm:grid-cols-[1fr_auto_auto]"
-              >
-                <Link to="/projects" aria-label="All projects" className="absolute inset-0" />
-                <span className="truncate font-serif text-lg tracking-[-0.01em]">
-                  {p.title}
-                  {p.role && <span className="text-muted"> · {p.role}</span>}
-                </span>
-                {p.year && (
-                  <span className="hidden font-mono text-[11px] tabular-nums text-muted sm:block">
-                    {p.year}
-                  </span>
-                )}
-                <RowOut link={p.link} label={p.title} />
-              </div>
-            ))}
-            {projects.length > rest.length + 1 && (
-              <p className="mb-0 px-1 py-3 font-mono text-[11px] text-muted">
-                + {projects.length - rest.length - 1} more in the record
-              </p>
-            )}
-          </div>
-        </Rise>
-      )}
+      {featured && <FeaturedWork featured={featured} />}
+      {rest.length > 0 && <MoreWork rest={rest} total={projects.length} />}
     </SectionBlock>
   );
 };
@@ -702,17 +734,18 @@ const NotesSection = () => {
 
 /* ── 007 Elsewhere ────────────────────────────────────────────────── */
 
-const ElsewhereSection = () => {
-  const { books, media, countries, trips, interests, volunteering, organizations } = useContent();
+type ElsewhereRecord = Pick<
+  ContentContextValue,
+  "books" | "media" | "countries" | "trips" | "interests" | "volunteering" | "organizations"
+>;
+
+// The same rule as Recognition holds here. An empty record hides its cell, and
+// the whole chapter stands down when off-the-clock life has no entries yet.
+const elsewhereCells = ({ books, media, countries, trips, interests, volunteering, organizations }: ElsewhereRecord) => {
   const shelves = buildShelves(books, media);
   const libraryCount = books.length + media.length;
   const inHand = shelves.flatMap((s) => s.items).find((i) => i.stage === "current");
-  const interestChips = interests.slice(0, 8);
-  const shownCountries = countries.slice(0, 12);
-
-  // Same rule as Recognition: an empty record hides its cell, and the
-  // whole chapter stands down when off-the-clock life has no entries yet.
-  const cells = [
+  return [
     {
       label: "Library",
       visible: libraryCount > 0,
@@ -741,68 +774,93 @@ const ElsewhereSection = () => {
       linkText: "Open record",
     },
   ].filter((c) => c.visible);
+};
+
+const ElsewhereCells = ({ cells }: { cells: ReturnType<typeof elsewhereCells> }) =>
+  cells.length > 0 ? (
+    <div className={`mb-2 mt-5 grid overflow-hidden rounded-card border border-dashed border-line ${CELL_COLS[Math.min(cells.length, 3)]}`}>
+      {cells.map((c, i) => (
+        <CountCell
+          key={c.label}
+          border={i < cells.length - 1}
+          label={c.label}
+          count={c.count}
+          unit={c.unit}
+          latest={c.latest}
+          href={c.href}
+          linkText={c.linkText}
+        />
+      ))}
+    </div>
+  ) : null;
+
+// The atlas and interests strips under the cells, each a door to its page.
+const ElsewhereStrips = ({ countries, shownCountries, interests, interestChips }: {
+  countries: Country[];
+  shownCountries: Country[];
+  interests: Interest[];
+  interestChips: Interest[];
+}) =>
+  shownCountries.length > 0 || interestChips.length > 0 ? (
+    <div className="mb-2 border-t border-dashed border-line">
+      {shownCountries.length > 0 && (
+        <Link
+          to="/travel"
+          className="group flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b border-dashed border-line px-1 py-3 transition-colors hover:bg-field/5"
+        >
+          <span className="w-28 shrink-0 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted">
+            Atlas
+          </span>
+          <span className="font-mono text-xs tracking-[0.02em] text-ink">
+            {shownCountries
+              .map((c) => c.name)
+              .join(" · ")}
+            {countries.length > shownCountries.length &&
+              ` · +${countries.length - shownCountries.length}`}
+          </span>
+        </Link>
+      )}
+      {interestChips.length > 0 && (
+        <Link
+          to="/interests"
+          className="group flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-dashed border-line px-1 py-3 transition-colors hover:bg-field/5"
+        >
+          <span className="w-28 shrink-0 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted">
+            Interests
+          </span>
+          <span className="flex flex-wrap gap-1.5">
+            {interestChips.map((i) => (
+              <Badge key={i.id}>{i.title}</Badge>
+            ))}
+            {interests.length > interestChips.length && (
+              <Badge>+{interests.length - interestChips.length}</Badge>
+            )}
+          </span>
+        </Link>
+      )}
+    </div>
+  ) : null;
+
+const ElsewhereSection = () => {
+  const record = useContent();
+  const { countries, interests } = record;
+  const interestChips = interests.slice(0, 8);
+  const shownCountries = countries.slice(0, 12);
+  const cells = elsewhereCells(record);
   if (cells.length === 0 && shownCountries.length === 0 && interestChips.length === 0)
     return null;
 
   return (
     <SectionBlock no="007" label="Off the clock" title="Elsewhere">
       <Rise>
-        {cells.length > 0 && (
-          <div className={`mb-2 mt-5 grid overflow-hidden rounded-card border border-dashed border-line ${CELL_COLS[Math.min(cells.length, 3)]}`}>
-            {cells.map((c, i) => (
-              <CountCell
-                key={c.label}
-                border={i < cells.length - 1}
-                label={c.label}
-                count={c.count}
-                unit={c.unit}
-                latest={c.latest}
-                href={c.href}
-                linkText={c.linkText}
-              />
-            ))}
-          </div>
-        )}
+        <ElsewhereCells cells={cells} />
 
-        {(shownCountries.length > 0 || interestChips.length > 0) && (
-          <div className="mb-2 border-t border-dashed border-line">
-            {shownCountries.length > 0 && (
-              <Link
-                to="/travel"
-                className="group flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b border-dashed border-line px-1 py-3 transition-colors hover:bg-field/5"
-              >
-                <span className="w-28 shrink-0 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted">
-                  Atlas
-                </span>
-                <span className="font-mono text-xs tracking-[0.02em] text-ink">
-                  {shownCountries
-                    .map((c) => c.name)
-                    .join(" · ")}
-                  {countries.length > shownCountries.length &&
-                    ` · +${countries.length - shownCountries.length}`}
-                </span>
-              </Link>
-            )}
-            {interestChips.length > 0 && (
-              <Link
-                to="/interests"
-                className="group flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-dashed border-line px-1 py-3 transition-colors hover:bg-field/5"
-              >
-                <span className="w-28 shrink-0 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted">
-                  Interests
-                </span>
-                <span className="flex flex-wrap gap-1.5">
-                  {interestChips.map((i) => (
-                    <Badge key={i.id}>{i.title}</Badge>
-                  ))}
-                  {interests.length > interestChips.length && (
-                    <Badge>+{interests.length - interestChips.length}</Badge>
-                  )}
-                </span>
-              </Link>
-            )}
-          </div>
-        )}
+        <ElsewhereStrips
+          countries={countries}
+          shownCountries={shownCountries}
+          interests={interests}
+          interestChips={interestChips}
+        />
       </Rise>
     </SectionBlock>
   );

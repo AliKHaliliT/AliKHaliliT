@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useVisibleNav } from "./useVisibleNav";
-import { useContent } from "@/entities/record";
+import { useContent, type UserSettings } from "@/entities/record";
 import { searchShortcutLabel, parseProfileLinks } from "@/shared/lib";
 import { useSiteIdentity } from "@/entities/site";
+import type { NavGroup } from "@/shared/config";
 import { ObfuscatedEmail, PixelBand } from "@/shared/ui";
 
 const openSearch = () => document.dispatchEvent(new Event("open-search"));
@@ -16,6 +17,92 @@ const colHead =
 const colLink =
   "block py-[5px] text-sm text-[color-mix(in_srgb,var(--footer-ink)_82%,transparent)] transition-[color,transform] duration-150 hover:translate-x-0.5 hover:text-field";
 
+type Social = { label: string; url: string };
+
+// The fixed platforms, then the owner's own links, then email. Owner-defined
+// links join the fixed set, so any platform belongs here.
+const socialLinks = (settings: UserSettings): Social[] =>
+  [
+    { label: "GitHub", url: settings.github },
+    { label: "LinkedIn", url: settings.linkedin },
+    { label: "Twitter", url: settings.twitter },
+    { label: "Scholar", url: settings.scholar },
+    { label: "Medium", url: settings.medium },
+    { label: "ORCID", url: settings.orcid },
+    { label: "Website", url: settings.website },
+    ...parseProfileLinks(settings.links),
+    { label: "Email", url: settings.email ? `mailto:${settings.email}` : undefined },
+  ].filter((s): s is Social => Boolean(s.url));
+
+// Owner-voice lines are editable via the site identity; empty falls back to
+// the house wording so a fresh deployment still signs off properly.
+const SignOff = ({ lines, location }: { lines: string[]; location?: string }) =>
+  lines.length > 0 ? (
+    <>
+      {lines.map((line, i) =>
+        i === lines.length - 1 && lines.length > 1 ? (
+          <em key={line} className="font-normal not-italic text-field">
+            <i className="font-serif italic">{line}</i>
+          </em>
+        ) : (
+          <span key={line}>
+            {line}
+            <br />
+          </span>
+        )
+      )}
+    </>
+  ) : (
+    <>
+      Built from {location?.split(",")[0].trim() || "here"},
+      <br />
+      <em className="font-normal not-italic text-field">
+        <i className="font-serif italic">logged everywhere.</i>
+      </em>
+    </>
+  );
+
+// Email addresses (the profile's and any mailto custom link) render as
+// obfuscated copy-chips instead of scrapeable mailto anchors.
+const SocialChips = ({ socials }: { socials: Social[] }) =>
+  socials.length > 0 ? (
+    <div className="mt-5 flex flex-wrap gap-2">
+      {socials.map((s) =>
+        s.url.startsWith("mailto:") ? (
+          <ObfuscatedEmail
+            key={`${s.label}-${s.url}`}
+            email={s.url.slice(7)}
+            title={`${s.label} · click to copy`}
+            className={chipClass}
+          />
+        ) : (
+          <a
+            key={`${s.label}-${s.url}`}
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={chipClass}
+          >
+            {s.label}
+          </a>
+        )
+      )}
+    </div>
+  ) : null;
+
+// One headed group of the site map, or nothing when the group has no pages.
+const MapGroup = ({ group, heading, headClass }: { group?: NavGroup; heading: string; headClass: string }) =>
+  group ? (
+    <>
+      <h4 className={headClass}>{heading}</h4>
+      {group.items.map((i) => (
+        <Link key={i.path} to={i.path} className={colLink}>
+          {i.label}
+        </Link>
+      ))}
+    </>
+  ) : null;
+
 /**
  * The dossier back cover: sign-off, socials, and the complete site map -
  * every route on the site is reachable from here.
@@ -25,8 +112,6 @@ export const Footer = () => {
   const site = useSiteIdentity();
   const owner = settings.name || site.author;
   const year = new Date().getFullYear();
-  // Owner-voice lines are editable via the site identity; empty falls back to
-  // the house wording so a fresh deployment still signs off properly.
   const taglineLines = (site.tagline ?? "")
     .split("\n")
     .map((line) => line.trim())
@@ -39,21 +124,6 @@ export const Footer = () => {
     visibleNav.find((g) => g.label === "Life"),
   ];
 
-  const socials = [
-    { label: "GitHub", url: settings.github },
-    { label: "LinkedIn", url: settings.linkedin },
-    { label: "Twitter", url: settings.twitter },
-    { label: "Scholar", url: settings.scholar },
-    { label: "Medium", url: settings.medium },
-    { label: "ORCID", url: settings.orcid },
-    { label: "Website", url: settings.website },
-    // Owner-defined links join the fixed set: any platform belongs here.
-    // Email addresses (the profile's and any mailto custom link) render as
-    // obfuscated copy-chips instead of scrapeable mailto anchors.
-    ...parseProfileLinks(settings.links),
-    { label: "Email", url: settings.email ? `mailto:${settings.email}` : undefined },
-  ].filter((s): s is { label: string; url: string } => Boolean(s.url));
-
   return (
     <footer id="site-footer" className="relative mt-20">
       <PixelBand offset={7} />
@@ -62,89 +132,18 @@ export const Footer = () => {
           <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div>
               <p className="m-0 font-serif text-[clamp(1.8rem,3.4vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.025em]">
-                {taglineLines.length > 0 ? (
-                  taglineLines.map((line, i) =>
-                    i === taglineLines.length - 1 && taglineLines.length > 1 ? (
-                      <em key={line} className="font-normal not-italic text-field">
-                        <i className="font-serif italic">{line}</i>
-                      </em>
-                    ) : (
-                      <span key={line}>
-                        {line}
-                        <br />
-                      </span>
-                    )
-                  )
-                ) : (
-                  <>
-                    Built from {settings.location?.split(",")[0].trim() || "here"},
-                    <br />
-                    <em className="font-normal not-italic text-field">
-                      <i className="font-serif italic">logged everywhere.</i>
-                    </em>
-                  </>
-                )}
+                <SignOff lines={taglineLines} location={settings.location} />
               </p>
-              {socials.length > 0 && (
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {socials.map((s) =>
-                    s.url.startsWith("mailto:") ? (
-                      <ObfuscatedEmail
-                        key={`${s.label}-${s.url}`}
-                        email={s.url.slice(7)}
-                        title={`${s.label} · click to copy`}
-                        className={chipClass}
-                      />
-                    ) : (
-                      <a
-                        key={`${s.label}-${s.url}`}
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={chipClass}
-                      >
-                        {s.label}
-                      </a>
-                    )
-                  )}
-                </div>
-              )}
+              <SocialChips socials={socialLinks(settings)} />
             </div>
 
             <nav aria-label="Career pages">
-              {career && (
-                <>
-                  <h4 className={colHead}>Career</h4>
-                  {career.items.map((i) => (
-                    <Link key={i.path} to={i.path} className={colLink}>
-                      {i.label}
-                    </Link>
-                  ))}
-                </>
-              )}
+              <MapGroup group={career} heading="Career" headClass={colHead} />
             </nav>
 
             <nav aria-label="Writing and life pages">
-              {writing && (
-                <>
-                  <h4 className={colHead}>Writing</h4>
-                  {writing.items.map((i) => (
-                    <Link key={i.path} to={i.path} className={colLink}>
-                      {i.label}
-                    </Link>
-                  ))}
-                </>
-              )}
-              {personal && (
-                <>
-                  <h4 className={`${colHead} ${writing ? "mt-7" : ""}`}>Life</h4>
-                  {personal.items.map((i) => (
-                    <Link key={i.path} to={i.path} className={colLink}>
-                      {i.label}
-                    </Link>
-                  ))}
-                </>
-              )}
+              <MapGroup group={writing} heading="Writing" headClass={colHead} />
+              <MapGroup group={personal} heading="Life" headClass={`${colHead} ${writing ? "mt-7" : ""}`} />
             </nav>
 
             <nav aria-label="System pages">

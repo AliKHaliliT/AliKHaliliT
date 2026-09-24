@@ -6,6 +6,35 @@ import { cn, formatMonthYearRange } from "@/shared/lib";
 import { PageHeader, EmptyState, Badge, TagList, Markdown } from "@/shared/ui";
 import { usePageDescription } from "@/entities/site";
 
+// The employer, linked when it has a page, and where the work happened. The
+// link stops its click so opening it never folds the card.
+const ExperienceWhere = ({ item }: { item: ExperienceType }) => (
+  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+    <span className="font-medium text-ink">
+      {item.link ? (
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1 hover:text-signal transition-colors duration-150"
+        >
+          {item.company}
+          <ExternalLink size={11} className="opacity-60" />
+        </a>
+      ) : (
+        item.company
+      )}
+    </span>
+    {item.location && (
+      <span className="flex items-center gap-1 text-xs">
+        <MapPin size={11} />
+        {item.location}
+      </span>
+    )}
+  </div>
+);
+
 function ExperienceCard({ item }: { item: ExperienceType }) {
   const [expanded, setExpanded] = useState(true);
   // No fabricated defaults: an entry without an employmentType shows none.
@@ -49,30 +78,7 @@ function ExperienceCard({ item }: { item: ExperienceType }) {
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
-              <span className="font-medium text-ink">
-                {item.link ? (
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 hover:text-signal transition-colors duration-150"
-                  >
-                    {item.company}
-                    <ExternalLink size={11} className="opacity-60" />
-                  </a>
-                ) : (
-                  item.company
-                )}
-              </span>
-              {item.location && (
-                <span className="flex items-center gap-1 text-xs">
-                  <MapPin size={11} />
-                  {item.location}
-                </span>
-              )}
-            </div>
+            <ExperienceWhere item={item} />
 
             {item.desc && (
               <p className="mt-2 max-w-[64ch] text-sm leading-relaxed text-muted">

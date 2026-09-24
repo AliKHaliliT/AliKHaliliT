@@ -13,6 +13,54 @@ import { usePageDescription } from "@/entities/site";
 const summary = (p: Project) =>
   p.desc || firstLine(p.body || p.fullDesc, 200);
 
+// The one project that gets an image up front; clicking anywhere opens its entry.
+const FeaturedProject = ({ project, onOpen }: { project: Project; onOpen: () => void }) => (
+  <m.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    onClick={onOpen}
+    className="group grid cursor-pointer overflow-hidden rounded-card border border-line bg-card transition-all duration-200 hover:-translate-y-px hover:border-line-strong hover:shadow-lift md:grid-cols-[1.1fr_1fr]"
+  >
+    <div className="relative min-h-48 bg-surface md:min-h-full">
+      {project.image ? (
+        <SafeImage
+          src={project.image}
+          alt={project.title}
+          className="absolute inset-0 transition-transform duration-200 group-hover:scale-[1.02]"
+          fallback={<SpecimenPlate title={project.title} year={project.year} />}
+        />
+      ) : (
+        <SpecimenPlate title={project.title} year={project.year} />
+      )}
+    </div>
+    <div className="flex flex-col p-6 md:p-8">
+      <p className="mb-3 flex items-center gap-1.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-signal">
+        <Star size={11} className="fill-current" />
+        Featured
+        {project.year && (
+          <span className="text-muted">
+            {" "}
+            · {project.year}
+          </span>
+        )}
+      </p>
+      <h2 className="mb-1 font-serif text-2xl font-semibold text-ink transition-colors duration-150 group-hover:text-signal">
+        {project.title}
+      </h2>
+      <p className="mb-3 text-sm font-medium text-muted">
+        {project.role}
+      </p>
+      {summary(project) && (
+        <p className="mb-4 text-sm leading-relaxed text-muted">
+          {summary(project)}
+        </p>
+      )}
+      <TagList tags={project.tags} max={6} className="mt-auto" />
+    </div>
+  </m.div>
+);
+
 /** The project index, led by the featured work and filterable by tag. */
 export const ProjectsPage = () => {
   const { projects } = useContent();
@@ -101,50 +149,7 @@ export const ProjectsPage = () => {
           <div className="space-y-10">
             {/* Featured: the one project that gets an image up front. */}
             {featured && (
-              <m.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                onClick={() => setSelectedProject(featured)}
-                className="group grid cursor-pointer overflow-hidden rounded-card border border-line bg-card transition-all duration-200 hover:-translate-y-px hover:border-line-strong hover:shadow-lift md:grid-cols-[1.1fr_1fr]"
-              >
-                <div className="relative min-h-48 bg-surface md:min-h-full">
-                  {featured.image ? (
-                    <SafeImage
-                      src={featured.image}
-                      alt={featured.title}
-                      className="absolute inset-0 transition-transform duration-200 group-hover:scale-[1.02]"
-                      fallback={<SpecimenPlate title={featured.title} year={featured.year} />}
-                    />
-                  ) : (
-                    <SpecimenPlate title={featured.title} year={featured.year} />
-                  )}
-                </div>
-                <div className="flex flex-col p-6 md:p-8">
-                  <p className="mb-3 flex items-center gap-1.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-signal">
-                    <Star size={11} className="fill-current" />
-                    Featured
-                    {featured.year && (
-                      <span className="text-muted">
-                        {" "}
-                        · {featured.year}
-                      </span>
-                    )}
-                  </p>
-                  <h2 className="mb-1 font-serif text-2xl font-semibold text-ink transition-colors duration-150 group-hover:text-signal">
-                    {featured.title}
-                  </h2>
-                  <p className="mb-3 text-sm font-medium text-muted">
-                    {featured.role}
-                  </p>
-                  {summary(featured) && (
-                    <p className="mb-4 text-sm leading-relaxed text-muted">
-                      {summary(featured)}
-                    </p>
-                  )}
-                  <TagList tags={featured.tags} max={6} className="mt-auto" />
-                </div>
-              </m.div>
+              <FeaturedProject project={featured} onOpen={() => setSelectedProject(featured)} />
             )}
 
             {/* The record: a year-grouped ledger. Rows open the full entry;

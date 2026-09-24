@@ -158,6 +158,21 @@ export function orderingFor(key: string): OrderingPolicy | undefined {
 const defaultPolicy = (type: ContentType): OrderingPolicy =>
   DATE_FIELDS[type] ? "chronological" : "alphabetical";
 
+/** The slug a file's name gives it, before any frontmatter override. */
+const fileSlug = (path: string): string => path.split("/").pop()?.replace(".md", "") || "";
+
+/** The heading an item reads under: a title, a city, or a name, in that order. */
+const displayTitle = (attributes: Frontmatter) =>
+  attributes.title || attributes.city || attributes.name || "Untitled";
+
+/** The subtype fields, which only posts and updates carry. */
+const subtypeFields = (type: ContentType, attributes: Frontmatter) => ({
+  // Map legacy 'type' field in posts to 'postType' to avoid conflict with content type
+  postType: type === "posts" ? attributes.type : undefined,
+  // Updates default to the 'note' subtype; other types don't carry one.
+  updateType: type === "updates" ? attributes.updateType || "note" : undefined,
+});
+
 /**
  * Reads one collection out of the bundled markdown.
  *
@@ -181,13 +196,12 @@ export function loadInitialData(type: ContentType): AnyContentItem[] {
     ([path, content]) => {
       const raw = String(content);
       const { attributes, body } = frontMatter<Frontmatter>(raw);
-      const slug = path.split("/").pop()?.replace(".md", "") || "";
+      const slug = fileSlug(path);
 
       const item = {
         id: attributes.id || slug,
         slug,
-        title:
-          attributes.title || attributes.city || attributes.name || "Untitled",
+        title: displayTitle(attributes),
         // A frontmatter `slug:` (or `title:`) intentionally overrides the
         // filename-derived value: published URLs depend on it.
         ...attributes,
@@ -196,11 +210,7 @@ export function loadInitialData(type: ContentType): AnyContentItem[] {
         type,
         tags: Array.isArray(attributes.tags) ? attributes.tags : [],
         body: body || "",
-        // Map legacy 'type' field in posts to 'postType' to avoid conflict with content type
-        postType: type === "posts" ? attributes.type : undefined,
-        // Updates default to the 'note' subtype; other types don't carry one.
-        updateType:
-          type === "updates" ? attributes.updateType || "note" : undefined,
+        ...subtypeFields(type, attributes),
       };
 
       // Checked here, where the offending file can still be named.

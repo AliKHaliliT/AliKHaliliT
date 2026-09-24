@@ -1,9 +1,68 @@
 import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import { Mic2, ExternalLink, Video, Presentation } from "lucide-react";
-import { useContent, SPEAKING_TYPE_LABEL, typeLabel } from "@/entities/record";
+import { useContent, SPEAKING_TYPE_LABEL, typeLabel, type SpeakingEvent } from "@/entities/record";
 import { PageHeader, FilterBar, EmptyState, Badge, TagList, StoryLink } from "@/shared/ui";
 import { usePageDescription } from "@/entities/site";
+
+// The event and the place under a talk's title; on small screens the year
+// rides along here because the rail is hidden.
+const TalkVenue = ({ item, year }: { item: SpeakingEvent; year?: string }) =>
+  item.event || item.location ? (
+    <p className="text-sm text-muted mt-1">
+      {item.event && (
+        <span className="font-medium text-ink">
+          {item.event}
+        </span>
+      )}
+      {item.event && item.location && " · "}
+      {item.location}
+      {year && (
+        <span className="sm:hidden font-mono text-[11px] text-muted">
+          {" "}· {year}
+        </span>
+      )}
+    </p>
+  ) : null;
+
+// The talk's slides, recording, and event page, each when it has one.
+const TalkLinks = ({ item }: { item: SpeakingEvent }) => (
+  <div className="flex items-center gap-1">
+    {item.slides && (
+      <a
+        href={item.slides}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-1.5 rounded-ctl text-muted hover:text-signal transition-colors duration-150"
+        title="View slides"
+      >
+        <Presentation size={15} />
+      </a>
+    )}
+    {item.video && (
+      <a
+        href={item.video}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-1.5 rounded-ctl text-muted hover:text-signal transition-colors duration-150"
+        title="Watch recording"
+      >
+        <Video size={15} />
+      </a>
+    )}
+    {item.link && (
+      <a
+        href={item.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-1.5 rounded-ctl text-muted hover:text-signal transition-colors duration-150"
+        title="Event page"
+      >
+        <ExternalLink size={15} />
+      </a>
+    )}
+  </div>
+);
 
 /** The speaking history, filterable by kind. */
 export const SpeakingPage = () => {
@@ -82,22 +141,7 @@ export const SpeakingPage = () => {
                     <h2 className="text-[15px] font-serif font-semibold text-ink leading-snug">
                       {item.title}
                     </h2>
-                    {(item.event || item.location) && (
-                      <p className="text-sm text-muted mt-1">
-                        {item.event && (
-                          <span className="font-medium text-ink">
-                            {item.event}
-                          </span>
-                        )}
-                        {item.event && item.location && " · "}
-                        {item.location}
-                        {year && (
-                          <span className="sm:hidden font-mono text-[11px] text-muted">
-                            {" "}· {year}
-                          </span>
-                        )}
-                      </p>
-                    )}
+                    <TalkVenue item={item} year={year} />
                     {item.body && (
                       <p className="text-sm text-muted leading-relaxed mt-2 line-clamp-3">
                         {item.body}
@@ -115,41 +159,7 @@ export const SpeakingPage = () => {
                     <Badge>
                       {typeLabel(SPEAKING_TYPE_LABEL, item.speakingType)}
                     </Badge>
-                    <div className="flex items-center gap-1">
-                      {item.slides && (
-                        <a
-                          href={item.slides}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-ctl text-muted hover:text-signal transition-colors duration-150"
-                          title="View slides"
-                        >
-                          <Presentation size={15} />
-                        </a>
-                      )}
-                      {item.video && (
-                        <a
-                          href={item.video}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-ctl text-muted hover:text-signal transition-colors duration-150"
-                          title="Watch recording"
-                        >
-                          <Video size={15} />
-                        </a>
-                      )}
-                      {item.link && (
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-ctl text-muted hover:text-signal transition-colors duration-150"
-                          title="Event page"
-                        >
-                          <ExternalLink size={15} />
-                        </a>
-                      )}
-                    </div>
+                    <TalkLinks item={item} />
                   </div>
                 </m.article>
               );

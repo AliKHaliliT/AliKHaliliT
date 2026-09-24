@@ -2,9 +2,35 @@ import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { m } from "framer-motion";
 import { ArrowLeft, Sprout } from "lucide-react";
-import { useContent } from "@/entities/record";
+import { useContent, type Post } from "@/entities/record";
 import { Badge, TagList, EmptyState, Markdown } from "@/shared/ui";
 import { useSiteIdentity } from "@/entities/site";
+
+// The note's stage, title, summary, and date.
+const NoteHeader = ({ post }: { post: Post }) => {
+  const evergreen = post.postType === "Evergreen";
+  return (
+    <header className="mb-8">
+      <Badge tone={evergreen ? "canopy" : "neutral"} className="mb-4">
+        {post.postType || "Seedling"}
+      </Badge>
+
+      <h1 className="text-3xl md:text-[2.5rem] md:leading-[1.15] font-serif font-semibold text-ink mb-4 leading-tight tracking-[-0.015em]">
+        {post.title}
+      </h1>
+      {post.desc && (
+        <p className="font-serif italic text-lg text-muted mb-4 leading-relaxed">
+          {post.desc}
+        </p>
+      )}
+      {post.date && (
+        <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted">
+          {post.date}
+        </p>
+      )}
+    </header>
+  );
+};
 
 /** One garden note. */
 export const GardenPostPage = () => {
@@ -40,8 +66,6 @@ export const GardenPostPage = () => {
     );
   }
 
-  const evergreen = post.postType === "Evergreen";
-
   return (
     <div className="space-y-8 pb-12">
 
@@ -62,25 +86,7 @@ export const GardenPostPage = () => {
           Back to garden
         </Link>
 
-        <header className="mb-8">
-          <Badge tone={evergreen ? "canopy" : "neutral"} className="mb-4">
-            {post.postType || "Seedling"}
-          </Badge>
-
-          <h1 className="text-3xl md:text-[2.5rem] md:leading-[1.15] font-serif font-semibold text-ink mb-4 leading-tight tracking-[-0.015em]">
-            {post.title}
-          </h1>
-          {post.desc && (
-            <p className="font-serif italic text-lg text-muted mb-4 leading-relaxed">
-              {post.desc}
-            </p>
-          )}
-          {post.date && (
-            <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted">
-              {post.date}
-            </p>
-          )}
-        </header>
+        <NoteHeader post={post} />
 
         <div className="h-px bg-line w-full mb-10" />
 
