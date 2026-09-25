@@ -10,8 +10,7 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 ## Next
 
 - Ali supplies: real author lists for the two Iranian conference papers (currently
-  "et al."), two pending experience entries when they turn official (details local), any
-  competition wins, a rating for The Gambler, and bodies for the anime and movies
+  "et al."), any competition wins, a rating for The Gambler, and bodies for the anime and movies
   interests; verified still pending (2026-08-10). The Turkey, Toronto, and Calgary dates all landed as April
   2026, month precision by the privacy rule (2026-08-01), and the atlas plus the book
   cover got real, permissively licensed images (2026-08-02).
