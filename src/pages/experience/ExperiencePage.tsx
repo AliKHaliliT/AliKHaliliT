@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import { Briefcase, MapPin, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
-import { useContent, Experience as ExperienceType, EMPLOYMENT_TYPE_LABEL } from "@/entities/record";
+import { useContent, Experience as ExperienceType, EMPLOYMENT_TYPE_LABEL, employmentTypes } from "@/entities/record";
 import { cn, formatMonthYearRange } from "@/shared/lib";
 import { PageHeader, EmptyState, Badge, TagList, Markdown } from "@/shared/ui";
 import { usePageDescription } from "@/entities/site";
@@ -38,7 +38,7 @@ const ExperienceWhere = ({ item }: { item: ExperienceType }) => (
 function ExperienceCard({ item }: { item: ExperienceType }) {
   const [expanded, setExpanded] = useState(true);
   // No fabricated defaults: an entry without an employmentType shows none.
-  const typeKey = item.employmentType;
+  const kinds = employmentTypes(item.employmentType);
   const ongoing = !item.endDate;
 
   return (
@@ -71,11 +71,11 @@ function ExperienceCard({ item }: { item: ExperienceType }) {
               <h3 className="font-serif font-semibold text-ink text-base leading-snug">
                 {item.title}
               </h3>
-              {typeKey && (
-                <Badge tone={ongoing ? "signal" : "neutral"}>
-                  {EMPLOYMENT_TYPE_LABEL[typeKey] ?? typeKey}
+              {kinds.map((kind) => (
+                <Badge key={kind} tone={ongoing ? "signal" : "neutral"}>
+                  {EMPLOYMENT_TYPE_LABEL[kind] ?? kind}
                 </Badge>
-              )}
+              ))}
             </div>
 
             <ExperienceWhere item={item} />

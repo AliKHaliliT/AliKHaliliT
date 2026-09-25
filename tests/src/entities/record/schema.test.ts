@@ -55,6 +55,30 @@ describe("validateItems", () => {
   });
 });
 
+describe("an experience entry's employment types", () => {
+  const role = (employmentType: unknown) => [{ id: "r", type: "experience", employmentType }];
+
+  it("accepts one known kind", () => {
+    expect(validateItems(role("part-time"), "experience", SOURCE)).toHaveLength(1);
+  });
+
+  it("accepts a list of known kinds, for a part-time contract", () => {
+    expect(validateItems(role(["contract", "part-time"]), "experience", SOURCE)).toHaveLength(1);
+  });
+
+  it("rejects a kind nobody defined", () => {
+    expect(() => validateItems(role(["contract", "gig"]), "experience", SOURCE)).toThrow(/employmentType/);
+  });
+
+  it("rejects an empty list, which names no kind at all", () => {
+    expect(() => validateItems(role([]), "experience", SOURCE)).toThrow(/employmentType/);
+  });
+
+  it("leaves the field alone on a collection that does not carry it", () => {
+    expect(validateItems([{ id: "b", type: "books", employmentType: "gig" }], "books", SOURCE)).toHaveLength(1);
+  });
+});
+
 describe("validateSeedItem", () => {
   it("names the markdown file when frontmatter cannot make an item", () => {
     expect(() => validateSeedItem({ type: "books" }, "books", "src/content/books/x.md")).toThrow(

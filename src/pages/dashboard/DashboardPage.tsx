@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { ObfuscatedEmail, SkillMatrix, AmbientField, Badge, PillLink, PixelBand, SectionBlock, TagList, DraftingPlot } from "@/shared/ui";
 import { parseKeyValue, formatMonthYearRange, formatShortDate, excerpt, firstLine, parseProfileLinks, LINK_ICONS } from "@/shared/lib";
-import { useContent, buildShelves, EMPLOYMENT_TYPE_LABEL, typeLabel, type ContentContextValue, type Country, type Interest, type Project, type UserSettings } from "@/entities/record";
+import { useContent, buildShelves, EMPLOYMENT_TYPE_LABEL, employmentTypes, typeLabel, type ContentContextValue, type Country, type Interest, type Project, type UserSettings } from "@/entities/record";
 import { useSiteIdentity, siteMark } from "@/entities/site";
 
 /** "1 paper", "3 papers": CountCell units read as prose. */
@@ -407,9 +407,9 @@ const CareerSection = () => {
               <Badge tone={!item.endDate ? "signal" : "neutral"}>
                 {formatMonthYearRange(item.startDate, item.endDate)}
               </Badge>
-              {item.employmentType && (
-                <Badge>{typeLabel(EMPLOYMENT_TYPE_LABEL, item.employmentType)}</Badge>
-              )}
+              {employmentTypes(item.employmentType).map((kind) => (
+                <Badge key={kind}>{typeLabel(EMPLOYMENT_TYPE_LABEL, kind)}</Badge>
+              ))}
               {item.location && <Badge>{item.location}</Badge>}
             </div>
             <TagList tags={item.tags} max={6} className="mt-4" />

@@ -145,6 +145,9 @@ export interface Course extends BaseContent {
   link?: string;
 }
 
+/** The employment kinds an experience entry may name. */
+export type EmploymentType = "full-time" | "part-time" | "internship" | "contract" | "freelance";
+
 /** A role held somewhere, the backbone of a work history. */
 export interface Experience extends BaseContent {
   type: "experience";
@@ -153,7 +156,8 @@ export interface Experience extends BaseContent {
   location?: string;
   startDate: string;
   endDate?: string;
-  employmentType?: "full-time" | "part-time" | "internship" | "contract" | "freelance";
+  /** One kind, or several for a role that is more than one, such as a part-time contract. */
+  employmentType?: EmploymentType | EmploymentType[];
   link?: string;
   /** One-line summary for previews; the body's first line stands in when absent. */
   desc?: string;

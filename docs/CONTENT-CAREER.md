@@ -15,7 +15,7 @@ company: Acme Corp
 location: Calgary, AB
 startDate: "2022-06"
 endDate: "2024-01" # omit for current role (shows "Present")
-employmentType: full-time # full-time | part-time | internship | contract | freelance
+employmentType: full-time # full-time | part-time | internship | contract | freelance, or a list such as [contract, part-time]
 link: https://...
 desc: One-line summary shown on previews; the body's first line stands in when absent.
 tags:

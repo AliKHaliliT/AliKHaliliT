@@ -12,6 +12,7 @@
  * optional, because a guard that outgrows the model rejects valid content.
  */
 
+import { EMPLOYMENT_TYPE_LABEL } from "./labels";
 import { AnyContentItem, ContentType, UserSettings } from "./model";
 
 /** Raised when content crossing into the record does not match its shape. */
@@ -33,6 +34,20 @@ export class RecordContractError extends Error {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+// One known employment kind, or a non-empty list of them; the label map is the list of kinds.
+const knownEmployment = (value: unknown): boolean => {
+  const kinds = Array.isArray(value) ? value : [value];
+  return kinds.length > 0 && kinds.every((kind) => typeof kind === "string" && Object.hasOwn(EMPLOYMENT_TYPE_LABEL, kind));
+};
+
+// What is wrong with a field only one collection carries, or null.
+function collectionProblem(value: Record<string, unknown>, type: ContentType): string | null {
+  if (type === "experience" && value.employmentType !== undefined && !knownEmployment(value.employmentType)) {
+    return "employmentType is not a known kind or a list of them";
+  }
+  return null;
+}
+
 /**
  * Describes what is wrong with one candidate item.
  *
@@ -52,7 +67,7 @@ function itemProblem(value: unknown, type: ContentType): string | null {
   if (value.tags !== undefined && !Array.isArray(value.tags)) {
     return "tags is present but not a list";
   }
-  return null;
+  return collectionProblem(value, type);
 }
 
 /**

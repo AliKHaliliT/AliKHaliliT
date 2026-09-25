@@ -6,7 +6,7 @@ import {
   Briefcase, GraduationCap, Trophy, FolderOpen, BookOpen, FileText, Sprout, Zap,
   BookMarked, BadgeCheck, Mic2, Heart, Building2, Smile, MapPin,
 } from "lucide-react";
-import { useContent, shelfSlug } from "@/entities/record";
+import { employmentTypes, useContent, shelfSlug } from "@/entities/record";
 import { cn, excerpt, formatShortDate, useScrollLock } from "@/shared/lib";
 
 type SearchResult = {
@@ -147,7 +147,7 @@ export const SearchModal = () => {
         id: p.id, title: p.title, subtitle: p.role, type: "Projects", href: "/projects",
       }));
     experience.forEach((e) =>
-      push(scoreOf(q, { title: e.title, facts: [e.company, e.location, e.employmentType], tags: e.tags, body: e.body }), {
+      push(scoreOf(q, { title: e.title, facts: [e.company, e.location, ...employmentTypes(e.employmentType)], tags: e.tags, body: e.body }), {
         id: e.id, title: e.title, subtitle: e.company, type: "Experience", href: "/experience",
       }));
     education.forEach((e) =>

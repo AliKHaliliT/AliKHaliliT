@@ -3,6 +3,8 @@
 // the fields are open strings (any domain is valid), so unknown values get
 // a capitalized fallback via typeLabel instead of being rejected.
 
+import type { EmploymentType } from "./model";
+
 /** Label for a possibly owner-invented type value: mapped when known,
  *  Title Case of the raw value when not. */
 export const typeLabel = (
@@ -28,6 +30,16 @@ export const EMPLOYMENT_TYPE_LABEL: Record<string, string> = {
   contract: "Contract",
   freelance: "Freelance",
 };
+
+/**
+ * The employment kinds an entry names, as a list whichever form it was written in.
+ *
+ * @param value - The entry's employmentType, one kind, several, or none.
+ *
+ * @returns Each kind in the order written, empty when the entry names none.
+ */
+export const employmentTypes = (value?: EmploymentType | EmploymentType[]): EmploymentType[] =>
+  value === undefined ? [] : Array.isArray(value) ? value : [value];
 
 /** Display labels for the common award kinds. */
 export const AWARD_TYPE_LABEL: Record<string, string> = {
