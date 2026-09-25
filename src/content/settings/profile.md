@@ -22,12 +22,11 @@ languages: |
   Turkish: Native or bilingual
   Farsi: Native
 skills: |
-  Software Engineering: Python, C/C++, TypeScript & JavaScript, FastAPI, React, React Native
+  Software Engineering: Python, C/C++, TypeScript & JavaScript, FastAPI, React, React Native, Software Architecture
   Core AI: Machine Learning, Deep Learning, PyTorch, TensorFlow, Keras
   Computer Vision: Image Processing, Object Detection, Segmentation, Pose Estimation, Video Action Recognition
   LLMs & Agents: RAG, MCP, Multi-Agent Orchestration, Prompt & Context Engineering, Pydantic AI
   Data & Knowledge: Time-Series Analysis, Feature Engineering, Knowledge Graphs
-  Geospatial: Geospatial AI, Remote Sensing, OGC Standards
   Cloud & Infrastructure: AWS, Docker, CI/CD, Infrastructure as Code
   Embedded & Robotics: IoT, Microcontrollers, Edge Computing, ROS2
   CAD & Simulation: Ansys, SOLIDWORKS
