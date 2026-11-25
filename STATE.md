@@ -9,7 +9,6 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Next
 
-- Ali supplies a rating for The Gambler (2026-11-25).
 - Ali supplies the anime, films, and series lists; each shelf lands with its list, and the
   anime and movies interests then point to their shelves (2026-11-25).
 - Ali decides whether the co-founder experience entry lands; its months are known
