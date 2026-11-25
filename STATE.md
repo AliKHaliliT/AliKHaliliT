@@ -9,8 +9,7 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Next
 
-- Ali supplies the anime, films, and series lists; each shelf lands with its list, and the
-  anime and movies interests then point to their shelves (2026-11-25).
+- Nothing queued.
 
 ## Deferred
 
