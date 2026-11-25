@@ -11,7 +11,6 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 - Ali supplies a rating for The Gambler and bodies for the anime and movies interests
   (2026-11-25).
-- Owner-voice drafts: site description and tagline (2026-11-25).
 - Ali supplies the EXIST grant's award month and the venture's co-founder start and end
   months (the venture's public name is optional; details local); the award entry then
   gets its date and a co-founder experience entry can land (2026-08-31).

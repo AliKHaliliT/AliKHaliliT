@@ -1,8 +1,9 @@
 {
   "name": "VITA",
   "title": "Ali Khalili · VITA",
-  "description": "The portfolio, digital garden, and field notes of Ali Khalili: projects, publications, travel, library, and writing in one personal operating system.",
+  "description": "Ali Khalili, AI/ML engineer and PhD researcher at the University of Calgary. Projects, publications, writing, and the rest of the record in one place.",
   "author": "Ali Khalili Tazehkandgheshlagh",
-  "url": "",
-  "mark": "VITA"
+  "url": "https://alikhalilit.github.io/AliKHaliliT",
+  "mark": "VITA",
+  "tagline": "Artificer, scholar,\nkeeper of records."
 }
