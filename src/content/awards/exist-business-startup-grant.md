@@ -1,6 +1,7 @@
 ---
 title: EXIST Business Start-up Grant (Gründerstipendium)
-issuer: German Federal Ministry for Economic Affairs and Climate Action (BMWK)
+issuer: German Federal Ministry for Economic Affairs and Energy (BMWE)
+date: "2026-01"
 awardType: grant
 link: https://www.exist.de
 ---
