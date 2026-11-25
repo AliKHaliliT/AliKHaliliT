@@ -6,4 +6,4 @@ awardType: grant
 link: https://www.exist.de
 ---
 
-Awarded to the three-founder team of a pre-incorporation venture I co-founded, with two of the founders based in Germany. I worked on the venture for more than a year and exited it when my Ph.D. brought me to Canada.
+Germany's federal grant for high-tech start-ups, awarded after an expert review of the idea and the people behind it.
