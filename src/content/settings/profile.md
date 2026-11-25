@@ -1,6 +1,6 @@
 ---
 name: Ali Khalili Tazehkandgheshlagh
-role: AI Engineer
+role: AI/ML Engineer
 location: Calgary, AB
 avatar: https://avatars.githubusercontent.com/u/30647838?v=4
 focus: PhD research · UbiSensing & AI Lab
