@@ -18,8 +18,7 @@ work. Format and rules: see [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Deferred
 
-- The `/skills` setup notes stay empty until wanted; hardware is deliberately excluded
-  (2026-11-25).
+- Nothing deferred.
 
 ## Blocked
 
