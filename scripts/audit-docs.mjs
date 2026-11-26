@@ -164,6 +164,10 @@ const OWNED_CITATION = /(?:'s |inherited |own )(?:decision|record)s? (0\d{3})\b/
 // The audits are skipped as quoting ground, because they carry the banned-word list the vocabulary advisory reads,
 // and so is the lint configuration, which names the markers it refuses.
 const CODESPELL_SKIP = ".git,node_modules,.hypothesis,__pycache__,dist,package-lock.json,*.svg,*.png,*.ico,*.woff,*.woff2,*.map,decisions,claims,reviews,inherited,mockServiceWorker.js,audit_docs.py,audit-docs.mjs,audit_inquiry.py";
+// The spelling pass hands the tool the files git tracks by name, because a walk of the folder also reads
+// whatever lies beside the tree, a saved log or a retained output, however large. One call takes paths up to
+// this many characters, which stays under the shortest command line a system the family runs on allows.
+const SPELLING_BATCH = 7000;
 // The project's own terms, one word per line, beside the check and never recopied at re-alignment.
 const IGNORE_FILE = ".codespellignore";
 // The dictionaries codespell reads: its two defaults and the British spellings read as misspellings of the
@@ -253,10 +257,18 @@ function looksLikePath(token) {
 /**
  * Whether git ignores the path a token names, asked with its trailing slash kept so a directory pattern
  * answers. An ignored path is by declaration not part of the tree, so a living document naming one claims
- * nothing the tree can be held to, whatever happens to exist on the machine the audit runs on.
+ * nothing the tree can be held to, whatever happens to exist on the machine the audit runs on. A path git
+ * refuses to judge, one beyond a symbolic link, is judged by the nearest ancestor git answers for, because
+ * the ignore file that covers the link covers everything reached through it.
  */
 function ignored(token) {
-  return spawnSync("git", ["check-ignore", "-q", "--", token.replace(/^\.?\//, "")], { cwd: ROOT }).status === 0;
+  let rel = token.replace(/^\.?\//, "");
+  while (rel) {
+    const status = spawnSync("git", ["check-ignore", "-q", "--", rel], { cwd: ROOT }).status;
+    if (status === 0 || status === 1) return status === 0;
+    rel = rel.replace(/\/+$/, "").split("/").slice(0, -1).join("/");
+  }
+  return false;
 }
 
 function lineOf(text, index) {
@@ -340,6 +352,10 @@ function* walkAll(dir) {
 const problems = [];
 const advice = [];
 const today = new Date();
+// Whole days from a date to today, counted by the calendar and not by the clock, because a machine that keeps
+// daylight saving has a day of twenty-three hours and one of twenty-five each year, and a count of elapsed
+// hours turns a day an hour late or early there.
+const daysSince = (date) => (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())) / 86_400_000;
 const basenames = new Set();
 for (const file of walkAll(ROOT)) basenames.add(file.split(/[\\/]/).pop());
 
@@ -411,7 +427,7 @@ function isBefore(commit, other) {
 function standingDays(raw, binding) {
   const born = firstCommit(raw.replace(STATE_TEXT, "").trim(), "STATE.md");
   const start = born === null ? null : commitDate(isBefore(born, binding) ? binding : born);
-  return start === null ? 0 : Math.floor((today - start) / 86_400_000);
+  return start === null ? 0 : daysSince(start);
 }
 
 /** Each section's lines with their numbers, every line above the sections but the title reported where it stands. */
@@ -465,7 +481,7 @@ function checkStateEntries(held) {
     for (const [lineNo, raw] of lines) {
       const stamp = raw.match(STATE_TEXT);
       if (!stamp) continue;
-      const age = Math.floor((today - new Date(`${stamp[1]}T00:00:00`)) / 86_400_000);
+      const age = daysSince(new Date(`${stamp[1]}T00:00:00`));
       if (age > horizon) {
         problems.push(
           `STATE.md:${lineNo}: entry last verified ${stamp[1]}, ${age} days ago against the ` +
@@ -613,7 +629,7 @@ function checkUpstream() {
     if (hit) {
       problems.push(`${label}: carries ${JSON.stringify(hit[0])}, an address, a URL, an email or an absolute path; an entry names none, because it is written to leave the repository`);
     }
-    const age = Math.floor((today - new Date(`${entry[1]}T00:00:00`)) / 86_400_000);
+    const age = daysSince(new Date(`${entry[1]}T00:00:00`));
     if (age > HORIZON_DAYS) {
       problems.push(
         `${label}: past the ${HORIZON_DAYS}-day horizon; re-verify against the template and re-date, ` +
@@ -995,22 +1011,47 @@ function codespellPresent() {
   return spawnSync("codespell", ["--version"], { encoding: "utf-8" }).status === 0;
 }
 
-// The path a codespell line names, spelled as git lists it, the leading dot dropped and the separators forward.
-function spelledPath(line) {
-  return line.split(":", 1)[0].trim().replace(/\\/g, "/").replace(/^\.\//, "");
+// Whether a name matches an entry of the skip list, a bare name or a pattern whose star stands for any run of characters.
+function skipped(name) {
+  return CODESPELL_SKIP.split(",").some((glob) => new RegExp(`^${glob.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*")}$`).test(name));
 }
 
-// Misspellings in the files git tracks, advised where codespell is installed; a finding on a path git does not
-// track is dropped, because the law binds a tracked byte. The pass spawns a process, so it runs once per audit
-// command, and the selftest proves it by the audit's own output.
+// The tracked paths the spelling pass reads, in git's order: a file that stands in the tree, no part of its path
+// hidden or named in the skip list, since the tool applies both rules on a walk and neither to a file it is handed.
+function spellingPaths(tracked) {
+  return [...tracked].filter((rel) => statSync(join(ROOT, rel), { throwIfNoEntry: false })?.isFile() && !rel.split("/").some((part) => part.startsWith(".") || skipped(part)));
+}
+
+// The paths in their order, cut into runs whose names together stay within the limit, a path longer than the
+// limit standing alone.
+function spellingBatches(paths, limit) {
+  const batches = [];
+  let size = 0;
+  for (const rel of paths) {
+    if (batches.length === 0 || size + rel.length + 1 > limit) {
+      batches.push([]);
+      size = 0;
+    }
+    batches[batches.length - 1].push(rel);
+    size += rel.length + 1;
+  }
+  return batches;
+}
+
+// Misspellings in the files git tracks and no other, advised where codespell is installed; the tool is handed
+// those files by name, a bounded run at a time, so nothing beside the tree is read. The pass spawns a process for
+// each run of paths, so it runs once per audit command, and the selftest proves it by the audit's own output
+// and by what a stand-in for the tool is handed.
 function adviseSpelling() {
   if (!codespellPresent()) return;
   const ownTerms = existsSync(join(ROOT, IGNORE_FILE)) ? ["--ignore-words", IGNORE_FILE] : [];
-  const done = spawnSync("codespell", ["--builtin", CODESPELL_BUILTIN, "--skip", CODESPELL_SKIP, ...ownTerms, "."], { cwd: ROOT, encoding: "utf-8" });
   const tracked = new Set(ownFiles());
   for (const rel of declaredGenerated()) tracked.delete(rel);
-  for (const line of `${done.stdout}`.split("\n")) {
-    if (line.trim() && tracked.has(spelledPath(line))) advice.push(`${line.trim()}; correct it, or name a real term of the domain in ${IGNORE_FILE}, one word per line`);
+  for (const batch of spellingBatches(spellingPaths(tracked), SPELLING_BATCH)) {
+    const done = spawnSync("codespell", ["--builtin", CODESPELL_BUILTIN, ...ownTerms, ...batch], { cwd: ROOT, encoding: "utf-8" });
+    for (const line of `${done.stdout}`.split("\n")) {
+      if (line.trim()) advice.push(`${line.trim()}; correct it, or name a real term of the domain in ${IGNORE_FILE}, one word per line`);
+    }
   }
 }
 // Every project kept inside this one carries a docs audit of its own, so a file the prose checks leave alone is one another audit reads.

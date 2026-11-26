@@ -6,6 +6,7 @@ What must stay true about this site, one row per claim, each bound to the holder
 | --- | --- | --- |
 | Imports point downward only, from app through pages, features, and entities to shared, never back up. | `eslint.config.js` "Imports point downward only" | impossible |
 | A slice is entered only through its `index.ts`. | `eslint.config.js` "Enter a slice through its index.ts" | impossible |
+| Slices of one layer never import each other through the alias. | `eslint.config.js` "Slices of one layer never import each other" | impossible |
 | The environment is read only through `shared/config`. | `eslint.config.js` "Read the environment through shared/config" | impossible |
 | Nothing outside `shared/config` calls `fetch`. | `eslint.config.js` "HTTP lives in its documented home" | impossible |
 | Nothing in product code prints to the console. | `eslint.config.js` "no-console" | impossible |

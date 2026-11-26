@@ -73,8 +73,8 @@ jobs:
           echo "78821ed4b7dee3b0f3fb57be168a3464491b0ae5a7a7ea4563e2aa29f7e92c93  docs/LIVING.md" | sha256sum -c -
           echo "c584e14aa409e363598529b2124c8eb3316b3d41ac44c8b2f30822bfef1fb0d3  docs/RECORDS.md" | sha256sum -c -
           echo "5ac73538a91eb3c5659392ff3d9ee4dbdd23c078a49045196516c07363af15bc  docs/PROSE.md" | sha256sum -c -
-          echo "bcaffa8a8b53f178598f4a7f66c90b4dfed2e5e389b26acc19c0c717a357ce8f  scripts/audit-docs.mjs" | sha256sum -c -
-          echo "15faa090d15740d0747ab2071649461a3180a6a748e0bb408a2417709d43d157  scripts/audit-docs-selftest.mjs" | sha256sum -c -
+          echo "57f9b2ec6b1659d931d617063ce8964514c2e4c190d211739ba559fd8e2a11c1  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "11b536064f5ace1e20a8eebdf1c91296aa3db7acab6b25b2a4464c49c523cea3  scripts/audit-docs-selftest.mjs" | sha256sum -c -
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
