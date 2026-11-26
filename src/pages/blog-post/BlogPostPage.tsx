@@ -8,7 +8,7 @@ import { formatFullDate, hostLabel } from "@/shared/lib";
 import { useSiteIdentity } from "@/entities/site";
 
 // The posts either side of this one in the list's order, where they exist.
-const neighbours = (blog: BlogPost[], post: BlogPost | undefined) => {
+const neighbors = (blog: BlogPost[], post: BlogPost | undefined) => {
   const index = post ? blog.findIndex((p) => p.id === post.id) : -1;
   return {
     newer: index > 0 ? blog[index - 1] : null,
@@ -158,7 +158,7 @@ export const BlogPostPage = () => {
     if (post?.title) document.title = `${post.title} · ${site.title}`;
   }, [post?.title, site]);
 
-  const { newer, older } = neighbours(blog, post);
+  const { newer, older } = neighbors(blog, post);
 
   if (!post) return <PostNotFound />;
 

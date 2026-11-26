@@ -12,6 +12,14 @@ What must stay true about this site, one row per claim, each bound to the holder
 | Colors come only from the token utilities, and no raw palette class ships. | `scripts/audit-docs.mjs` "raw palette class" | impossible |
 | No test opens a connection to a host beyond this machine. | `tests/setup.ts` "refused a connection" | impossible |
 | Every content folder loads as an array, and each populated one carries its items. | `tests/src/entities/record/seed.test.ts` "returns an array for every content folder, items for the populated ones" | listed cases |
+| No comment in the tree defers work with a marker. | `eslint.config.js` "no-warning-comments" | impossible |
+| No tracked text file carries an invisible character, a generated file apart. | `scripts/audit-docs.mjs` "checkInvisible" | impossible |
+| A word spelled in the other variety in living prose is named on every run where codespell is installed. | `scripts/audit-docs.mjs` "en-GB_to_en-US" | advised |
+| No suite replaces a collaborator by patching a module's internals. | `scripts/audit-docs.mjs` "module mocking is banned" | impossible |
+| An upstream entry carries no address, URL, email or absolute path. | `scripts/audit-docs.mjs` "checkUpstream" | impossible |
+| Every install script the manifest approves belongs to a package the lock installs, at the version the lock installs. | `scripts/audit-docs.mjs` "checkApprovedScripts" | impossible |
+| An edition below the snapshot holds no path the workshop withholds, and its silent version names nothing of the style. | `scripts/cut-edition.mjs` "proveSilent" | listed cases |
+| A file stripped for an edition differs from its source in comments and docstrings alone. | `scripts/cut-edition.mjs` "proveStrips" | listed cases |
 | A committed markdown file whose frontmatter cannot make an item is refused with the file named. | `tests/src/entities/record/schema.test.ts` "names the markdown file when frontmatter cannot make an item" | listed cases |
 | A saved copy that breaks the record's contract never reaches a page, and its key is named. | `tests/src/entities/record/store.test.ts` "falls back and names the key when the stored shape breaks the contract" | listed cases |
 | An experience entry names only known employment kinds, one or a list of them. | `tests/src/entities/record/schema.test.ts` "rejects a kind nobody defined" | listed cases |

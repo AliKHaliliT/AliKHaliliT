@@ -18,8 +18,9 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const AUDIT = join(ROOT, "scripts", "audit-docs.mjs");
-const BUDGET_LINES = 150;
+const BUDGET_WORDS = 2000;
 const HORIZON_DAYS = 90;
+const NOW_HORIZON_DAYS = 30;
 const NOW_CAP = 5;
 const NAME_CAP = 72;
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -144,7 +145,7 @@ function proveFilePlants() {
     "an untracked plant",
     [
       ["docs/lowercase-planted.md", "# Planted\n"],
-      ["docs/PLANTED.md", `# Planted\n${"line\n".repeat(150)}`],
+      ["docs/PLANTED.md", `# Planted\n\n${"word ".repeat(2001)}\n`],
       ["docs/decisions/bad-name-planted.md", "# Bad\n"],
       ["docs/decisions/0093-planted-with-a-title-so-long-that-it-runs-past-the-seventy-two-character-cap.md", `# 0093. Planted\n\n${record}`],
       [`docs/decisions/${twin}-planted-twin-a.md`, `# ${twin}. Planted twin\n\n${record}`],
@@ -153,7 +154,7 @@ function proveFilePlants() {
     [
       "docs/lowercase-planted.md: organic documents are UPPERCASE markdown",
       "docs/PLANTED.md: not registered in the AGENTS.md index",
-      `docs/PLANTED.md: 152 lines against the ${BUDGET_LINES}-line budget`,
+      `docs/PLANTED.md: 2003 words of prose against the ${BUDGET_WORDS}-word budget`,
       "docs/decisions/bad-name-planted.md: records are named NNNN-short-kebab-title.md",
       `the cap is ${NAME_CAP}`,
       `share the number ${twin}`,
@@ -171,6 +172,9 @@ function proveTrackedPlants() {
       ["docs/planted.png", "not a document\n"],
       ["docs/planted-folder/GUIDE.md", "# Guide\n"],
       ["docs/PLANTED-DASHES.md", "\u2014 \u2014 \u2014\n"],
+      ["docs/PLANTED-INVISIBLE.md", "a\u200bb\n"],
+      ["docs/PLANTED-CITED.md", "# Planted\n\nSee decision 0001 in passing.\n"],
+      ["tests/planted-seam.ts", 'vi.mock("@/shared/api")\n'],
     ],
     [
       "stray-planted/: exists in the tree but has no room",
@@ -180,9 +184,107 @@ function proveTrackedPlants() {
       "docs/planted-folder/ has no row in the AGENTS.md index",
       "a file below a docs/ subfolder is a dated record named YYYY-MM-DD-short-kebab-title.md",
       "docs/PLANTED-DASHES.md carries 3 em dashes; the budget is 2 per file",
+      "docs/PLANTED-INVISIBLE.md:1: carries U+200B, an invisible character",
+      "docs/PLANTED-CITED.md:3: cites record 0001 by bare number",
+      "tests/planted-seam.ts:1: patches a module with 'vi.mock('; module mocking is banned",
     ],
     true,
   );
+}
+
+/** A tracked file over the budget, carrying an invisible character and a banned word, that the attributes file declares linguist-generated raises nothing and is advised nothing, and the file and the declaration both leave. */
+function proveOwnedCitationLine() {
+  const rel = "docs/PLANTED-OWNED.md";
+  plant(rel, "# Planted\n\nThe wire form is \"decision 0001\", the style's decision 0001, Planted.\n");
+  git("add", "-N", "--", rel);
+  try {
+    const noise = audit().filter((line) => line.includes(rel) && line.includes("by bare number"));
+    if (noise.length > 0) wrong(`an owned citation on the same line was reported as bare: ${noise.join("; ")}`);
+  } finally {
+    git("rm", "--cached", "-q", "--", rel);
+    unplant(rel);
+  }
+}
+
+/** A tracked line carrying a bare record number beside the same number with its owner raises nothing, so a form kept byte for byte is answered by the comment beside it. */
+function proveDeclaredDashes() {
+  const attributes = join(ROOT, ".gitattributes");
+  const original = existsSync(attributes) ? readFileSync(attributes) : null;
+  const rel = "docs/PLANTED-DECLARED.md";
+  writeFileSync(attributes, Buffer.concat([original ?? Buffer.alloc(0), Buffer.from(`\n${rel} linguist-generated\n`)]));
+  plant(rel, "\u2014 \u2014 \u2014 \u200b\nWe delve into it here.\n");
+  git("add", "-N", "--", rel);
+  try {
+    const noise = audit().filter((line) => line.includes(rel) && (line.includes("carries") || line.includes("inflated vocabulary")));
+    if (noise.length > 0) wrong(`a declared file over the budget was counted or advised: ${noise.join("; ")}`);
+  } finally {
+    git("rm", "--cached", "-q", "--", rel);
+    unplant(rel);
+    if (original === null) unlinkSync(attributes);
+    else writeFileSync(attributes, original);
+  }
+}
+
+// What the proof plants for a run: a project's guide, an audit of its own, a file carrying every defect the
+// prose checks hold, one to a line after the first, a project of its own keeping, which is its audit's to
+// hold and never this one's, and a file beside the folder whose name opens as the folder's does.
+const NESTED_PLANT = "nested-planted";
+const NESTED_PARTS = {
+  guide: [`${NESTED_PLANT}/AGENTS.md`, "# Planted guide\n"],
+  audit: [`${NESTED_PLANT}/scripts/audit-docs.mjs`, "// Planted\n"],
+  notes: [`${NESTED_PLANT}/notes.md`, "\u2014 \u2014 \u2014 \u200b\nSee decision 0001 in passing.\nWe delve into it here.\nThe reciever waits here.\n"], // codespell:ignore reciever
+  inner: [`${NESTED_PLANT}/inner/AGENTS.md`, "# Planted inner guide\n"],
+  beside: [`${NESTED_PLANT}.md`, "\u2014 \u2014 \u2014\n"],
+};
+
+/** The audit's lines that name the plant, with the named parts planted and tracked for one run. */
+function plantedNest(parts) {
+  const plants = parts.map((part) => NESTED_PARTS[part]);
+  for (const [rel, content] of plants) {
+    plant(rel, content);
+    git("add", "-N", "--", rel);
+  }
+  try {
+    return audit().filter((line) => line.includes(NESTED_PLANT));
+  } finally {
+    for (const [rel] of plants) {
+      git("rm", "--cached", "-q", "--", rel);
+      unplant(rel);
+    }
+  }
+}
+
+/** Under a guide and an audit of its own a planted project's file raises nothing here, and neither does a project it keeps, while its folder still needs a room and a file beside it is still read; a guide with no audit beside it fails; and the same file under no guide is read. */
+function proveNestedProject() {
+  let lines = plantedNest(["guide", "audit", "notes", "inner", "beside"]);
+  const noise = lines.filter((line) => line.includes("notes.md") || line.includes("/inner/") || line.includes("carries a guide of its own"));
+  if (noise.length > 0) wrong(`a project kept inside this one was read past its folder or asked for the audit it carries: ${noise.join("; ")}`);
+  expect(lines, `${NESTED_PLANT}/: exists in the tree but has no room`, "the folder of a project kept inside this one");
+  expect(lines, `${NESTED_PLANT}.md carries 3 em dashes`, "a file beside a project kept inside this one");
+  expect(plantedNest(["guide", "notes"]), `${NESTED_PLANT}/: carries a guide of its own and no docs audit`, "a guide with no audit beside it");
+  lines = plantedNest(["notes"]);
+  for (const needle of ["notes.md carries 3 em dashes", "notes.md:1: carries U+200B", "notes.md:2: cites record 0001 by bare number", "notes.md:3: inflated vocabulary"]) expect(lines, needle, "a file under no guide");
+  if (spawnSync("codespell", ["--version"], { encoding: "utf-8" }).status !== 0) console.log("kept project spelling case skipped: codespell is not on PATH");
+  else expect(lines, "reciever ==> receiver", "a file under no guide"); // codespell:ignore reciever
+}
+
+/** A guide the editions lay over a cut makes no project of the overlay folder, so it is read as this project's own file and no audit is asked of it. */
+function proveOverlayGuide() {
+  const rel = "edition/overlay/AGENTS.md";
+  if (existsSync(join(ROOT, rel))) {
+    console.log("overlay guide plant skipped: this project's editions already lay a guide");
+    return;
+  }
+  plant(rel, "# A public guide\n\n\u2014 \u2014 \u2014\n");
+  git("add", "-N", "--", rel);
+  try {
+    const lines = audit();
+    expect(lines, `${rel} carries 3 em dashes`, "a guide in the overlay folder");
+    if (lines.some((line) => line.includes("carries a guide of its own"))) wrong("the overlay folder was read as a project kept inside this one");
+  } finally {
+    git("rm", "--cached", "-q", "--", rel);
+    unplant(rel);
+  }
 }
 
 /** A record over the budget born in this working tree is judged; one born before the rule arrived is left to history, so the rehearsal proves that half. */
@@ -200,7 +302,7 @@ function proveAppendedPlants() {
     [
       ["AGENTS.md", "\nNames `docs/GHOST-PLANTED.md` and `.github/workflows/GHOST-PLANTED.yml` and links [nowhere](docs/NOWHERE-PLANTED.md) in passing.\n"],
       ["docs/ARCHITECTURE.md", "\n```text\nplanted/\n└── ghost_planted_file.ts\n```\n"],
-      ["docs/BASELINE.md", "line\n".repeat(160)],
+      ["docs/BASELINE.md", `${"word ".repeat(2001)}\n`],
       ["README.md", `\nRequires Node ${claimed}+ here.\n`],
     ],
     [
@@ -209,7 +311,7 @@ function proveAppendedPlants() {
       "links to docs/NOWHERE-PLANTED.md, which does not resolve",
       "the tree names ghost_planted_file.ts, which exists nowhere in this repository",
       `docs/BASELINE.md: `,
-      `lines against the ${BUDGET_LINES}-line budget; split by fission`,
+      `words of prose against the ${BUDGET_WORDS}-word budget; split by fission`,
       ...(engines ? [`claims Node ${claimed}+ while engines declares ${engines}`] : []),
     ],
   );
@@ -275,13 +377,100 @@ function proveStatePlants() {
   console.log("queue age firing case skipped: no queued entry in this tree has two horizons of history");
 }
 
+/** A legal state file, every section holding its empty line, that the point plants are cut from. */
+const STATE_CANON = "# Project State\n\n## Now\n\n- Nothing in flight.\n\n## Next\n\n- Nothing queued.\n\n## Deferred\n\n- Nothing deferred.\n\n## Blocked\n\n- Nothing blocked.\n";
+
+/** A calendar date some days back on the local clock, the one the audit reads a stamp against. */
+function daysAgo(days) {
+  const day = new Date();
+  day.setDate(day.getDate() - days);
+  return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+}
+
+/** The finding a planted line raises, named by the number of the line in the planted file. */
+function atLine(text, line, finding) {
+  return `STATE.md:${text.split("\n").indexOf(line) + 1}: ${finding}`;
+}
+
+/**
+ * Each point of the STATE schema fires on a file cut from a legal one, and the legal cuts raise nothing.
+ *
+ * The plants share a run only where each raises a finding that no other plant in its run can raise, by its message
+ * or by the line it names, so a break of one point leaves its own plant's finding missing whatever the others print.
+ * The horizons are planted away from their edges, because this proof and the audit read two clocks.
+ */
+function proveStatePoints() {
+  const path = join(ROOT, "STATE.md");
+  if (!existsSync(path)) {
+    console.log("STATE point plants skipped: no STATE.md in this tree");
+    return;
+  }
+  const today = `(${daysAgo(0)})`;
+  const five = Array.from({ length: NOW_CAP }, (_, n) => `- Planted in-flight work ${n} ${today}\n`).join("");
+  const undated = "entry does not end with its last-verified date";
+  const scattered = STATE_CANON.replace("## Now\n", "Planted narration of finished work.\n# A planted second title\n\n## Now\n")
+    .replace("- Nothing in flight.\n", `A planted paragraph inside a section.\n- Planted stalled work (${daysAgo(60)})\n`)
+    .replace("- Nothing queued.\n", `- Planted undated work\n- Planted work ${today} with words after its date\n- Nothing from the planted source counts yet\n`)
+    .replace("- Nothing deferred.\n", `- Nothing queued.\n- Nothing deferred.\n- Planted deferred work ${today}\n`)
+    .replace("- Nothing blocked.\n", `\n## Done\n\n- Planted finished work ${today}\n`);
+  proveReplaced("a scattered STATE plant", "STATE.md", scattered, [
+    atLine(scattered, "Planted narration of finished work.", "stands above the sections"),
+    atLine(scattered, "# A planted second title", "stands above the sections"),
+    atLine(scattered, "A planted paragraph inside a section.", "is not an entry"),
+    `against the ${NOW_HORIZON_DAYS}-day horizon of Now`,
+    atLine(scattered, "- Planted undated work", undated),
+    atLine(scattered, `- Planted work ${today} with words after its date`, undated),
+    atLine(scattered, "- Nothing from the planted source counts yet", undated),
+    atLine(scattered, "- Nothing queued.", undated),
+    atLine(scattered, "- Nothing deferred.", "says - Nothing deferred. beside other lines in Deferred"),
+    "STATE.md: Blocked holds neither an entry nor its empty line",
+    "not the four the schema fixes",
+  ]);
+  const ordered = STATE_CANON.replace("## Next", "## Swapped").replace("## Deferred", "## Next").replace("## Swapped", "## Deferred")
+    .replace("- Nothing in flight.\n", `${five}- Nothing else starts before the planted source arrives ${today}\n`);
+  proveReplaced("an ordered STATE plant", "STATE.md", ordered, ["not the four the schema fixes", `entries against the cap of ${NOW_CAP}`]);
+  const legal = STATE_CANON.replace("- Nothing in flight.\n", five)
+    .replace("- Nothing queued.\n", `- Planted queued work (${daysAgo(60)})\n- Planted work first seen (2025-01-01), verified again ${today}\n`)
+    .replace(/\n/g, "\r\n");
+  const original = readFileSync(path);
+  writeFileSync(path, legal);
+  try {
+    const raised = findings().filter((line) => line.startsWith("STATE.md"));
+    if (raised.length > 0) wrong(`a legal STATE file raised ${JSON.stringify(raised.slice(0, 2))}`);
+  } finally {
+    writeFileSync(path, original);
+  }
+}
+
 const UPSTREAM_HEAD = "# Upstream\n\nAligned to Planted at 0123456789ab.\n\nEvery entry is a lead, not a verdict.\n\n## Open\n\n";
 const UPSTREAM_PARTS = "**What it is.** x.\n\n**How the work surfaced it.** x.\n\n**Why it is believed better.** x.\n\n**Records checked.** None.\n";
 
+/** The legal plants need their row in the index table, borrowed and given back; a project that carries the file already has one. */
+function withUpstreamRow(prove) {
+  const agents = join(ROOT, "AGENTS.md");
+  const original = readFileSync(agents);
+  const text = original.toString("utf-8");
+  const anchor = "| [docs/decisions/](docs/decisions/)";
+  if (!text.includes("(docs/UPSTREAM.md)")) {
+    writeFileSync(agents, text.replace(anchor, `| [docs/UPSTREAM.md](docs/UPSTREAM.md) | Planted: what this project has for its style. |\n${anchor}`));
+  }
+  try {
+    prove();
+  } finally {
+    writeFileSync(agents, original);
+  }
+}
+
 function proveUpstreamPlants() {
   const entry = `### ${TODAY} Planted entry\n\nKind: defect\nPin: 0123456789ab\n\n`;
-  proveReplaced("a legal UPSTREAM.md", "docs/UPSTREAM.md", `${UPSTREAM_HEAD}Nothing open.\n`, [], true);
-  proveReplaced("a legal UPSTREAM.md entry", "docs/UPSTREAM.md", UPSTREAM_HEAD + entry + UPSTREAM_PARTS, [], true);
+  withUpstreamRow(() => {
+    proveReplaced("a legal UPSTREAM.md", "docs/UPSTREAM.md", `${UPSTREAM_HEAD}Nothing open.\n`, [], true);
+    proveReplaced("a legal UPSTREAM.md entry", "docs/UPSTREAM.md", UPSTREAM_HEAD + entry + UPSTREAM_PARTS, [], true);
+    proveReplaced("an entry that quotes packages with their versions", "docs/UPSTREAM.md", UPSTREAM_HEAD + entry + UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, as esbuild@0.28.1 and @tanstack/react-query@5.105.3 in the manifest show."), [], true);
+    proveReplaced("an entry that quotes a version whose last label is one letter", "docs/UPSTREAM.md", UPSTREAM_HEAD + entry + UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, as some-tool@1.4.b in the lock shows."), [], true);
+    proveReplaced("an entry that quotes a version whose last label runs into digits", "docs/UPSTREAM.md", UPSTREAM_HEAD + entry + UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, as some-tool@1.4.beta2 in the lock shows."), [], true);
+    proveReplaced("an entry that quotes a version whose last label runs into a hyphen", "docs/UPSTREAM.md", UPSTREAM_HEAD + entry + UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, as some-tool@1.4.rc-1 in the lock shows."), [], true);
+  });
   const variants = [
     ["# Upstream\n\nEvery entry is a lead, not a verdict.\n\n## Open\n\nNothing open.\n", "no Aligned line"],
     ["# Upstream\n\nAligned to Planted at 0123456789ab.\n\nNo section.\n", "no ## Open section"],
@@ -292,6 +481,14 @@ function proveUpstreamPlants() {
     [`${UPSTREAM_HEAD}${entry}**What it is.** x.\n\n**Why it is believed better.** x.\n`, "part **How the work surfaced it** missing"],
     [`${UPSTREAM_HEAD}${entry}**What it is.** x.\n\n**How the work surfaced it.** x.\n\n**Records checked.** None.\n`, "neither Why it is believed better"],
     [`${UPSTREAM_HEAD}### 2026-01-01 Planted entry\n\nKind: defect\nPin: 0123456789ab\n\n${UPSTREAM_PARTS}`, `past the ${HORIZON_DAYS}-day horizon`],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, as https://example.invalid/private shows.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, in /home/someone/project/app.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, write to someone@example.invalid for the rest.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, write to someone@163.invalid for the rest.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, write to someone@example.zz for the rest.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, in C:\\Users\\someone\\project.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, in /Volumes/shared/project/app.")}`, "an address, a URL, an email or an absolute path"],
+    [`${UPSTREAM_HEAD}${entry}${UPSTREAM_PARTS.replace("**What it is.** x.", "**What it is.** x, in /media/someone/disk/project.")}`, "an address, a URL, an email or an absolute path"],
   ];
   for (const [text, needle] of variants) proveReplaced("an UPSTREAM.md plant", "docs/UPSTREAM.md", text, [needle]);
 }
@@ -363,18 +560,44 @@ function proveVocabularyPlant() {
   }
 }
 
-/** Two spliced clauses in a record main does not hold are advised, one across a wrap, the label and the list intro are not, and the record leaves. */
+/** Three spliced clauses in a record main does not hold are advised, one across a wrap and one in a bullet, while the label, the list intro and a two-word label behind a list marker are not, and the record leaves. */
+/** A planted tag and a planted pin without its version each raise their finding, and the plant leaves. */
+function proveActionPins() {
+  proveGroup("a workflow action pinned by tag", [[".github/workflows/PLANTED.yml", "on: push\njobs:\n  planted:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v7\n"]], [".github/workflows/PLANTED.yml:6: actions/checkout@v7 is pinned by a name that can move"]);
+  proveGroup("a workflow action pinned without its version", [[".github/workflows/PLANTED.yml", "on: push\njobs:\n  planted:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n"]], [".github/workflows/PLANTED.yml:6: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 names its commit and not its version"]);
+  proveGroup("an edition's workflow action pinned by tag", [["edition/overlay/.github/workflows/PLANTED.yml", "on: push\njobs:\n  planted:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v7\n"]], ["edition/overlay/.github/workflows/PLANTED.yml:6: actions/checkout@v7 is pinned by a name that can move"]);
+}
+
 function proveSpliceAdvice() {
   const number = freeNumber();
   const name = `${number}-planted-splice.md`;
   const path = join(ROOT, "docs", "decisions", name);
-  writeFileSync(path, `# ${number}. Planted splice\n\nStatus: Accepted\nDate: 2026-01-01\n\n## Context\n\nThe reader found the second defect, which is why: the dot was gone.\n- **A label.** Rejected: it duplicates what the tree records.\nThe audit gains three checks:\n\nReproduced in a fresh environment with the seat's development\nrequirements: the revealed type was nothing.\n`);
+  writeFileSync(path, `# ${number}. Planted splice\n\nStatus: Accepted\nDate: 2026-01-01\n\n## Context\n\nThe reader found the second defect, which is why: the dot was gone.\n- **A label.** Rejected: it duplicates what the tree records.\nThe audit gains three checks:\n\nReproduced in a fresh environment with the seat's development\nrequirements: the revealed type was nothing.\n- Completeness review: collapsed, the marker is not a word.\n- The agent ran the whole review: it found the marker counted.\n`);
   try {
     const found = adviceLines().filter((line) => line.includes(name) && line.includes("lowercase clause"));
-    if (found.length !== 2 || !found[0].includes(`${name}:8:`) || !found[1].includes(`${name}:13:`)) wrong(`the planted splices were advised ${found.length} time(s) instead of once each at lines 8 and 13`);
+    if (found.length !== 3 || !found[0].includes(`${name}:8:`) || !found[1].includes(`${name}:13:`) || !found[2].includes(`${name}:15:`)) wrong(`the planted splices were advised ${found.length} time(s) instead of once each at lines 8, 13 and 15`);
   } finally {
     unlinkSync(path);
   }
+}
+
+/** An install script approved for a package the lock installs at another version fails, so does one for a package the lock never installs, and the manifest's bytes come back. */
+function proveApprovalPlant() {
+  const path = join(ROOT, "package.json");
+  const lock = join(ROOT, "package-lock.json");
+  if (!existsSync(path) || !existsSync(lock)) {
+    console.log("approval plant skipped: no package.json and package-lock.json in this tree");
+    return;
+  }
+  // A package the lock installs, so a check that read the name and not the version would pass the plant.
+  const installed = Object.keys(JSON.parse(readFileSync(lock, "utf-8")).packages ?? {}).find((key) => key.startsWith("node_modules/"));
+  const name = installed?.slice("node_modules/".length) ?? "planted-package";
+  const manifest = JSON.parse(readFileSync(path, "utf-8"));
+  manifest.allowScripts = { ...manifest.allowScripts, [`${name}@0.0.0-planted`]: true, "planted-unversioned": true };
+  proveReplaced("an approval the lock does not install", "package.json", `${JSON.stringify(manifest, null, 2)}\n`, [
+    `package.json: allowScripts approves ${name} at 0.0.0-planted, which package-lock.json does not install`,
+    "package.json: allowScripts approves planted-unversioned, which package-lock.json does not install",
+  ]);
 }
 
 /** A misspelling appended to the README is advised where codespell is installed, and the bytes come back. */
@@ -393,9 +616,27 @@ function proveSpellingPlant() {
   }
 }
 
+/** A misspelling in a file git does not track raises no spelling advice, and the file leaves. */
+function proveUntrackedSpelling() {
+  if (spawnSync("codespell", ["--version"], { encoding: "utf-8" }).status !== 0) {
+    console.log("untracked spelling plant skipped: codespell is not on PATH");
+    return;
+  }
+  const rel = "PLANTED-UNTRACKED.txt";
+  plant(rel, "The reciever waits here.\n"); // codespell:ignore reciever
+  try {
+    if (adviceLines().some((line) => line.includes("PLANTED-UNTRACKED"))) wrong("a misspelling in a file git does not track was advised");
+  } finally {
+    unplant(rel);
+  }
+}
+
 function proveImmutability() {
   const folder = join(ROOT, "docs", "decisions");
-  const name = readdirSync(folder).sort().find((entry) => readFileSync(join(folder, entry), "utf-8").includes("\nStatus: Accepted\n"));
+  // The record edited is one git tracks, read with either line ending, because an untracked record a script has
+  // just written has no diff for the audit to refuse, and a Windows checkout keeps carriage returns.
+  const tracked = new Set(git("ls-files", "-z", "--", "docs/decisions").split("\0").filter(Boolean).map((rel) => rel.split("/").pop()));
+  const name = readdirSync(folder).sort().find((entry) => tracked.has(entry) && /\r?\nStatus: Accepted\r?\n/.test(readFileSync(join(folder, entry), "utf-8")));
   if (!name) {
     console.log("immutability plants skipped: no accepted record of this project's own to plant on");
     return;
@@ -415,7 +656,9 @@ function proveImmutability() {
 /** One word added to a list line inside an accepted record fails, because a list marker is content and not a diff header. */
 function proveBulletEdit() {
   const folder = join(ROOT, "docs", "decisions");
+  const tracked = new Set(git("ls-files", "-z", "--", "docs/decisions").split("\0").filter(Boolean).map((rel) => rel.split("/").pop()));
   for (const name of readdirSync(folder).sort()) {
+    if (!tracked.has(name)) continue;
     const path = join(folder, name);
     const original = readFileSync(path);
     const text = original.toString("utf-8");
@@ -448,10 +691,13 @@ function bodyLink(text) {
 }
 
 /** The first record of the project's own with a relative link outside its Status line, with that link's target, or null. */
+// An untracked record is invisible to the immutability check, which reads records through git,
+// so a plant on one proves nothing and the choice passes such a record over.
 function recordWithLink() {
   const folder = join(ROOT, "docs", "decisions");
+  const tracked = new Set(git("ls-files", "-z", "--", "docs/decisions").split("\0").filter(Boolean).map((rel) => rel.split("/").pop()));
   for (const name of readdirSync(folder).sort()) {
-    if (!name.endsWith(".md")) continue;
+    if (!name.endsWith(".md") || !tracked.has(name)) continue;
     const target = bodyLink(readFileSync(join(folder, name), "utf-8"));
     if (target !== null) return [join(folder, name), name, target];
   }
@@ -483,10 +729,23 @@ function proveIgnoredPath() {
 }
 
 /** A link target repaired to one that resolves passes; a changed link text or a target that does not resolve fails. */
+/** An untracked record with a link, sorting before every real one, is never the record the link plants choose. */
+function proveTrackedChoice() {
+  const rel = "docs/decisions/0000-planted-untracked-link.md";
+  plant(rel, "# 0000. Planted untracked link\n\nStatus: Accepted\nDate: 2026-01-01\n\n## Decision\n\nSee [the map](../ARCHITECTURE.md).\n");
+  try {
+    const chosen = recordWithLink();
+    if (chosen !== null && chosen[1] === "0000-planted-untracked-link.md") wrong("the link repair plants chose an untracked record, which the immutability check cannot see");
+  } finally {
+    unplant(rel);
+  }
+}
+
 function proveLinkRepair() {
+  proveTrackedChoice();
   const found = recordWithLink();
   if (found === null) {
-    console.log("link repair plants skipped: no record of this project's own carries a relative link");
+    console.log("link repair plants skipped: no tracked record of this project's own carries a relative link");
     return;
   }
   const [path, name, target] = found;
@@ -678,7 +937,7 @@ if (baseline.length > 0) {
   for (const p of baseline.slice(0, 5)) console.log(`  ${p}`);
   process.exit(1);
 }
-for (const proof of [proveFilePlants, proveTrackedPlants, proveRecordDashes, proveAppendedPlants, proveInvariantPlants, proveStatePlants, proveUpstreamPlants, provePalettePlant, proveCitationPlant, proveDensePlant, proveVocabularyPlant, proveSpliceAdvice, proveSpellingPlant, proveIgnoredTerm, proveImmutability, proveBulletEdit, proveLinkRepair, proveIgnoredPath, proveRecordLinkPlant, proveAnchors, proveTemplateCopy, proveDisposition, proveIgnorePlant, proveStaleBranch, proveNoRemoteReport, proveUnrunReport]) {
+for (const proof of [proveFilePlants, proveTrackedPlants, proveRecordDashes, proveDeclaredDashes, proveNestedProject, proveOverlayGuide, proveAppendedPlants, proveInvariantPlants, proveStatePlants, proveStatePoints, proveUpstreamPlants, provePalettePlant, proveCitationPlant, proveDensePlant, proveVocabularyPlant, proveSpliceAdvice, proveActionPins, proveApprovalPlant, proveSpellingPlant, proveUntrackedSpelling, proveIgnoredTerm, proveImmutability, proveBulletEdit, proveLinkRepair, proveIgnoredPath, proveRecordLinkPlant, proveAnchors, proveTemplateCopy, proveDisposition, proveIgnorePlant, proveStaleBranch, proveNoRemoteReport, proveUnrunReport, proveOwnedCitationLine]) {
   proof();
 }
 console.log(failures === 0 ? "every rule fires" : `${failures} rule(s) do not work`);

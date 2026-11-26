@@ -41,6 +41,7 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
 | `.github/workflows/deploy.yml` | The site deploys through GitHub Actions to Pages. |
 | `.env.example` | Anything reads a `.env`; nothing does today. |
 | `.codespellignore` | The spelling advisory names a real term of this project's domain. One word per line, the project's own list from adoption on and never recopied at re-alignment; the docs audit passes it to codespell when it exists. |
+| `edition/` | Absent, since this deployment publishes no edition; [EDITIONS.md](EDITIONS.md) governs one if it ever does. |
 
 ## Never tracked
 
@@ -57,6 +58,10 @@ its trigger disappears. A conditional file whose trigger is gone is clutter, not
   embedded, since a tracked image is as permanent as tracked text. When it is unclear
   whether a fact is sensitive, surface it to the owner rather than recording it (adopted
   in [decision 0005, Write tracked content for a public audience](decisions/0005-write-tracked-content-for-a-public-audience.md)).
+  A worker whose working tree does not outlive its session, as in a hosted sandbox rebuilt
+  from the repository, keeps no such file, since nothing untracked survives there. It puts the
+  fact to the owner, who keeps it outside the repository, and the tracked entry's pointer says
+  the owner holds it.
 - Anything regenerable: `node_modules/`, `dist/`, coverage, caches, and the icon exports
   (`pixel-mark-*.png`).
 - The directory a second working tree occupies, `.worktrees/` by the family's convention and

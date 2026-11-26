@@ -1,4 +1,4 @@
-import { Star, StarHalf, type LucideIcon } from "lucide-react";
+import { Star, type LucideIcon } from "lucide-react";
 import { Badge, SafeImage, SpineArt } from "@/shared/ui";
 import { ShelfItem } from "@/entities/record";
 
@@ -30,12 +30,18 @@ export const ShelfCard = ({ item, icon: Icon }: { item: ShelfItem; icon: LucideI
       {item.rating != null && item.rating > 0 && (
         <div className="mt-1 flex gap-0.5 text-signal">
           {[...Array(5)].map((_, i) => {
-            const rating = item.rating ?? 0;
-            const full = rating >= i + 1;
+            const share = Math.min(Math.max((item.rating ?? 0) - i, 0), 1);
             return (
               <span key={i} className="relative inline-flex">
-                <Star size={12} fill={full ? "currentColor" : "none"} className={full ? "" : "text-line-strong"} />
-                {!full && rating >= i + 0.5 && <StarHalf size={12} fill="currentColor" className="absolute inset-0" />}
+                <Star size={12} className="text-line-strong" />
+                {share > 0 && (
+                  <span
+                    className="absolute inset-y-0 left-0 flex overflow-hidden"
+                    style={{ width: `${Math.round(share * 100)}%` }}
+                  >
+                    <Star size={12} fill="currentColor" className="shrink-0" />
+                  </span>
+                )}
               </span>
             );
           })}

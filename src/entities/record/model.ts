@@ -163,7 +163,7 @@ export interface Experience extends BaseContent {
   desc?: string;
 }
 
-/** A degree or programme, with the institution that granted it. */
+/** A degree or program, with the institution that granted it. */
 export interface Education extends BaseContent {
   type: "education";
   title: string;

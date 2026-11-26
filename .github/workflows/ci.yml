@@ -1,71 +1,106 @@
 name: CI
 
+# Runs the commands AGENTS.md documents, plus the build, so the rules the tools hold are
+# enforced rather than remembered.
+# Every action is pinned to the commit it runs, with its version named beside it, because a tag is a
+# name that moves, and the docs audit refuses a tag or a pin without its version.
+
+# A push to a branch of this repository is that branch's run, so a job runs on a pull request only
+# when the request comes from a fork, whose push never reaches this repository.
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  verify:
+  landing:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository }}
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      verified: ${{ steps.evidence.outputs.verified }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - name: No landed branch is left behind main
+        run: |
+          # A branch at main's own commit carries nothing main lacks and passes, which is where a worker whose
+          # remote refuses a deletion leaves its branch between a landing and its next change. A branch main has
+          # moved past is a landed branch left behind and fails.
+          git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          stale=$(git for-each-ref --merged origin/main --no-contains origin/main --format='%(refname)' refs/remotes/origin | sed 's|^refs/remotes/||')
+          if [ -n "$stale" ]; then
+            echo "$stale"
+            echo "A landed branch is left behind main; delete it locally and on the remote, since main has moved past it."
+            exit 1
+          fi
+      - name: Evidence of a run this commit already passed
+        id: evidence
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A fast-forward keeps the commit, so a branch run that passed at this commit has seen this tree whole;
+          # the gate is not repeated for it and only this landing check runs. Without that evidence the gate runs.
+          passed=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${GITHUB_SHA}&status=success&per_page=50" --jq '[.workflow_runs[] | select(.head_branch != "main" and .event == "push")] | length' 2>/dev/null || echo 0)
+          if [ "${passed:-0}" -gt 0 ]; then
+            echo "verified=true" >> "$GITHUB_OUTPUT"
+            echo "a branch run passed at ${GITHUB_SHA}, so the gate is not repeated; only the landing check ran"
+          else
+            echo "verified=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  check:
+    runs-on: ubuntu-latest
+    needs: landing
+    if: ${{ needs.landing.outputs.verified != 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # Record immutability is checked against history, so the clone cannot be shallow.
           fetch-depth: 0
-
-      - name: Landed branches are gone
-        run: |
-          git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
-          stale=$(git branch -r --merged origin/main | grep -vE 'origin/(main|HEAD)$' || true)
-          if [ -n "$stale" ]; then
-            echo "$stale"
-            echo "A landed branch outlives its landing; delete it locally and on the remote in the push that moves main."
-            exit 1
-          fi
-
       - name: Pins
-        # Red here means a copy diverged from the style, or the style moved and this
-        # project needs re-alignment; the pins update with the alignment. The audit
-        # script and its selftest are pinned beside the rulebook and checked before
-        # they run, because a checker the checked project can edit is no checker at all.
+        # Each carried copy is pinned to the bytes it held at this project's last alignment, so red
+        # here means a copy changed without a re-alignment; the pins move with each one. A move of the
+        # style itself is invisible here and is found by reading the style. The audit scripts are
+        # pinned beside the rulebook and checked before they run, because a checker the checked
+        # project can edit is no checker at all.
         run: |
-          echo "b43956e7cd0a89a593b88a64dd1d36c1f75142852a8a3dcf54af11b8b583de11  docs/CONVENTIONS.md" | sha256sum -c -
-          echo "b78e085b296e38a5c6e543de4bfd4c43b8cf60f247caa881806a9f6858a96ba8  scripts/audit-docs.mjs" | sha256sum -c -
-          echo "2e98c4d3dc5dca487bb151d3f704ce94d8f8b4f5add56388e393dec82fb83395  scripts/audit-docs-selftest.mjs" | sha256sum -c -
-
-      - name: Seams
-        run: |
-          if git grep -nE "vi\.mock\(" -- tests; then
-            echo "Module mocking is banned; substitute only at a declared seam."
-            exit 1
-          fi
-
+          echo "e61f960f9f601f44c1ff204827aeab3642f17a9f49918ccb2263ca29a0d095f6  docs/CONVENTIONS.md" | sha256sum -c -
+          echo "78821ed4b7dee3b0f3fb57be168a3464491b0ae5a7a7ea4563e2aa29f7e92c93  docs/LIVING.md" | sha256sum -c -
+          echo "c584e14aa409e363598529b2124c8eb3316b3d41ac44c8b2f30822bfef1fb0d3  docs/RECORDS.md" | sha256sum -c -
+          echo "5ac73538a91eb3c5659392ff3d9ee4dbdd23c078a49045196516c07363af15bc  docs/PROSE.md" | sha256sum -c -
+          echo "bcaffa8a8b53f178598f4a7f66c90b4dfed2e5e389b26acc19c0c717a357ce8f  scripts/audit-docs.mjs" | sha256sum -c -
+          echo "15faa090d15740d0747ab2071649461a3180a6a748e0bb408a2417709d43d157  scripts/audit-docs-selftest.mjs" | sha256sum -c -
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
           cache: npm
-
       - name: Install
         run: |
           npm ci
           # The docs audit's spelling advisory runs where codespell is installed.
           pipx install codespell
-
+      - name: Dependency audit, advisory
+        continue-on-error: true
+        # The tree the lock installs, read against the advisories the registry has published by the day of the
+        # run; a finding is review's to fix or dismiss in writing.
+        run: npm audit
       - name: Audit selftest
         run: node scripts/audit-docs-selftest.mjs
-
+      - name: Edition selftest
+        run: node scripts/cut-edition.mjs --selftest
       - name: Docs
         run: node scripts/audit-docs.mjs
-
-      - name: Type-check
-        run: npm run typecheck
-
       - name: Lint
         run: npm run lint
-
+      - name: Type-check
+        run: npm run typecheck
       - name: Test
         run: npm test
-
       - name: Build
         run: npm run build
 

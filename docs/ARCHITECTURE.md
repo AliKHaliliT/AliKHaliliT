@@ -64,6 +64,7 @@ vita/
 ├── scripts/                    # Tracked repository tooling
 │   ├── audit-docs.mjs          # The docs audit; the gate's Docs command
 │   ├── audit-docs-selftest.mjs # Proves every rule of the audit against a planted defect
+│   ├── cut-edition.mjs         # The edition tool; cuts the tree a public repository receives
 │   ├── make-icon.mjs           # Renders the pixel-mark to PNG
 │   └── profile-art.mjs         # Draws the profile page's SVG art
 │
@@ -316,7 +317,7 @@ runs. And no request leaves the loopback, `tests/setup.ts` refusing any connecti
 host before its socket opens and a test that must reach a host naming it in the open, because
 an adapter that resolves its credentials from the environment is a working adapter on a
 machine that has them. The suite runs in a shuffled order under a seed the run prints, so a
-test that leans on its neighbour fails on the day it is written.
+test that leans on its neighbor fails on the day it is written.
 
 The 11 suites here are characterization and unit tests over the record's schema, seed, store,
 shelves, and ordering, the site identity and palette, the portfolio snapshot, and the date,

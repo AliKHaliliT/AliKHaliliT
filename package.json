@@ -12,6 +12,8 @@
     "lint": "eslint .",
     "docs": "node scripts/audit-docs.mjs",
     "docs:selftest": "node scripts/audit-docs-selftest.mjs",
+    "edition": "node scripts/cut-edition.mjs",
+    "edition:selftest": "node scripts/cut-edition.mjs --selftest",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "preview": "vite preview",
@@ -31,24 +33,30 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-jsdoc": "^64.0.2",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "eslint-plugin-sonarjs": "^4.2.0",
-    "globals": "^16.5.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-jsdoc": "^65.4.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "eslint-plugin-sonarjs": "^4.2.2",
+    "globals": "^17.14.0",
     "qrcode": "^1.5.4",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4",
+    "typescript-eslint": "^8.72.1",
     "vite": "^7.2.4",
     "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
   }
 }

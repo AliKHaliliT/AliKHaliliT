@@ -89,7 +89,7 @@ export const SpineArt = ({
         <rect x="11" y={bandY + bandH + 10} width="6" height="6" fill={accent} />
       </svg>
 
-      {/* catalogue number and the title, in the dossier type */}
+      {/* catalog number and the title, in the dossier type */}
       <span className="absolute left-[14%] top-[4%] font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--color-text-secondary)]">
         No. {number}
       </span>

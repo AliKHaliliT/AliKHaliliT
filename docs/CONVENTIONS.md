@@ -2,6 +2,8 @@
 
 This file is the rulebook for this project's technical documentation: which documents exist, what species each one is, how each species is written, and where a "why" belongs. It is normative and frozen; do not modify this file. If a rule ever has to change, the change is made deliberately, by the style's owner, inside the template itself in the My-Styles repository, and recorded as a new decision record superseding the style's record 0001, which is also where the rationale behind this whole system lives. A project derived from this template never edits its copy of this file and never diverges from it, however much better a local rule looks from below; a case for changing a rule travels upstream through the report described in AGENTS.md, and the rule then changes for every project or for none.
 
+The rulebook is read as four documents: this core, the rules for living documents in [LIVING.md](LIVING.md), the rules for records in [RECORDS.md](RECORDS.md) and the prose law in [PROSE.md](PROSE.md); each is frozen as this file is.
+
 ## The two species of documents
 
 Every technical document is exactly one of two species, and the species dictates all of its rules.
@@ -18,12 +20,21 @@ Every project carries this fixed spine:
 
 | Document | Species | Role |
 | --- | --- | --- |
-| `AGENTS.md` | Living | Vendor-neutral agent entry point: the operating manual and the single documentation index. |
+| `AGENTS.md` | Living | Vendor-neutral agent entry point: the commands and the single documentation index. |
+| `docs/RULES.md` | Living, frozen | The hard rules of the tree, read whole before any work. |
+| `docs/CONDUCT.md` | Living, frozen | The hard rules of conduct, read whole before any work. |
+| `docs/LANDING.md` | Living, frozen | The hard rules of landing, read whole before any work. |
+| `docs/GATE.md` | Living, frozen | The delivery gate a change is weighed against before it is delivered. |
+| `docs/ADOPTION.md` | Living, frozen | How a repository adopts this style and how a child re-aligns. |
+| `docs/REPORTING.md` | Living, frozen | The upstream report, what a project sends its template and how an entry is resolved. |
 | `STATE.md` | Living | Current project state: what is in flight, queued, deferred, or blocked. |
 | `CHANGELOG.md` | Records | Curated per-release summary for consumers; present only where consumers upgrade through releases (the trigger lives in BASELINE.md). |
 | `docs/ARCHITECTURE.md` | Living | The map of the system as it is today. |
 | `docs/INVARIANTS.md` | Living | The product's stated invariants, one row per claim, each bound to the holder that refuses a violation and graded by what its green is worth. |
-| `docs/CONVENTIONS.md` | Living, frozen | This rulebook. |
+| `docs/CONVENTIONS.md` | Living, frozen | The rulebook's core; its parts follow. |
+| `docs/LIVING.md` | Living, frozen | The rulebook's rules for living documents and the invariants ledger. |
+| `docs/RECORDS.md` | Living, frozen | The rulebook's rules for decision records. |
+| `docs/PROSE.md` | Living, frozen | The prose law, the rulebook's rules for every tracked byte of prose. |
 | `docs/decisions/` | Records | The decision log of this project's own choices; the durable home of rationale. |
 
 Assistant-specific instruction files (a `CLAUDE.md`, a `GEMINI.md`, tool rule files) do not exist in this project. Every assistant reads `AGENTS.md` directly. If a tool ever genuinely cannot read `AGENTS.md`, it gets a one-line shim that does nothing but import or point to `AGENTS.md` in whatever include syntax the tool understands. A shim is not a document: it is not indexed, it carries no content of its own, and it never grows a second line.
@@ -33,83 +44,6 @@ Beyond the spine, documentation grows organically. Any further document the proj
 ## The index contract
 
 `AGENTS.md` holds the single index of all technical documents, each with a one-line description of what it contains and when to read it. A document that is not listed there does not exist. No reader can be expected to find it, and no agent will. Creating a document and registering it in the index happen in the same change, as does delisting on removal.
-
-## Rules for living documents
-
-- Present tense only; describe what is, never what was or how it got here.
-- No dates and no changelog narration (`STATE.md` and `UPSTREAM.md` entries are the exceptions; each carries an absolute date). A `STATE.md` date is the entry's last-verified stamp, not its birthday. Re-dating requires actually re-verifying the entry against the tree or the world; touching the text does not count. An entry older than 90 days is expired, meaning nothing may rely on it or repeat it until it is re-verified and then re-dated or removed, and the docs audit fails on it so the sweep cannot be forgotten. An in-flight `Now` entry expires after 30 days instead, since work that has not moved in a month is finished or stalled.
-- Record intent and decisions, never inventory the tree can answer. A premise like "the app has no icon of its own" is the tree's fact and rots silently the day someone adds one; state the wish and let the tree carry the facts.
-- A sentence in a living document is a claim, not a fact. Verify a claim before relying on it or repeating it, and end every change by sweeping `STATE.md` for entries the change completed or invalidated. Both halves bind agents and humans alike.
-- Rewrite in place; never append-and-preserve. Deleting stale text is the job; git is the archive.
-- Size budgets come in two classes. `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/INVARIANTS.md`, and this rulebook grow with the system rather than against a number, since a manual, a map, a ledger of claims, and a rulebook must cover whatever exists; they still say everything as briefly as it can be said, and an agent guide that keeps growing usually means the project's boundary was drawn too wide, which is a scoping problem no budget fixes. Every other living document is bounded at 150 lines, the docs audit fails one that exceeds its bound, and the remedy is fission, a split by subject into child documents, each registered in the index and each bounded itself. `README.md` stands outside both classes; its shape is governed by the README schema in BASELINE.md. Growth happens by fission.
-- The mechanical half of freshness is checked rather than reviewed. The docs audit verifies that every root-anchored repository path a living document names exists, a token whose first segment the root does not know, or whose path the ignore file covers, being read as prose, that every relative link resolves, in a living document and in a record of the project's own alike, that no `STATE.md` or `UPSTREAM.md` entry has outlived its horizon or stood unchanged in the queue for two of them, that no bounded document exceeds its budget, that every row of the invariants ledger has its three cells, a holder in the tree that contains its needle, and a rung from the list, that every document under `docs/` is registered in the index or is a record in a registered record folder, numbered in `decisions/` and `inherited/` and dated elsewhere, that every tracked directory near the root and every root file has a room in the map or the baseline, that a record changes only on its Status line or at a link target, the new target resolving, that a docstring documenting parameters names the signature and carries the trio together, that the layout conventions were held over a tree that exists, and that names and the STATE and UPSTREAM schemas hold their shapes. Decision records are exempt from every rule in this section but the one on links; they describe the past, which does not rot, while a path only points at the present.
-
-### The STATE.md schema
-
-`STATE.md` has exactly four sections, and every entry in them is one line that ends with its last-verified date (YYYY-MM-DD).
-
-| Section | Holds |
-| --- | --- |
-| `Now` | Work in flight, or a condition future work must honor that no other document carries |
-| `Next` | Work queued |
-| `Deferred` | Work consciously postponed |
-| `Blocked` | Work waiting on something external |
-
-- An entry earns `Now` only while its work is genuinely unfinished, or while it names a condition future work must honor that no other document carries.
-- Completing the work deletes the entry in the same change, and a narration of the landing never replaces it, because finished work is git's memory, not STATE.md's.
-- An entry is deleted when it no longer applies; striking a line through does not delete it.
-- The file is swept at both ends of every change. Before starting anything new, delete entries describing finished work and re-verify or delete any entry the tree no longer confirms. After finishing, sweep for entries the change completed or invalidated.
-- Re-verifying an entry means re-checking its claim or re-making its choice; a fresh date over an unexamined claim re-verifies nothing.
-- The docs audit caps `Now` at five entries, so accretion fails the build instead of accumulating quietly.
-- An entry in `Next`, `Deferred`, or `Blocked` whose text has stood unchanged, its date aside, for two horizons is a decision record trying to be born, so it is promoted to `Now`, written as a record and removed, or dropped; the docs audit reads the entry's age from history and fails it past that point, because the file's dates are last-verified stamps and cannot show it.
-- After a long absence, expired stamps everywhere are the horizon working as intended, and the first task back is the sweep.
-
-In a project built from this template, `UPSTREAM.md` at the top of `docs/` is a living document of the same kind. It opens with the template and the commit the project is aligned to, and holds the entries the project has for its style under one section, `## Open`, with `Nothing open.` when there are none. Each entry is dated, kinded, pinned, and shaped as the agent guide says, is deleted when re-alignment resolves it, and expires after 90 days until re-verified. The file is free-growing, since the horizon bounds it better than a line budget would.
-
-## Rules for the invariants ledger
-
-`docs/INVARIANTS.md` lists what must stay true about the product, one row per claim, in a table whose header row is `| Claim | Held by | Rung |`. The claim is one plain sentence a reader can test. The holder is what refuses a violation, written as the tracked path in backticks, followed where the file holds more than one thing by a quoted needle the file must contain, a test's name, a contract's name, a rule's message; or the holder is the word review, when nothing decides the claim. The rung says what a green result is worth and is one of five words: impossible, where a type, an import contract, or a check over the whole tree refuses the violation before anything ships; generated cases, where a property test fails on a counterexample drawn from generated input; listed cases, where an example test fails on the cases it lists; advised, where a check names the violation on every run and a reader decides; and review, where nothing decides it. No rung claims proof, because a sampled property is not a proof and a passing test is not a theorem, and a holder of review pairs only with the rung review.
-
-The docs audit decides the decidable half, that every row has its three cells, that every holder path is a tracked file containing its needle, that every rung is one of the five words, and that review pairs with review; it prints every review row as an advisory on every run, so a claim nothing decides cannot hide behind a green. Whether a claim is true, whether its holder holds it, and whether every claim the README and the map make has a row are review's. The template's rows are the exemplar and describe its demo. A project writes its own rows at adoption, cut from them, and the ledger is the project's own document from then on, re-adapted at re-alignment like `STATE.md` and never recopied. The shapes a claim takes recur across products, a total conserved, a value kept within bounds, an order preserved, a round trip without loss, an action refused to a role, a failure reverted whole, and the family's treasury lists them in its study of invariant binding.
-
-## Rules for records (decision records)
-
-Write a decision record when a choice shapes future work and its reasoning would otherwise be lost: an architectural boundary, a convention, a rejected-but-tempting alternative, a reversal of an earlier decision, a dead end. Records live in `docs/decisions/`, named `NNNN-short-kebab-title.md` with a zero-padded sequence number, and follow this template:
-
-```markdown
-# NNNN. Title stating the decision
-
-Status: Accepted
-Date: YYYY-MM-DD
-
-## Context
-
-The situation that forced a decision, and the constraints that shaped it.
-
-## Evidence
-
-What was run or measured and what came back. This section appears only where
-the decision rests on something measured or run; a record resting on reasoning
-alone omits it. The results the decision rested on are quoted here in full,
-never pointed at, because a record must stay accurate after the tree it
-measured moves on.
-
-## Options considered
-
-Each realistic option with the one-or-two-line reason it lost. This section is the highest-value part of the record, because it is what stops the same alternative from being re-proposed a year later.
-
-## Decision
-
-What was decided, stated plainly.
-
-## Consequences
-
-What becomes easier, what becomes harder, and what future work this implies.
-```
-
-An accepted record is immutable. When a decision changes, write a new record explaining why, and flip the old record's `Status:` line to `Superseded by [NNNN](NNNN-the-new-record.md)`; that status line and the repair of a dead link's target are the only edits an accepted record may ever receive, and the docs audit decides the second, holding that the changed lines differ inside link targets alone and that every new target resolves. A defect found in a record after it merged stays, a wording, a figure or a mark of punctuation alike. A later record supersedes it where the defect changes what was decided, and nothing supersedes a wording, because a record is evidence of its day and never a precedent for new writing; the law a new record is held to is this rulebook's, not an older record's.
-
-A dead end is written when its evidence arrives, not when work completes. A reverted approach leaves no bytes in the tree, so nothing else will remember it, and the finding is lost exactly when it is most worth keeping. Where the attempt cost real effort or could plausibly be retried, its record names the evidence that killed it, the condition that would reopen it, and the commit that held the attempt, which after the revert is the only surviving proof the attempt existed. Ordinary iteration earns no record; the test is whether someone might plausibly walk back in a month later.
 
 ## Where a "why" belongs
 
@@ -122,7 +56,7 @@ A changelog exists only where consumers upgrade through releases, so a project t
 
 Chronology itself is never documented. Git already is the complete log, and any document that re-narrates it degenerates into a worse git log.
 
-A reference in a living document carries its description. A record is cited by its number and its title, verbatim from its heading and in the same paragraph as the link, so the sentence stands without the click and cannot drift, because a record is immutable. A path or a symbol is cited with its role in the sentence, what the reference is for here, and never with its behaviour, which is the file's own claim and moves when the file moves. The docs audit holds the title; the role stays with review.
+A reference in a living document carries its description. A record is cited by its number and its title, verbatim from its heading and in the same paragraph as the link, so the sentence stands without the click and cannot drift, because a record is immutable. A path or a symbol is cited with its role in the sentence, what the reference is for here, and never with its behavior, which is the file's own claim and moves when the file moves. A record cited where no link can stand, in a document or a configuration comment that travels into a project built from the style, names whose record it is, the style's or this project's own, beside its number and its title, because there the same number names an inherited record and one of the project's own; a form kept byte for byte, a serialized string compared as written, keeps its bytes and names the record in a comment on the same line. The docs audit holds the title and the owner; the role stays with review.
 
 ## Naming
 
@@ -137,31 +71,3 @@ Not everything is documented that heavily, by design. Thin mappers such as the t
 The rest of the TSDoc vocabulary is used where it fits and omitted where it does not: a caveat becomes a `@remarks` block rather than a loose sentence, cross-references use `@see`, defaults use `@defaultValue`, and retirement uses `@deprecated`. Tags you do not see are simply not called for by that code; generated code should add them as it introduces the behavior.
 
 Test files stand outside the every-export rule, because a suite documents itself through the name of each case and the assertion it makes. A comment belongs in a test only where the reason a case exists is invisible from its name, as with a regression guard that should name the defect it pins.
-
-## Prose
-
-Most of this family's prose is written by machines, so the law names the failure modes of machine writing precisely enough for review to check. The rules below govern every tracked byte of living prose and every new record. Words quoted inside this section as examples of what to cut are exempt where they are quoted, and nowhere else.
-
-The house voice is plain declarative sentences that argue their case. Judgment is welcome when it carries its reasons, and the family's idiom of animate machinery, a gate that lives somewhere, a claim that rests, stays. What the voice never does is let a vague actor hide a decision, so "the owner removed the check" beats "the check was removed" and both beat "the decision emerged".
-
-A small census of language-model tells is tolerated one at a time and forbidden stacked: the balanced antithesis, the triadic list, the not-X-but-Y reversal, the em dash aside. At most one such flourish per paragraph, and the rest plain sentences. The clause-colon splice, a sentence shaped as claim, colon, elaboration, is banned outright; in prose a colon introduces only a list, a quote, or a label.
-
-An em dash is legal where it clearly beats the comma, the parenthesis, or the period it replaces, and it spends its paragraph's one flourish. A tracked file carries at most two, because the plague arrives as clusters and a cluster is countable, so the docs audit counts that boundary, in the terminal and in CI alike, while the judgment of fit stays with review. A record is counted from the arrival of the count's scope sentence in the tree's own history and never before it, because an accepted record admits no edit that could bring it under the budget, and a rule that reaches behind its arrival can never go green.
-
-Every sentence must survive the portability test. A sentence that could sit unchanged in another repository's documentation states nothing about this one, so it is cut or bound to this subject with a fact, a mechanism, a consequence, or a judgment this subject earned. The same test condemns the inflated vocabulary that means nothing anywhere, words in the family of delve, tapestry, paradigm shift, game changer, ever-evolving, cutting-edge, supercharge, transformative, multifaceted, meticulous, paramount, embark, empower, and elevate, and the padding phrases in the family of "it's worth noting", "at the end of the day", "in today's world", "let's dive in", and "going forward". CI greps a domain-safe subset of these on living prose, the records and the treasury excluded as quoting ground, and advises; the verdict is review's, because a banned word can be an honest domain term and only a reader knows which. A spell check runs over the same ground with the same standing, because a misspelling in the message a developer reads while something is already failing is part of the form the template teaches; a flagged word is corrected, or, when it is a real term of the domain, named in `.codespellignore` at the root, one word per line, the project's own file from adoption on and never recopied, so the decision is written where the check runs.
-
-A claim about the world names its source or dies. "Experts agree", "studies show", and "widely regarded as" are not sources; cite the work or cut the sentence, and when no source exists, say so instead of inventing weight. A specific fact enjoys the same protection, so a number is never smoothed into an adjective and "cuts the run from 40 minutes to 4" never becomes "significantly faster". Plain verbs carry claims best, "is" and "has" beat "serves as", and a trailing participle that pretends to explain, the "highlighting" and "underscoring" family, is replaced by the actual mechanism or dropped.
-
-A qualifier that bounds a claim is not filler and survives every cut. "No known remaining risks" promises less than "no remaining risks", and the word that made the difference was the claim's boundary, so a pass that removes padding removes what surrounds a claim and never what limits one. The test is whether the sentence promises more without the word; a hedge dropped leaves the promise the same and a boundary dropped enlarges it.
-
-Theater is cut wherever it appears. That covers throat-clearing openers, setups that flatter the writer as the lone honest expert, rhetorical questions the next sentence answers, importance puffery in the family of "marks a pivotal moment" and "a testament to", negative listing, staccato fragments for drama, and endings that recap what the reader just read. A final line that turns the point into an aphorism or a mic drop is deleted, never rewritten into a better one; the piece ends on its clearest concrete sentence, and when the ending needs more, it gets a plain takeaway or the next action.
-
-Formatting obeys the same law. No emoji in headings, no bold sprinkled mid-sentence for emphasis, no bullet list where two sentences of prose read better, no header over a two-sentence section. Format carries structure the content actually has.
-
-A project adopting this style brings prose it did not write under a law written for prose it will. The law binds the whole tree from adoption, because a gate that excuses a class of files teaches that the class is exempt, and the adopting refactor is where the corpus is brought under it. Inherited prose that cannot be brought under the law in the same change is listed in STATE as debt, one entry per document or group, and paid before the adoption is called done; nothing converges by waiting for someone to edit it next. A path whose bytes another guard hashes or pins, such as data files with manifest digests, is excluded by name in the workflow with the reason beside it, since a comment edit that moves a provenance hash is not a prose fix.
-
-A report to a person opens with one paragraph a reader outside the work could follow, what happened and what it means, before any detail, and every abstract finding is paired with one concrete instance, the input that broke the invariant or the line that carried the drift. This is not a schema and not layman's terms; it is the order in which an expert who did not do the work can check it. Chat replies, upstream reports, and handoffs are reports to a person and follow it.
-
-Before shipping prose, the writer checks its own output against this section: colons only for lists, quotes, and labels; at most one flourish per paragraph and two em dashes per file; every generic sentence bound to the subject or cut; every emphasis argued rather than labeled; a report to a person opened with its plain account; the ending concrete. Beyond the counts named above, and the splice advisory that names a colon opening a lowercase clause in a record before it lands and decides nothing, no tool judges any of this, so the check is the writer's own, and review reads behind it.
-
-The form follows the shape of the information. Like items that share attributes go in a table, one row each. Steps that happen in order go in a numbered list. Items that stand alone go in bullets. An argument, one claim leading to the next, goes in a paragraph, and a paragraph is for arguing. A paragraph that mostly names things, paths, symbols, options, records, is an enumeration wearing prose, and the docs audit advises when one names eight or more references, because past that point a reader is parsing rather than reading. The answer is the shape, never a cut, since every fact the paragraph held survives the move into a list or a table.

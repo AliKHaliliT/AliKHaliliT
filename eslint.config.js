@@ -73,6 +73,9 @@ export default defineConfig([
       // at the boundary, and the scripts, which are .mjs and lint under their own block, keep
       // console because their output is their purpose.
       'no-console': 'error',
+      // A comment that defers work with a marker is debt carried in the tree instead of in
+      // STATE.md, so the four markers the rulebook's Prose section names are refused anywhere.
+      'no-warning-comments': ['error', { terms: ['todo', 'fixme', 'xxx', 'hack'], location: 'anywhere' }],
       // The environment is read only through shared/config, and HTTP lives only in its
       // documented home; both rules are checked here, with the homes excepted below.
       'no-restricted-syntax': [

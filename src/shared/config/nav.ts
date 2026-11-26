@@ -26,7 +26,7 @@ export type NavItem = {
   label: string;
   path: string;
 };
-/** A labelled run of destinations, which is also a tick on the ground track. */
+/** A labeled run of destinations, which is also a tick on the ground track. */
 export type NavGroup = { label?: string; separator?: boolean; items: NavItem[] };
 
 /**

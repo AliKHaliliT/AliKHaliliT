@@ -32,7 +32,7 @@ title: Book Title
 author: Author Name
 cover: https://...
 status: Reading # Reading | Read | To Read
-rating: 4 # 1–5 in steps of 0.5, optional
+rating: 4 # 1–5, optional; a fraction fills that share of a star
 ---
 Notes / review in Markdown.
 ```
@@ -55,7 +55,7 @@ title: Title
 medium: game # film | series | anime | game | anything else
 creator: Studio or Director # optional; the author-analog
 status: Played # optional; e.g. Watched | Watching | To Watch | Played | Playing | To Play
-rating: 4 # 1–5 in steps of 0.5, optional
+rating: 4 # 1–5, optional; a fraction fills that share of a star
 image: https://... # poster or cover, optional
 link: https://... # official page, store page, ..., optional
 desc: One-line summary shown in the detail view. # optional

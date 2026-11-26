@@ -26,6 +26,9 @@ const LIVING = [
   "docs/BASELINE.md",
   "docs/CONVENTIONS.md",
   "docs/INVARIANTS.md",
+  "docs/LIVING.md",
+  "docs/PROSE.md",
+  "docs/RECORDS.md",
 ];
 
 /** An entry older than this is expired and must be re-verified before anything relies on it. */
@@ -37,13 +40,34 @@ const HORIZON_DAYS = 90;
 const NOW_HORIZON_DAYS = 30;
 /** Now is for in-flight work only; past this many entries the section is accreting, not tracking. */
 const NOW_CAP = 5;
-/** Bounded documents fail past this; the manual, the map, the README, the rulebook, and the invariants ledger grow with the system. */
-const BUDGET_LINES = 150;
-const FREE_GROWING = new Set(["AGENTS.md", "docs/ARCHITECTURE.md", "README.md", "docs/CONVENTIONS.md", "docs/INVARIANTS.md"]);
+/** A bounded document fails past this many words of prose, counted outside its tables and fenced blocks, because that is what a reader takes in whole; a register, the state file, the invariants ledger and a child's upstream file, grows by rows and is not measured, and README.md answers to the baseline's schema instead. */
+const BUDGET_WORDS = 2000;
+const UNBUDGETED = new Set(["README.md", "STATE.md", "docs/INVARIANTS.md", "docs/UPSTREAM.md"]);
+
+/** The words of a document outside its tables and fenced blocks, the measure its budget is held to. */
+function proseWords(text) {
+  let words = 0;
+  let fenced = false;
+  for (const line of text.split("\n")) {
+    if (line.startsWith("```")) {
+      fenced = !fenced;
+      continue;
+    }
+    if (fenced || line.startsWith("|")) continue;
+    words += line.split(/\s+/).filter(Boolean).length;
+  }
+  return words;
+}
 
 const BACKTICK = /`([^`\n]+)`/g;
 const LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
-const STATE_DATE = /\((\d{4}-\d{2}-\d{2})\)/g;
+/**
+ * An entry closes with its last-verified date, the one date the horizon reads and the one the age check strips to find
+ * the entry's text in history, so an entry dated anywhere else would read a stale date or look new at every re-dating.
+ */
+const STATE_TEXT = /\s*\((\d{4}-\d{2}-\d{2})\)\s*$/;
+/** The schema's four sections in their order, each with the one line it holds alone when it holds no entry. */
+const STATE_SECTIONS = { Now: "- Nothing in flight.", Next: "- Nothing queued.", Deferred: "- Nothing deferred.", Blocked: "- Nothing blocked." };
 const RECORD_NAME = /^\d{4}-[a-z0-9-]+\.md$/;
 const DATED_RECORD_NAME = /^\d{4}-\d{2}-\d{2}-[a-z0-9-]+\.md$/;
 // The numbered record folders: decisions/, this project's own, and inherited/, the template's own
@@ -58,6 +82,11 @@ const UPSTREAM_PIN = /^Pin: [0-9a-f]{7,40}$/m;
 const UPSTREAM_PARTS = ["**What it is", "**How the work surfaced it", "**Records checked"];
 const UPSTREAM_WHY = ["**Why it is believed better", "**What was worked around"];
 const UPSTREAM_ALIGNED = /^Aligned to .+ at (`?[0-9a-f]{7,40}`?|the host's own commit)\.?$/m;
+// The leaks a tool can decide in an entry written to leave the repository: a URL, a web host, an email,
+// a drive path and an absolute path under the usual roots. A name is review's. An email's host ends in a
+// label of letters, as every top-level domain does, so a package written with its version, a name joined
+// to dotted numbers by an at sign, is not read as one.
+const UPSTREAM_ADDRESS = /[a-z][a-z0-9+.-]*:\/\/|\bwww\.|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}(?![A-Za-z0-9-])|(?<![A-Za-z0-9])[A-Za-z]:[\\/]|(?<![\w./-])\/(?:home|Users|root|mnt|media|Volumes|private|run|srv|opt|var|tmp|etc)\//;
 const RAW_PALETTE =
   /\b(?:bg|text|border|ring|fill|stroke|from|via|to)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}\b/;
 const FENCE = /```[^\n]*\n([\s\S]*?)```/g;
@@ -124,14 +153,22 @@ const EM_DASH = Buffer.from("\u2014", "utf-8");
 const EM_DASH_SCOPE = "records held to the em dash budget of two per file";
 // The vocabulary the prose law bans, advised and never gated, because an honest domain term
 // reads the same as a tell; the workflow's list, moved here so a tree with no remote hears it.
-const VOCABULARY = /paradigm shift|game.changer|ever-evolving|cutting.edge|\bdelve|\btapestry\b|\bsupercharge|\btransformative\b|\bmultifaceted\b|\bmeticulous\b|\bparamount\b|\bembark\b|it.s worth noting|at the end of the day|in today.s world|let.s dive|going forward|a testament to|marks a pivotal|plays a vital role|experts agree|studies show|widely regarded as/i;
-// What the two advisories skip: the workflows, the rulebook that lists the tells, and this
+const VOCABULARY = /paradigm shift|game.changer|ever-evolving|cutting.edge|\bdelve|\btapestry\b|\bsupercharge|\btransformative\b|\bmultifaceted\b|\bmeticulous\b|\bparamount\b|\bembark\b|it.s worth noting|at the end of the day|in today.s world|let.s dive|going forward|a testament to|marks a pivotal|plays a vital role|experts agree|studies show|widely regarded as|\bTODO\b|\bFIXME\b|\bTBD\b|as an ai\b|as a language model|i hope this helps|certainly!/i;
+// What the two advisories skip: the workflows, the prose law that lists the tells, and this
 // script, which carries the list; a record is skipped by its depth under docs/.
-const VOCABULARY_SKIP = [".github/", "docs/CONVENTIONS.md", "scripts/audit-docs.mjs", "scripts/audit-docs-selftest.mjs"];
-// The audits are skipped as quoting ground, because they carry the banned-word list the vocabulary advisory reads.
+const VOCABULARY_SKIP = [".github/", "docs/PROSE.md", "scripts/audit-docs.mjs", "scripts/audit-docs-selftest.mjs", "eslint.config.js"];
+// A record cited by its number alone says nothing about whose sequence it belongs to, and in a project built from the style the same number names an inherited record and one of the project's own. A citation names its owner, the style's or this project's own, or stands inside a titled link, which the citation check holds; the files the vocabulary advisory skips are quoting ground here too.
+const BARE_CITATION = /(?<!\[)(?<!'s )(?<!inherited )(?<!own )\b(?:decision|record)s? (0\d{3})\b/g;
+// A line that names the same record with its owner clears a bare mention on that line, so a form kept byte for byte, a serialized string compared as written, keeps its bytes and the comment beside it answers.
+const OWNED_CITATION = /(?:'s |inherited |own )(?:decision|record)s? (0\d{3})\b/g;
+// The audits are skipped as quoting ground, because they carry the banned-word list the vocabulary advisory reads,
+// and so is the lint configuration, which names the markers it refuses.
 const CODESPELL_SKIP = ".git,node_modules,.hypothesis,__pycache__,dist,package-lock.json,*.svg,*.png,*.ico,*.woff,*.woff2,*.map,decisions,claims,reviews,inherited,mockServiceWorker.js,audit_docs.py,audit-docs.mjs,audit_inquiry.py";
 // The project's own terms, one word per line, beside the check and never recopied at re-alignment.
 const IGNORE_FILE = ".codespellignore";
+// The dictionaries codespell reads: its two defaults and the British spellings read as misspellings of the
+// American ones, because one variety holds across a tree.
+const CODESPELL_BUILTIN = "clear,rare,en-GB_to_en-US";
 // A prose paragraph that names this many references or more is an enumeration wearing prose, a
 // list or a table with its rows run together; measured over the family and over a project built
 // from it, everything at this count was a schema stated as prose or a set of bindings, and
@@ -141,18 +178,53 @@ const DENSE_PARAGRAPH = 8;
 const REFERENCE = /`[^`\n]+`|\[[^\]]*\]\([^)\s]+\)/g;
 const NOT_PROSE = ["#", "- ", "* ", "|", ">"];
 
-/** One git call against the repository this file lives in; empty when git says no. */
+// A project kept inside this one, a folder below the root that carries a guide of its own, is governed by its
+// own style and read by its own audit, so the checks that walk every tracked file stop at its folder. A guide
+// with no audit beside it fails, because a file this audit leaves alone must be one another audit reads. The
+// style's own folders hold documents and overlays and never a project, as the edition tool reads them.
+const GUIDE = "AGENTS.md";
+const NESTED_AUDITS = ["scripts/audit_docs.py", "scripts/audit-docs.mjs", "scripts/audit_inquiry.py"];
+const STYLE_FOLDERS = ["docs/", "edition/"];
+
+// Every answer git gives is remembered for the life of this process, which is the life of one
+// run: a run changes nothing git reads, history, index, tree or refs, and the selftest plants
+// between runs, each run a process of its own. So a question is asked once, the same arguments
+// are answered from memory, and the input a batched question was given is part of its key.
+const ANSWERS = new Map();
+
+/** The remembered answer to a question, asked the first time only. */
+function remembered(key, ask) {
+  if (!ANSWERS.has(key)) ANSWERS.set(key, ask());
+  return ANSWERS.get(key);
+}
+
+/** One git call against the repository this file lives in; empty when git says no, and asked once per run. */
 function git(...args) {
-  try {
-    return execFileSync("git", args, { cwd: ROOT, encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] });
-  } catch {
-    return "";
-  }
+  return remembered(args.join("\0"), () => {
+    try {
+      return execFileSync("git", args, { cwd: ROOT, encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] });
+    } catch {
+      return "";
+    }
+  });
 }
 
 /** Every tracked path, posix and relative to the root, so untracked local clutter never fires a check. */
 function trackedFiles() {
   return git("ls-files", "-z").split("\0").filter(Boolean);
+}
+
+/** The projects kept inside this one, each a folder below the root that carries a guide of its own, the outermost alone. */
+function nestedRoots() {
+  const guides = trackedFiles().filter((path) => path.endsWith(`/${GUIDE}`) && !STYLE_FOLDERS.some((folder) => path.startsWith(folder)));
+  const roots = guides.map((path) => path.slice(0, -`/${GUIDE}`.length)).sort();
+  return roots.filter((root) => !roots.some((other) => root.startsWith(`${other}/`)));
+}
+
+/** Every tracked path the prose checks read, the tree without the projects kept inside it, each of which its own audit reads. */
+function ownFiles() {
+  const nests = nestedRoots().map((root) => `${root}/`);
+  return trackedFiles().filter((path) => !nests.some((nest) => path.startsWith(nest)));
 }
 
 /** Every name drawn in a document's tree diagrams, directories without their trailing slash. */
@@ -276,10 +348,10 @@ for (const rel of LIVING) {
   if (!existsSync(doc)) continue;
   const text = readFileSync(doc, "utf-8");
 
-  if (!FREE_GROWING.has(rel)) {
-    const lines = text.split("\n").length;
-    if (lines > BUDGET_LINES) {
-      problems.push(`${rel}: ${lines} lines against the ${BUDGET_LINES}-line budget; split by fission`);
+  if (!UNBUDGETED.has(rel)) {
+    const words = proseWords(text);
+    if (words > BUDGET_WORDS) {
+      problems.push(`${rel}: ${words} words of prose against the ${BUDGET_WORDS}-word budget; split by fission`);
     }
   }
 
@@ -331,75 +403,126 @@ function commitDate(commit) {
 
 // Whether the first commit is a proper ancestor of the second, which is what before means in a history.
 function isBefore(commit, other) {
-  return commit !== other && git("rev-list", "--count", `${other}..${commit}`).trim() === "0";
+  return Boolean(other) && commit !== other && git("rev-list", other).split("\n").includes(commit);
 }
 
 // How long a queued entry has stood unchanged, counted from the binding commit or the entry's
 // own, whichever is later.
 function standingDays(raw, binding) {
-  const born = firstCommit(raw.replace(/\s*\(\d{4}-\d{2}-\d{2}\)\s*$/, "").trim(), "STATE.md");
+  const born = firstCommit(raw.replace(STATE_TEXT, "").trim(), "STATE.md");
   const start = born === null ? null : commitDate(isBefore(born, binding) ? binding : born);
   return start === null ? 0 : Math.floor((today - start) / 86_400_000);
 }
 
-const statePath = resolve(ROOT, "STATE.md");
-if (existsSync(statePath)) {
-  const text = readFileSync(statePath, "utf-8");
-  const sections = [...text.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
-  if (sections.join(",") !== "Now,Next,Deferred,Blocked") {
-    problems.push(`STATE.md: sections are [${sections.join(", ")}], not the four the schema fixes`);
-  }
-  let section = "";
-  const binding = firstCommit(STATE_AGE_SCOPE, "scripts/audit-docs.mjs");
+/** Each section's lines with their numbers, every line above the sections but the title reported where it stands. */
+function stateSections(text) {
+  const held = new Map();
+  let section = null;
+  let titled = false;
   text.split("\n").forEach((raw, offset) => {
+    if (!raw.trim()) return;
     if (raw.startsWith("## ")) {
       section = raw.slice(3).trim();
-      return;
-    }
-    const stamp = raw.match(/\((\d{4}-\d{2}-\d{2})\)/);
-    if (!stamp) return;
-    const horizon = section === "Now" ? NOW_HORIZON_DAYS : HORIZON_DAYS;
-    const age = Math.floor((today - new Date(`${stamp[1]}T00:00:00`)) / 86_400_000);
-    if (age > horizon) {
-      problems.push(
-        `STATE.md:${offset + 1}: entry last verified ${stamp[1]}, ${age} days ago against the ` +
-          `${horizon}-day horizon of ${section}; re-verify it against reality, then re-date or remove it`,
-      );
-    }
-    if (section === "Now" || binding === null) return;
-    const standing = standingDays(raw, binding);
-    if (standing > HORIZON_DAYS * 2) {
-      problems.push(
-        `STATE.md:${offset + 1}: entry has stood unchanged in ${section} for ${standing} days, two horizons; ` +
-          "promote it to Now, write it as a decision record, or drop it",
-      );
+      if (!held.has(section)) held.set(section, []);
+    } else if (section !== null) {
+      held.get(section).push([offset + 1, raw]);
+    } else if (raw.startsWith("# ") && !titled) {
+      titled = true;
+    } else {
+      problems.push(`STATE.md:${offset + 1}: stands above the sections, where the schema holds the title alone`);
     }
   });
-  const nowSection = text.match(/^## Now\r?\n([\s\S]*?)(?=^## )/m);
-  if (nowSection) {
-    const entries = [...nowSection[1].matchAll(/^- /gm)].length;
-    if (entries > NOW_CAP) {
-      problems.push(`STATE.md: Now holds ${entries} entries against the cap of ${NOW_CAP}; sweep finished work into git's memory`);
+  return held;
+}
+
+/** One line of a section, an entry closed by its date or the section's empty line standing alone. */
+function checkStateLine(section, [lineNo, raw], alone) {
+  const empty = STATE_SECTIONS[section];
+  if (raw === empty) {
+    if (!alone) problems.push(`STATE.md:${lineNo}: says ${empty} beside other lines in ${section}`);
+  } else if (!raw.startsWith("- ")) {
+    problems.push(`STATE.md:${lineNo}: is not an entry; a section holds one-line entries or its empty line alone`);
+  } else if (!STATE_TEXT.test(raw)) {
+    problems.push(`STATE.md:${lineNo}: entry does not end with its last-verified date`);
+  }
+}
+
+/** Every section of the schema holds entries closed by their dates, or its empty line alone. */
+function checkStateLines(held) {
+  for (const [section, empty] of Object.entries(STATE_SECTIONS)) {
+    const lines = held.get(section);
+    if (lines === undefined) continue;
+    if (lines.length === 0) problems.push(`STATE.md: ${section} holds neither an entry nor its empty line, ${empty}`);
+    for (const line of lines) checkStateLine(section, line, lines.length === 1);
+  }
+}
+
+/** Every entry is within its section's horizon, and no queued entry has stood for two of them. */
+function checkStateEntries(held) {
+  const binding = firstCommit(STATE_AGE_SCOPE, "scripts/audit-docs.mjs");
+  for (const [section, lines] of held) {
+    const horizon = section === "Now" ? NOW_HORIZON_DAYS : HORIZON_DAYS;
+    for (const [lineNo, raw] of lines) {
+      const stamp = raw.match(STATE_TEXT);
+      if (!stamp) continue;
+      const age = Math.floor((today - new Date(`${stamp[1]}T00:00:00`)) / 86_400_000);
+      if (age > horizon) {
+        problems.push(
+          `STATE.md:${lineNo}: entry last verified ${stamp[1]}, ${age} days ago against the ` +
+            `${horizon}-day horizon of ${section}; re-verify it against reality, then re-date or remove it`,
+        );
+      }
+      if (section === "Now" || binding === null) continue;
+      const standing = standingDays(raw, binding);
+      if (standing > HORIZON_DAYS * 2) {
+        problems.push(
+          `STATE.md:${lineNo}: entry has stood unchanged in ${section} for ${standing} days, two horizons; ` +
+            "promote it to Now, write it as a decision record, or drop it",
+        );
+      }
     }
   }
+}
+
+const statePath = resolve(ROOT, "STATE.md");
+if (existsSync(statePath)) {
+  const text = readFileSync(statePath, "utf-8").replace(/\r\n/g, "\n");
+  const sections = [...text.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+  if (sections.join(",") !== Object.keys(STATE_SECTIONS).join(",")) {
+    problems.push(`STATE.md: sections are [${sections.join(", ")}], not the four the schema fixes`);
+  }
+  const held = stateSections(text);
+  checkStateLines(held);
+  checkStateEntries(held);
+  const now = held.get("Now") ?? [];
+  if (now.length > NOW_CAP) {
+    problems.push(`STATE.md: Now holds ${now.length} entries against the cap of ${NOW_CAP}; sweep finished work into git's memory`);
+  }
+}
+
+/** The documentation index table alone, because registration means a row there. */
+function indexRows(agents) {
+  if (!agents.includes("## Documentation index")) return "";
+  return agents.split("## Documentation index")[1].split("\n## ")[0];
 }
 
 const docsDir = resolve(ROOT, "docs");
 if (existsSync(docsDir)) {
   const agents = existsSync(resolve(ROOT, "AGENTS.md")) ? readFileSync(resolve(ROOT, "AGENTS.md"), "utf-8") : "";
+  const rows = indexRows(agents);
   for (const entry of readdirSync(docsDir)) {
     const full = join(docsDir, entry);
     if (!statSync(full).isFile() || !entry.endsWith(".md")) continue;
-    if (!agents.includes(entry)) {
+    if (!rows.includes(`(docs/${entry})`)) {
       problems.push(`docs/${entry}: not registered in the AGENTS.md index`);
     }
     if (entry.replace(/-/g, "").replace(/\.md$/, "") !== entry.replace(/-/g, "").replace(/\.md$/, "").toUpperCase()) {
       problems.push(`docs/${entry}: organic documents are UPPERCASE markdown`);
     }
-    if (!["ARCHITECTURE.md", "CONVENTIONS.md", "BASELINE.md", "UPSTREAM.md", "INVARIANTS.md"].includes(entry)) {
-      const lines = readFileSync(full, "utf-8").split("\n").length;
-      if (lines > BUDGET_LINES) {
-        problems.push(`docs/${entry}: ${lines} lines against the ${BUDGET_LINES}-line budget; split by fission`);
+    if (!LIVING.includes(`docs/${entry}`) && !UNBUDGETED.has(`docs/${entry}`)) {
+      const words = proseWords(readFileSync(full, "utf-8"));
+      if (words > BUDGET_WORDS) {
+        problems.push(`docs/${entry}: ${words} words of prose against the ${BUDGET_WORDS}-word budget; split by fission`);
       }
     }
     if (!LIVING.includes(`docs/${entry}`)) {
@@ -442,7 +565,7 @@ if (existsSync(docsDir)) {
       continue;
     }
     const folder = path.split("/").slice(0, 2).join("/");
-    if (!agents.includes(`(${folder}/)`)) {
+    if (!indexRows(agents).includes(`(${folder}/)`)) {
       problems.push(`${path}: ${folder}/ has no row in the AGENTS.md index; a subfolder of docs/ is a registered record folder or it does not exist`);
     }
     if (folder !== "docs/inherited" && !DATED_RECORD_NAME.test(path.split("/").pop())) {
@@ -485,6 +608,10 @@ function checkUpstream() {
     }
     if (!UPSTREAM_WHY.some((why) => chunk.includes(why))) {
       problems.push(`${label}: neither Why it is believed better nor What was worked around`);
+    }
+    const hit = UPSTREAM_ADDRESS.exec(`${entry[2]}\n${chunk}`);
+    if (hit) {
+      problems.push(`${label}: carries ${JSON.stringify(hit[0])}, an address, a URL, an email or an absolute path; an entry names none, because it is written to leave the repository`);
     }
     const age = Math.floor((today - new Date(`${entry[1]}T00:00:00`)) / 86_400_000);
     if (age > HORIZON_DAYS) {
@@ -686,11 +813,31 @@ function emDashCount(bytes) {
 
 // Every tracked text file stays within the em dash budget, a record from the rule's arrival on, since a
 // record admits no edit that could bring it under; the inherited folder is counted where it was written.
+// Every tracked path the attributes file declares linguist-generated, written by a machine and kept as it was
+// written, so the prose law does not read it.
+function declaredGenerated() {
+  const tracked = trackedFiles();
+  const declared = new Set();
+  if (tracked.length === 0) return declared;
+  const out = remembered(`check-attr\0${tracked.join("\0")}`, () => {
+    try {
+      return execFileSync("git", ["check-attr", "linguist-generated", "-z", "--stdin"], { cwd: ROOT, encoding: "utf-8", input: tracked.join("\0"), stdio: ["pipe", "pipe", "ignore"] });
+    } catch {
+      return "";
+    }
+  });
+  if (out === "") return declared;
+  const fields = out.split("\0");
+  for (let i = 0; i + 2 < fields.length; i += 3) if (fields[i + 2] === "set" || fields[i + 2] === "true") declared.add(fields[i]);
+  return declared;
+}
+
 function checkEmDashes() {
   const over = [];
-  for (const rel of trackedFiles()) {
+  const declared = declaredGenerated();
+  for (const rel of ownFiles()) {
     const path = join(ROOT, rel);
-    if (rel.startsWith("docs/inherited/") || !existsSync(path) || statSync(path).isDirectory()) continue;
+    if (rel.startsWith("docs/inherited/") || declared.has(rel) || !existsSync(path) || statSync(path).isDirectory()) continue;
     const count = emDashCount(readFileSync(path));
     if (count > EM_DASH_BUDGET) over.push([rel, count]);
   }
@@ -698,10 +845,28 @@ function checkEmDashes() {
   const arrival = firstCommit(EM_DASH_SCOPE, "scripts/audit-docs.mjs");
   const added = addedCommits("docs");
   for (const [rel, count] of over) {
-    if (judgedForDashes(rel, added.get(rel), arrival)) problems.push(`${rel} carries ${count} em dashes; the budget is ${EM_DASH_BUDGET} per file`);
+    if (judgedForDashes(rel, added.get(rel), arrival)) problems.push(`${rel} carries ${count} em dashes; the budget is ${EM_DASH_BUDGET} per file, and a file a machine wrote and the tree keeps as written is declared linguist-generated in .gitattributes`);
   }
 }
 checkEmDashes();
+
+// Characters that change how text reads without being seen, the bidirectional controls, the zero-width
+// spaces and joiners, the invisible operators and the byte-order mark; a tracked text file carries none,
+// because what a reader cannot see still changes what a compiler, a reviewer or a model reads.
+const INVISIBLE = /[\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/;
+function checkInvisible() {
+  const declared = declaredGenerated();
+  for (const rel of ownFiles()) {
+    const path = join(ROOT, rel);
+    if (rel.startsWith("docs/inherited/") || declared.has(rel) || !existsSync(path) || statSync(path).isDirectory()) continue;
+    const bytes = readFileSync(path);
+    if (bytes.includes(0)) continue;
+    const text = bytes.toString("utf-8");
+    const hit = INVISIBLE.exec(text);
+    if (hit) problems.push(`${rel}:${lineOf(text, hit.index)}: carries U+${hit[0].codePointAt(0).toString(16).toUpperCase().padStart(4, "0")}, an invisible character; a tracked file carries nothing a reader cannot see`);
+  }
+}
+checkInvisible();
 
 // Every relative link in a record of the project's own resolves; the inherited folder is checked where it was written.
 function checkRecordLinks() {
@@ -722,22 +887,38 @@ function checkRecordLinks() {
 }
 checkRecordLinks();
 
-// Whether a tracked file is read for the vocabulary: not a workflow, the rulebook, this script, a record, or a binary.
-function readForVocabulary(rel) {
-  if (VOCABULARY_SKIP.some((skip) => rel.startsWith(skip))) return false;
+// Whether a tracked file is read for the vocabulary: not a workflow, the rulebook, this script, a record, a declared generated file, or a binary.
+function readForVocabulary(rel, declared) {
+  if (declared.has(rel) || VOCABULARY_SKIP.some((skip) => rel.startsWith(skip))) return false;
   if (rel.startsWith("docs/") && rel.split("/").length > 2) return false;
   const path = join(ROOT, rel);
   return existsSync(path) && !statSync(path).isDirectory();
 }
 
-// The prose law's banned vocabulary in living prose and code, advised because an honest term reads like a tell.
+// The prose law's banned vocabulary in living prose and code, advised because an honest term reads like a tell; a declared generated file is a machine's words and is left alone.
 function adviseVocabulary() {
-  for (const rel of trackedFiles().filter(readForVocabulary)) {
+  const declared = new Set(declaredGenerated());
+  for (const rel of ownFiles().filter((rel) => readForVocabulary(rel, declared))) {
     const bytes = readFileSync(join(ROOT, rel));
     if (bytes.includes(0)) continue;
     bytes.toString("utf-8").split("\n").forEach((line, index) => {
       const hit = line.match(VOCABULARY);
       if (hit) advice.push(`${rel}:${index + 1}: inflated vocabulary or weasel attribution, '${hit[0]}'; the verdict is review's`);
+    });
+  }
+}
+
+// No living document or tracked configuration cites a record by its number alone; a declared generated file is left alone.
+function checkBareCitations() {
+  const declared = new Set(declaredGenerated());
+  for (const rel of ownFiles().filter((rel) => readForVocabulary(rel, declared))) {
+    const bytes = readFileSync(join(ROOT, rel));
+    if (bytes.includes(0)) continue;
+    bytes.toString("utf-8").split("\n").forEach((line, index) => {
+      const owned = new Set([...line.matchAll(OWNED_CITATION)].map((match) => match[1]));
+      for (const hit of line.matchAll(BARE_CITATION)) {
+        if (!owned.has(hit[1])) problems.push(`${rel}:${index + 1}: cites record ${hit[1]} by bare number; name whose record it is, the style's or this project's own, and its title`);
+      }
     });
   }
 }
@@ -777,6 +958,8 @@ function proseBlocks(text) {
 // Each colon in a record's prose that closes a clause of three words or more and opens a lowercase one, with the
 // colon's line and its clause. A block's lines are joined before matching, because a wrapped line can carry the
 // colon while the line above carries the clause, and a rule that read one line at a time passed exactly that shape.
+// A list marker is not a word, so the marker the block splitter starts a block at is dropped before the clause is
+// counted, and a two-word label behind it stays a label.
 function spliceCandidates(text) {
   const found = [];
   for (const block of proseBlocks(text)) {
@@ -784,7 +967,7 @@ function spliceCandidates(text) {
     let joined = "";
     for (const [, line] of block) {
       starts.push(joined.length);
-      joined += `${line.replace(BACKTICK, " ")} `;
+      joined += `${(/^[-*] /.test(line) ? line.slice(2) : line).replace(BACKTICK, " ")} `;
     }
     for (const match of joined.matchAll(SPLICE)) {
       if (match[1].trim().split(/\s+/).length < 3) continue;
@@ -812,17 +995,51 @@ function codespellPresent() {
   return spawnSync("codespell", ["--version"], { encoding: "utf-8" }).status === 0;
 }
 
-// Misspellings in living prose and code, advised where codespell is installed; the pass spawns a process,
-// so it runs once per audit command, and the selftest proves it by the audit's own output.
+// The path a codespell line names, spelled as git lists it, the leading dot dropped and the separators forward.
+function spelledPath(line) {
+  return line.split(":", 1)[0].trim().replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+// Misspellings in the files git tracks, advised where codespell is installed; a finding on a path git does not
+// track is dropped, because the law binds a tracked byte. The pass spawns a process, so it runs once per audit
+// command, and the selftest proves it by the audit's own output.
 function adviseSpelling() {
   if (!codespellPresent()) return;
   const ownTerms = existsSync(join(ROOT, IGNORE_FILE)) ? ["--ignore-words", IGNORE_FILE] : [];
-  const done = spawnSync("codespell", ["--skip", CODESPELL_SKIP, ...ownTerms, "."], { cwd: ROOT, encoding: "utf-8" });
+  const done = spawnSync("codespell", ["--builtin", CODESPELL_BUILTIN, "--skip", CODESPELL_SKIP, ...ownTerms, "."], { cwd: ROOT, encoding: "utf-8" });
+  const tracked = new Set(ownFiles());
+  for (const rel of declaredGenerated()) tracked.delete(rel);
   for (const line of `${done.stdout}`.split("\n")) {
-    if (line.trim()) advice.push(`${line.trim()}; correct it, or name a real term of the domain in ${IGNORE_FILE}, one word per line`);
+    if (line.trim() && tracked.has(spelledPath(line))) advice.push(`${line.trim()}; correct it, or name a real term of the domain in ${IGNORE_FILE}, one word per line`);
+  }
+}
+// Every project kept inside this one carries a docs audit of its own, so a file the prose checks leave alone is one another audit reads.
+function checkNested() {
+  const tracked = new Set(trackedFiles());
+  for (const root of nestedRoots()) {
+    if (!NESTED_AUDITS.some((audit) => tracked.has(`${root}/${audit}`))) problems.push(`${root}/: carries a guide of its own and no docs audit, so no audit reads it; adopt a style in the folder, whose audit comes with it, or remove the guide, which returns the folder to this project`);
+  }
+}
+// A suite replaces a collaborator only at a declared seam, by a hand-written fake, so nothing tracked under tests/
+// mocks a module. The check stood in the workflow, which runs only where the tree is a repository's root and the
+// repository names a remote, and stands here so every run of the gate's Docs command holds it.
+const SEAMS = /vi\.mock\(/;
+function checkSeams() {
+  for (const rel of ownFiles().filter((path) => path.startsWith("tests/"))) {
+    const path = join(ROOT, rel);
+    if (!existsSync(path) || statSync(path).isDirectory()) continue;
+    const bytes = readFileSync(path);
+    if (bytes.includes(0)) continue;
+    bytes.toString("utf-8").split("\n").forEach((line, index) => {
+      const hit = SEAMS.exec(line);
+      if (hit) problems.push(`${rel}:${index + 1}: patches a module with '${hit[0]}'; module mocking is banned, so substitute only at a declared seam`);
+    });
   }
 }
 adviseVocabulary();
+checkBareCitations();
+checkNested();
+checkSeams();
 adviseSplices();
 adviseSpelling();
 
@@ -839,6 +1056,42 @@ function checkIgnoredWorkingTrees() {
 }
 
 checkIgnoredWorkingTrees();
+
+// An action a workflow uses from another repository names the commit it runs, forty hex characters, with its
+// version in the comment beside it, because a tag is a name that moves. A local action, a path beginning with ./,
+// and a container image, docker://, name no ref in another repository.
+const USES_LINE = /^\s*-?\s*uses:\s*['"]?([^'"\s]+)['"]?(.*)$/;
+const PINNED_USES = /^[^@]+@[0-9a-f]{40}$/;
+const VERSION_COMMENT = /^\s+#\s*v?\d/;
+
+// Every workflow file in the tree's .github/workflows folder, in name order.
+/** Where a tree keeps workflows: its own, and the one its editions carry to the public, which runs there under the same law. */
+const WORKFLOW_FOLDERS = [".github/workflows", "edition/overlay/.github/workflows"];
+
+function workflowFiles() {
+  return WORKFLOW_FOLDERS.map((name) => join(ROOT, name))
+    .filter((folder) => existsSync(folder) && statSync(folder).isDirectory())
+    .flatMap((folder) => readdirSync(folder).filter((name) => /\.ya?ml$/.test(name)).sort().map((name) => join(folder, name)));
+}
+
+// Every action a workflow uses from another repository is pinned to a commit, with its version named beside it.
+function checkActionPins() {
+  for (const path of workflowFiles()) {
+    const rel = relative(ROOT, path).split("\\").join("/");
+    readFileSync(path, "utf-8").split(/\r?\n/).forEach((line, index) => {
+      const match = USES_LINE.exec(line);
+      if (!match || match[1].startsWith("./") || match[1].startsWith("docker://")) return;
+      const [, reference, tail] = match;
+      if (!PINNED_USES.test(reference)) {
+        problems.push(`${rel}:${index + 1}: ${reference} is pinned by a name that can move; an action from another repository names the commit it runs, forty hex characters, with its version in a comment beside it`);
+      } else if (!VERSION_COMMENT.test(tail)) {
+        problems.push(`${rel}:${index + 1}: ${reference} names its commit and not its version; the comment beside the pin says which release the commit is`);
+      }
+    });
+  }
+}
+
+checkActionPins();
 
 // Whether the tree has a local branch named main, which the stale-branch check reads against.
 function localMain() {
@@ -1016,6 +1269,36 @@ if (existsSync(pkg)) {
   }
 }
 
+// Every install script the manifest approves names a package the lock installs, at the version the lock installs
+// where the approval names one, because an approval written for a version the lock has moved past approves nothing
+// and the install script of the version that replaced it runs unapproved. A script the list never decided is npm's
+// own warning to give, since which packages carry one depends on the system that installs them.
+function lockedPackages(lock) {
+  const names = new Set();
+  const versions = new Set();
+  for (const [path, entry] of Object.entries(JSON.parse(readFileSync(lock, "utf-8")).packages ?? {})) {
+    const at = path.lastIndexOf("node_modules/");
+    if (at === -1) continue;
+    const name = path.slice(at + "node_modules/".length);
+    names.add(name);
+    versions.add(`${name}@${entry.version}`);
+  }
+  return { names, versions };
+}
+
+function checkApprovedScripts() {
+  const lock = join(ROOT, "package-lock.json");
+  if (!existsSync(pkg) || !existsSync(lock)) return;
+  const { names, versions } = lockedPackages(lock);
+  for (const approval of Object.keys(JSON.parse(readFileSync(pkg, "utf-8")).allowScripts ?? {})) {
+    const split = approval.lastIndexOf("@");
+    if (split <= 0 ? names.has(approval) : versions.has(approval)) continue;
+    const what = split <= 0 ? approval : `${approval.slice(0, split)} at ${approval.slice(split + 1)}`;
+    problems.push(`package.json: allowScripts approves ${what}, which package-lock.json does not install; approve the version the lock resolves`);
+  }
+}
+checkApprovedScripts();
+
 // What a check needs before it can run. A check whose need is absent is reported as not run,
 // with the need named, so a clean verdict never hides a check the tree gave nothing to check.
 const CHECK_NEEDS = [
@@ -1027,6 +1310,9 @@ const CHECK_NEEDS = [
   ["the rooms check", "docs/ARCHITECTURE.md"],
   ["the docs-zone checks", "docs"],
   ["the record-link check", "docs"],
+  ["the action pin check", ".github/workflows"],
+  ["the approval check", "package-lock.json"],
+  ["the seams check", "tests"],
 ];
 const unrun = CHECK_NEEDS.filter(([, need]) => !existsSync(join(ROOT, need))).map(([name, need]) => `${name} did not run: ${need} is absent from this tree`);
 if (existsSync(join(ROOT, "docs", "inherited")) && alignedAtHost()) unrun.push("the disposition check did not run: docs/UPSTREAM.md aligns this arrow at the host's own commit, so the family audit holds its inherited folder and no re-alignment gains it a record");
@@ -1049,4 +1335,5 @@ if (problems.length > 0) {
   console.log(`\n${problems.length} problem(s). The tree disagrees with its own conventions.`);
   process.exit(1);
 }
-console.log("The tree agrees with its own conventions.");
+const unread = nestedRoots().map((root) => `${root}/ not read, a project of its own under its own audit`).join("; ");
+console.log(unread ? `The tree agrees with its own conventions (${unread}).` : "The tree agrees with its own conventions.");
